@@ -108,7 +108,7 @@ module.exports = (opts = {}) => {
             if (!req.query.render) return res.sendFile(pathAbs);
             const ext = path.extname(pathAbs).substring(1).toLowerCase();
             data.desc = `Download this file or preview it right in your browser.`;
-            data.path = pathRel;
+            data.path = encodeURI(pathRel);
             data.title = data.dirName;
             if (ext.match(/^(md|markdown)$/)) {
                 data.previewType = 'markdown';

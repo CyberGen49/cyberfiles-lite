@@ -16,5 +16,6 @@ window.addEventListener('load', () => {
     setInterval(updateTimes, 1000*60);
     for (const el of _qsa('[data-video-url]')) {
         el.src = `https://src.simplecyber.org/video/?hue=210&nameOnlyFullscreen=true&url=${window.location.protocol}//${window.location.host}${el.dataset.videoUrl}`;
+        console.log(el.src);
     }
 });
