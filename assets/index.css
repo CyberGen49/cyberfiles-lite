@@ -1,0 +1,187 @@
+
+body {
+    background: var(--b10);
+}
+
+#head {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#title {
+    font-family: 'Quicksand';
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--b90);
+}
+
+#path {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 3px 0px;
+    scrollbar-width: 0px;
+}
+#path::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    display: none;
+}
+#path .part {
+    font-family: 'Quicksand';
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--f75);
+    flex-shrink: 0;
+    transition: 0.1s var(--bezier);
+}
+.canHover #path .part:hover,
+#path .part:focus-visible {
+    color: var(--b70);
+}
+#path .part[href=""] {
+    color: var(--b85);
+    pointer-events: none;
+}
+#path .sep {
+    flex-shrink: 0;
+}
+#path .sep::after {
+    font-family: 'Quicksand';
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--b50);
+    content: '/';
+}
+#path .sep:last-child {
+    display: none;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2));
+    border-radius: 16px;
+}
+.card .header {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px 11px 15px;
+    background: var(--b18);
+    box-shadow: 0px 16px 0px 0px var(--b18);
+    line-height: 1.2;
+    color: var(--b70);
+    border-radius: 16px 16px 0px 0px;
+    user-select: none;
+}
+.card .body {
+    padding: 20px 15px;
+    background: var(--b15);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.card[data-preview-type="markdown"] .body img {
+    max-width: 100%;
+}
+.card[data-preview-type="image"] .body {
+    padding: 0px;
+    display: flex;
+    justify-content: center;
+}
+.card[data-preview-type="image"] img {
+    max-width: 100%;
+}
+.card[data-preview-type="video"] .body {
+    padding: 0px;
+    background: black;
+}
+.card[data-preview-type="video"] .body iframe {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    margin-bottom: -3px;
+}
+.card[data-preview-type="text"] .body {
+    padding: 0px;
+}
+.card[data-preview-type="text"] .body pre {
+    margin: 0px;
+    padding: 15px;
+    background: none;
+    max-height: unset;
+}
+.card[data-preview-type="text"] .body pre code {
+    background: none;
+}
+
+#fileList {
+    padding: 3px;
+}
+#fileList .fileEntry {
+    height: 40px;
+    padding: 0px 8px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    border-radius: 12px;
+    color: var(--b90);
+    transition: 0.1s var(--bezier);
+}
+.canHover #fileList .fileEntry:hover,
+#fileList .fileEntry:focus-visible {
+    color: inherit;
+    background: var(--b25);
+}
+.canHover #fileList .fileEntry:hover .name,
+#fileList .fileEntry:focus-visible .name {
+    color: white;
+}
+#fileList .fileEntry > * {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1.2;
+}
+#fileList .fileEntry .icon {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Material Symbols';
+    font-size: 28px;
+    color: var(--b70);
+    line-height: 1;
+}
+#fileList .fileEntry .name {
+    flex-grow: 1;
+}
+#fileList .fileEntry .modified {
+    width: 180px;
+    color: var(--b80);
+}
+#fileList .fileEntry .size {
+    width: 100px;
+    color: var(--b80);
+}
+
+#download {
+    font-family: 'Quicksand';
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#footer {
+    padding: 20px;
+    font-size: 15px;
+    color: var(--b50);
+    text-align: center;
+}
+#footer a {
+    color: var(--b65);
+}
+
+.btn:hover {
+    cursor: pointer;
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index of <%= dirName %> | CyberFiles Lite</title>
+    <meta name="theme-color" content="#17181c">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CyberFiles Lite">
+    <meta property="og:title" content="<%= title %>">
+    <meta property="og:description" content="<%= desc %>">
+    <meta name="description" content="<%= desc %>">
+    <link rel="stylesheet" href="https://src.simplecyber.org/base.css">
+    <script defer src="https://src.simplecyber.org/base.js"></script>
+    <script defer src="https://src.simplecyber.org/dayjs.min.js"></script>
+    <script src="https://src.simplecyber.org/prism.js"></script>
+</head>
+<body class="changeColours" style="--fgHue: 210">
+    <div class="container col">
+        <div id="head">
+            <div id="title">Index of <span id="domain"></span></div>
+            
+            <% if (tree.length > 1) { %>
+                <div id="path" class="no-select">
+                    <% for (const part of tree) { %>
+                        <a href="<%= part.path %>" class="part">
+                            <%= part.name %>
+                        </a>
+                        <span class="sep"></span>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+        <% if (files) { %>
+            <div class="card no-select">
+                <div class="header">
+                    <%= stats.count.dirs %> folder<%= (stats.count.dirs !== 1) ? 's':'' %> and <%= stats.count.files %> file<%= (stats.count.files !== 1) ? 's':'' %> • <%= stats.duration %>ms
+                </div>
+                <div id="fileList" class="body">
+                    <% for (const file of files) { %>
+                        <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry">
+                            <div class="icon"><%= file.icon %></div>
+                            <div class="name"><%= file.name %></div>
+                            <div class="modified" data-timestamp="<%= file.mtime %>">-</div>
+                            <div class="size"><%= file.sizeHuman || '-' %></div>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+        <% if (readme) { %>
+            <div id="readmeCard" class="card">
+                <div class="header row no-wrap align-center" style="padding: 4px 15px">
+                    <div class="flex-grow" style="margin-top: 1px;">README</div>
+                    <a class="btn alt2 small noShadow iconOnly" href="<%= readme.path %>?render=true" title="Open this file">
+                        <div class="icon">open_in_new</div>
+                    </a>
+                </div>
+                <div id="readme" class="body"><%- readme.html %></div>
+            </div>
+        <% } %>
+        <% if (previewType) { %>
+            <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
+                <div class="header row no-wrap align-center" style="padding: 4px 15px">
+                    <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= tree[tree.length-2].path %>" title="Back to containing folder">
+                        <div class="icon">arrow_back</div>
+                    </a>
+                    <div class="flex-grow" style="margin-top: 1px;"><%= dirName %></div>
+                    <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= path %>" download title="Download this file">
+                        <div class="icon">download</div>
+                    </a>
+                </div>
+                <div class="body">
+                    <% if (previewType == 'markdown') { %>
+                        <%- html %>
+                    <% } %>
+                    <% if (previewType == 'image') { %>
+                        <img src="<%= path %>">
+                    <% } %>
+                    <% if (previewType == 'video') { %>
+                        <iframe allow="autoplay; fullscreen" frameborder="0" data-video-url="<%= path %>"></iframe>
+                    <% } %>
+                    <% if (previewType == 'text') { %>
+                        <pre class="language-<%= language %>"><code><%= text %></code></pre>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+        <div id="footer">
+            <p>Powered by <a href="https://github.com/CyberGen49/cyberfiles-lite">CyberFiles Lite</a></p>
+        </div>
+    </div>
+</body>
+<%- css %>
+<%- js %>
+</html>

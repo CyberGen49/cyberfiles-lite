@@ -1,0 +1,13 @@
+{
+    "cyberfiles": {
+        "root": "../",
+        "index_files": [ "index.html" ],
+        "hide_patterns": [
+            "\\/(\\.|_).*?(\\/|$)"
+        ]
+    },
+    "server": {
+        "port": 8086,
+        "ip_header": "cf-connecting-ip"
+    }
+}
