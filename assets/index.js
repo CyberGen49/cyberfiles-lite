@@ -1,7 +1,8 @@
 
 window.addEventListener('load', () => {
     _qs('#domain').innerText = window.location.hostname;
-    _qs('#path').scrollLeft = _qs('#path').scrollWidth;
+    if (_qs('#path'))
+        _qs('#path').scrollLeft = _qs('#path').scrollWidth;
     const updateTimes = () => {
         for (const el of _qsa('[data-timestamp]')) {
             const timestamp = parseInt(el.dataset.timestamp);

@@ -67,6 +67,11 @@ module.exports = (opts = {}) => {
     return async(req, res, next) => {
         // Set constants and variables
         const startTime = Date.now();
+        try {
+            decodeURI(req.path)
+        } catch (error) {
+            return res.status(400).end(`400 Bad Request`)
+        }
         const pathRel = path.normalize(decodeURI(req.path));
         const pathAbs = path.join(opts.root, pathRel);
         let data = {
@@ -115,7 +120,7 @@ module.exports = (opts = {}) => {
             } else if (ext.match(/^(mp4|webm|mov)$/)) {
                 data.previewType = 'video';
                 return render();
-            } else if (prismLangs[ext] && fs.statSync(pathAbs).size < (1024*1024)) {
+            } else if (prismLangs[ext] && fs.statSync(pathAbs).size < (1024*512)) {
                 data.previewType = 'text';
                 data.language = prismLangs[ext],
                 data.text = fs.readFileSync(pathAbs).toString().trim()
@@ -149,7 +154,7 @@ module.exports = (opts = {}) => {
             const isDir = stats.isDirectory();
             const file = {
                 name: name,
-                path: path.join(pathRel, name),
+                path: encodeURI(path.join(pathRel, name)),
                 isDir: stats.isDirectory(),
                 mtime: stats.mtimeMs,
                 icon: 'folder'

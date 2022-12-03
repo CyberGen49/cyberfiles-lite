@@ -138,7 +138,8 @@ body {
 #fileList .fileEntry:focus-visible .name {
     color: white;
 }
-#fileList .fileEntry > * {
+#fileList .fileEntry > *,
+#fileList .fileEntry .name > * {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -153,17 +154,25 @@ body {
     font-size: 28px;
     color: var(--b70);
     line-height: 1;
+    flex-shrink: 0;
 }
 #fileList .fileEntry .name {
     flex-grow: 1;
 }
+#fileList .fileEntry .name .lower {
+    display: none;
+    color: var(--b70);
+    font-size: 15px;
+}
 #fileList .fileEntry .modified {
-    width: 180px;
+    width: 160px;
     color: var(--b80);
+    flex-shrink: 0;
 }
 #fileList .fileEntry .size {
     width: 100px;
     color: var(--b80);
+    flex-shrink: 0;
 }
 
 #download {
@@ -184,4 +193,27 @@ body {
 
 .btn:hover {
     cursor: pointer;
+}
+
+@media screen and ( max-width: 640px ) {
+    .container {
+        padding: 20px 10px;
+    }
+    #head {
+        padding: 0px 10px;
+    }
+    #fileList .fileEntry {
+        height: 60px;
+    }
+    #fileList .fileEntry .name .lower {
+        display: block;
+    }
+    #fileList .fileEntry .icon {
+        width: 48px;
+        font-size: 36px;
+    }
+    #fileList .fileEntry .modified,
+    #fileList .fileEntry .size {
+        display: none;
+    }
 }

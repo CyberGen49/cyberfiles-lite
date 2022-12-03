@@ -20,7 +20,6 @@
     <div class="container col">
         <div id="head">
             <div id="title">Index of <span id="domain"></span></div>
-            
             <% if (tree.length > 1) { %>
                 <div id="path" class="no-select">
                     <% for (const part of tree) { %>
@@ -41,7 +40,17 @@
                     <% for (const file of files) { %>
                         <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry">
                             <div class="icon"><%= file.icon %></div>
-                            <div class="name"><%= file.name %></div>
+                            <div class="name col gap-2">
+                                <div><%= file.name %></div>
+                                <% if (file.icon !== 'arrow_upward') { %>
+                                    <div class="lower">
+                                        <span data-timestamp="<%= file.mtime %>">-</span>
+                                        <% if (file.sizeHuman) { %>
+                                            • <span><%= file.sizeHuman %></span>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </div>
                             <div class="modified" data-timestamp="<%= file.mtime %>">-</div>
                             <div class="size"><%= file.sizeHuman || '-' %></div>
                         </a>
