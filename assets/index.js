@@ -80,6 +80,7 @@ window.addEventListener('load', () => {
     }
     const markdownContainer = _qs(`.card[data-preview-type="markdown"]`);
     if (markdownContainer) {
+        Prism.highlightAll();
         const head = _qs('.header', markdownContainer);
         const body = _qs('.body', markdownContainer);
         const idEls = _qsa('[id]', body);

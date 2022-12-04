@@ -4,9 +4,13 @@ const path = require('path');
 const express = require('express');
 const ejs = require('ejs');
 const mime = require('mime');
+const Prism = require('prismjs');
+const loadLanguages = require('prismjs/components/');
 const utils = require('web-resources');
 const { marked } = require('marked');
 const prismLangs = require('./prism-lang-exts.json');
+
+loadLanguages();
 
 function iconFromExt(filePath) {
     const ext = path.extname(filePath).substring(1).trim();
@@ -63,7 +67,7 @@ module.exports = (opts = {}) => {
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirname, opts.root);
     if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
-    if (!opts.icon) opts.icon = `https://github.com/CyberGen49/cyberfiles-lite/blob/main/assets/icon-circle.png`;
+    if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
     const isPathHidden = filePath => {
         for (const pattern of opts.hide_patterns) {
             const regex = new RegExp(pattern);
@@ -91,7 +95,7 @@ module.exports = (opts = {}) => {
             previewType: false,
             dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
             icon: opts.icon,
-            // Not ideal, but we want this thing to be self-contained
+            // We want this thing to be self-contained
             css: `<style>\n${fs.readFileSync('./assets/index.css')}\n</style>`,
             js: `<script>\n${fs.readFileSync('./assets/index.js')}\n</script>`
         };
@@ -134,8 +138,14 @@ module.exports = (opts = {}) => {
                 return render();
             } else if (prismLangs[ext] && fs.statSync(pathAbs).size < (1024*512)) {
                 data.previewType = 'text';
-                data.language = prismLangs[ext],
-                data.text = fs.readFileSync(pathAbs).toString().trim()
+                data.language = prismLangs[ext];
+                const contents = fs.readFileSync(pathAbs).toString();
+                try {
+                    data.text = Prism.highlight(contents, Prism.languages[data.language], data.language).trim();
+                } catch (error) {
+                    console.error(`Error syntax highlighting ${pathAbs}:`, error);
+                    data.text = utils.escapeHTML(contents.trim());
+                }
                 return render();
             } else
                 return res.sendFile(pathAbs);

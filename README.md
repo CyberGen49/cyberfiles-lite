@@ -85,9 +85,46 @@ The HTTP header containing the client's IP address, used only for logging to the
 Default: `req.socket.remoteAddress`
 
 ## Adding CyberFiles Lite to an existing project
-**This project is not yet available on npm**
+If you have an existing ExpressJS project, you can add CyberFiles lite to it so your users can see directory listings on pages that don't have index files. 
 
+### Installation
+Start by installing the package with `npm`:
 
+```bash
+npm i cyberfiles-lite
+```
+
+Then, require it in your project:
+
+```js
+const cyberfiles = require('cyberfiles-lite');
+```
+
+The module exports a single, default function. This function takes a single, optional `opts` parameter, which is an object containing any number of the options listed [below](#options).
+
+### Setup
+Add CyberFiles Lite as an Express middleware by `use`ing it:
+
+```js
+// Where express is initialized and set to `srv`
+srv.use(cyberfiles());
+```
+
+Without any options, the root of the file index will be set to the current directory (see the [root](#string-root) option). You don't need any static file handling, since CyberFiles will handle any static file URLs accordingly.
+
+By default, CyberFiles will respond with a directory's `index.html` file if it exists (see the [index_files](#string-index_files) option).
+
+### Example
+This is about the simplest your server needs to be to get things working:
+
+```js
+const express = require('express');
+const cyberfiles = require('./main');
+
+const srv = express();
+srv.use(cyberfiles());
+srv.listen(8080, () => console.log(`Listening on port 8080`));
+```
 
 ## Options
 These are all the configuration options for CyberFiles Lite.

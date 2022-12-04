@@ -17,7 +17,7 @@
     <script defer src="https://src.simplecyber.org/tabbable.js"></script>
     <script defer src="https://src.simplecyber.org/focus-trap.js"></script>
     <script defer src="https://src.simplecyber.org/dayjs.min.js"></script>
-    <script src="https://src.simplecyber.org/prism.js"></script>
+    <script src="https://src.simplecyber.org/prism.js" data-manual></script>
 </head>
 <body class="changeColours" style="--fgHue: 210">
     <div class="container col">
@@ -94,7 +94,7 @@
                         <iframe allow="autoplay; fullscreen" frameborder="0" data-video-url="<%= path %>"></iframe>
                     <% } %>
                     <% if (previewType == 'text') { %>
-                        <pre class="language-<%= language %>"><code><%= text %></code></pre>
+                        <pre class="language-<%= language %>"><code><%- text %></code></pre>
                     <% } %>
                 </div>
             </div>
