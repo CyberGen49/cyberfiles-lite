@@ -85,6 +85,7 @@ window.addEventListener('load', () => {
         const body = _qs('.body', markdownContainer);
         const idEls = _qsa('[id]', body);
         let data = [];
+        let levels = [];
         for (const el of idEls) {
             const tagName = el.tagName.toLowerCase();
             if (!tagName.toLowerCase().match(/^(h1|h2|h3|h4|h5|h6)$/))
@@ -97,13 +98,14 @@ window.addEventListener('load', () => {
             // el.insertAdjacentElement('afterbegin', lnk);
             data.push({
                 type: 'item',
-                icon: `format_${tagName}`,
+                //icon: `format_${tagName}`,
                 name: el.innerText,
                 action: async() => {
                     await sleep(100);
                     window.location.hash = `#${el.id}`;
                 }
             });
+            levels.push(tagName.replace('h', ''));
         }
         if (data.length > 0) {
             const el = document.createElement('button');
@@ -113,9 +115,26 @@ window.addEventListener('load', () => {
                 <div class="icon">segment</div>
             `;
             on(el, 'click', () => {
-                showContext(data);
+                const id = showContext(data);
+                const items = _qsa(`.item`, _id(id));
+                let i = 0;
+                for (const item of items) {
+                    const level = levels[i];
+                    const label = _qs('.label', item);
+                    label.style.paddingLeft = `${(level-1)*15}px`;
+                    let colour = `var(--f80)`;
+                    if (level == 2) colour = `var(--f85)`;
+                    if (level == 3) colour = `var(--b90)`;
+                    if (level == 4) colour = `var(--b80)`;
+                    if (level >= 5) colour = `var(--b75)`;
+                    label.style.color = colour;
+                    i++;
+                }
             });
             _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
     }
+    const hash = window.location.hash;
+    window.location.hash = '#';
+    setTimeout(() => window.location.hash = hash, 100);
 });
