@@ -100,7 +100,7 @@ Then, require it in your project:
 const cyberfiles = require('cyberfiles-lite');
 ```
 
-The module exports a single, default function. This function takes a single, optional `opts` parameter, which is an object containing any number of the options listed [below](#options).
+The module exports a single, default function. This function only takes an optional `opts` parameter, which is an object containing any number of the options listed [below](#options), and returns an Express request handler.
 
 ### Setup
 Add CyberFiles Lite as an Express middleware by `use`ing it:
@@ -110,7 +110,7 @@ Add CyberFiles Lite as an Express middleware by `use`ing it:
 srv.use(cyberfiles());
 ```
 
-Without any options, the root of the file index will be set to the current directory (see the [root](#string-root) option). You don't need any static file handling, since CyberFiles will handle any static file URLs accordingly.
+Without any options, the root of the file index will be set to the current directory (see the [root](#string-root) option). Other static file handling (like `express.static()`) isn't necessary, since CyberFiles will handle any static file URLs accordingly.
 
 By default, CyberFiles will respond with a directory's `index.html` file if it exists (see the [index_files](#string-index_files) option).
 
@@ -119,11 +119,12 @@ This is about the simplest your server needs to be to get things working:
 
 ```js
 const express = require('express');
-const cyberfiles = require('./main');
+const cyberfiles = require('cyberfiles-lite');
 
+const port = 8080;
 const srv = express();
 srv.use(cyberfiles());
-srv.listen(8080, () => console.log(`Listening on port 8080`));
+srv.listen(port, () => console.log(`Listening on port ${port}`));
 ```
 
 ## Options
