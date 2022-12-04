@@ -1,10 +1,6 @@
 {
     "cyberfiles": {
-        "root": "../",
-        "index_files": [ "index.html" ],
-        "hide_patterns": [
-            "\\/(\\.|_).*?(\\/|$)"
-        ]
+        "root": "../"
     },
     "server": {
         "port": 8080,

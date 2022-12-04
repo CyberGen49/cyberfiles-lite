@@ -2,7 +2,7 @@
 const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
 window.addEventListener('load', () => {
-    _qs('#domain').innerText = window.location.hostname;
+    //_qs('#domain').innerText = window.location.hostname;
     if (_qs('#path'))
         _qs('#path').scrollLeft = _qs('#path').scrollWidth;
     const updateTimes = () => {
@@ -17,7 +17,7 @@ window.addEventListener('load', () => {
     updateTimes();
     setInterval(updateTimes, 1000*60);
     for (const el of _qsa('[data-video-url]')) {
-        el.src = `https://src.simplecyber.org/video/?hue=210&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
+        el.src = `https://src.simplecyber.org/video/?hue=${document.body.style.getPropertyValue('--fgHue')}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
         console.log(el.src);
     }
     for (const el of _qsa('#fileList .fileEntry')) {
@@ -93,7 +93,10 @@ window.addEventListener('load', () => {
                 type: 'item',
                 icon: `format_${tagName}`,
                 name: el.innerText,
-                action: () => window.location.hash = `#${el.id}`
+                action: async() => {
+                    await sleep(100);
+                    window.location.hash = `#${el.id}`;
+                }
             });
         }
         if (data.length > 0) {
@@ -106,7 +109,7 @@ window.addEventListener('load', () => {
             on(el, 'click', () => {
                 showContext(data);
             });
-            head.insertAdjacentElement(`afterbegin`, el);
+            _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
     }
 });

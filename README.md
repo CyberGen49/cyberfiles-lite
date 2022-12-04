@@ -134,15 +134,25 @@ A directory path to serve as the root of your file index. Defaults to the curren
 
 Default: The current directory
 
+### String `site_name`
+The name of this file index, used in various places around the site.
+
+Default: `"CyberFiles Lite"`
+
 ### String `icon`
 A URL to use as the tab icon for the file index.
 
-Default: `undefined`
+Default: `"https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png"`
+
+### String `hue`
+The hue to use as the accent colour around the file index, from 0 to 360.
+
+Default: `210`
 
 ### String[] `index_files`
 An array of file names to checked for and sent when a directory is accessed. If one of these files exist in a directory, they'll be sent instead of the file index.
 
-Default: `[ index.html ]`
+Default: `[ "index.html" ]`
 
 ### String[] or RegExp[] `hide_patterns`
 An array of RegEx strings to be checked against the relative file/directory path of each request. If the pattern matches, the file/directory will be hidden from view.

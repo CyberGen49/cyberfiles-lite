@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index of <%= dirName %> | CyberFiles Lite</title>
-    <meta name="theme-color" content="#17181c">
+    <title><%= dirName %> | <%= site_name %></title>
+    <meta name="theme-color" content="#<%= theme_color %>">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="CyberFiles Lite">
+    <meta property="og:site_name" content="<%= site_name %>">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:description" content="<%= desc %>">
     <meta name="description" content="<%= desc %>">
@@ -19,10 +19,10 @@
     <script defer src="https://src.simplecyber.org/dayjs.min.js"></script>
     <script src="https://src.simplecyber.org/prism.js" data-manual></script>
 </head>
-<body class="changeColours" style="--fgHue: 210">
+<body class="changeColours" style="--fgHue: <%= hue %>">
     <div class="container col">
         <div id="head">
-            <div id="title">Index of <span id="domain"></span></div>
+            <div id="title"><%= site_name %></div>
             <% if (tree.length > 1) { %>
                 <div id="path" class="no-select">
                     <% for (const part of tree) { %>
@@ -37,7 +37,7 @@
         <% if (files) { %>
             <div class="card no-select">
                 <div class="header">
-                    <%= stats.count.dirs %> folder<%= (stats.count.dirs !== 1) ? 's':'' %> and <%= stats.count.files %> file<%= (stats.count.files !== 1) ? 's':'' %> • <%= stats.duration %>ms
+                    <%= stats.count_string %> • <%= stats.duration %>ms
                 </div>
                 <div id="fileList" class="body">
                     <% for (const file of files) { %>
@@ -63,7 +63,7 @@
         <% } %>
         <% if (readme) { %>
             <div id="readmeCard" class="card" data-preview-type="markdown">
-                <div class="header row no-wrap align-center" style="padding: 4px 15px">
+                <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
                     <div class="flex-grow" style="margin-top: 1px;">README</div>
                     <a class="btn alt2 small noShadow iconOnly" href="<%= readme.path %>?render=true" title="Open this file">
                         <div class="icon">open_in_new</div>
@@ -74,7 +74,7 @@
         <% } %>
         <% if (previewType) { %>
             <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
-                <div class="header row no-wrap align-center" style="padding: 4px 15px">
+                <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
                     <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= tree[tree.length-2].path %>" title="Back to containing folder">
                         <div class="icon">arrow_back</div>
                     </a>

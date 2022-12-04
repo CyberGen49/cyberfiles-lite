@@ -1,6 +1,7 @@
 
 body {
     background: var(--b10);
+    scroll-behavior: smooth;
 }
 
 #head {

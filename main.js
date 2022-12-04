@@ -40,12 +40,28 @@ function iconFromExt(filePath) {
     return 'draft';
 }
 
+// https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
+function hslToHex(h, s, l) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+    };
+    return `${f(0)}${f(8)}${f(4)}`;
+}
+
 /**
  * @typedef CyberFilesLiteOptions
  * @type {object}
  * @property {string} [root] A directory path to serve as the root of your file index. Defaults to the current directory.
  * 
+ * @property {string} [site_name] The name of this file index, used in various places around the site. Defaults to `CyberFiles Lite`.
+ * 
  * @property {string} [icon] A URL to use as the tab icon for the file index.
+ * 
+ * @property {number} [hue] The hue to use as the accent colour around the file index, 0-360. Defaults to 210.
  * 
  * @property {string[]} [index_files] An array of file names to checked for and sent when a directory is accessed. If one of these files exist in a directory, they'll be sent instead of the file index.
  * 
@@ -68,6 +84,8 @@ module.exports = (opts = {}) => {
     if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
     if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
+    if (opts.hue === undefined) opts.hue = 210;
+    if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     const isPathHidden = filePath => {
         for (const pattern of opts.hide_patterns) {
             const regex = new RegExp(pattern);
@@ -95,13 +113,19 @@ module.exports = (opts = {}) => {
             previewType: false,
             dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
             icon: opts.icon,
+            hue: opts.hue,
+            site_name: opts.site_name,
+            theme_color: '17181c',
             // We want this thing to be self-contained
             css: `<style>\n${fs.readFileSync('./assets/index.css')}\n</style>`,
             js: `<script>\n${fs.readFileSync('./assets/index.js')}\n</script>`
         };
-        data.title = `Index of ${data.dirName}`;
+        data.title = data.dirName;
+        if (req.headers['user-agent'].match(/DiscordBot/gi))
+            data.theme_color = hslToHex(opts.hue, 75, 80);
         // Handle rendering
         const render = async() => {
+            res.setHeader('content-type', 'text/html');
             res.end(await ejs.renderFile('./assets/index.ejs', data));
         }
         // Make sure file exists
@@ -125,7 +149,6 @@ module.exports = (opts = {}) => {
             const ext = path.extname(pathAbs).substring(1).toLowerCase();
             data.desc = `Download this file or preview it right in your browser.`;
             data.path = encodeURI(pathRel);
-            data.title = data.dirName;
             if (ext.match(/^(md|markdown)$/)) {
                 data.previewType = 'markdown';
                 data.html = marked.parse(fs.readFileSync(pathAbs).toString());
@@ -206,12 +229,20 @@ module.exports = (opts = {}) => {
             icon: 'arrow_upward'
         });
         data.files = files;
-        data.desc = `Browse ${files.length} file(s) in this directory.`;
         data.stats = {
             count: { files: filesWorking.files.length, dirs: filesWorking.dirs.length },
             totalSize: totalSize,
             duration: Math.round(Date.now()-startTime)
         };
+        let tmp = [];
+        if (data.stats.count.dirs > 0)
+            tmp.push(`${data.stats.count.dirs} ${(data.stats.count.dirs == 1) ? 'folder':'folders'}`);
+        if (data.stats.count.files > 0)
+            tmp.push(`${data.stats.count.files} ${(data.stats.count.files == 1) ? 'file':'files'}`);
+        if (tmp.length == 0) tmp.push(`0 files`);
+        data.stats.count_string = tmp.join(' and ');
+        data.desc = `Browse ${data.stats.count_string} in this directory.`;
+
         if (readme) data.readme = {
             html: marked.parse(fs.readFileSync(readme.pathAbs).toString()),
             path: readme.pathRel
