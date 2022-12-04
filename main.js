@@ -106,7 +106,7 @@ module.exports = (opts = {}) => {
         }
         const pathRel = path.normalize(decodeURI(req.path));
         const pathAbs = path.join(opts.root, pathRel);
-        if (isPathHidden(pathRel)) return res.status(404).end(`404 Not Found`)
+        if (isPathHidden(pathRel)) return next();
         let data = {
             files: false,
             readme: false,
@@ -130,7 +130,7 @@ module.exports = (opts = {}) => {
             res.end(await ejs.renderFile('./assets/index.ejs', data));
         }
         // Make sure file exists
-        if (!fs.existsSync(pathAbs)) return res.status(404).end(`404 Not Found`);
+        if (!fs.existsSync(pathAbs)) return next();
         // Build file path tree
         const tree = [{ name: 'Root', path: '/' }];
         const parts = pathRel.split('/').filter(String);
