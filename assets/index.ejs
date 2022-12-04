@@ -89,7 +89,7 @@
                         <img src="<%= path %>">
                     <% } %>
                     <% if (previewType == 'video') { %>
-                        <iframe allow="autoplay; fullscreen" frameborder="0" data-video-url="<%= path %>"></iframe>
+                        <iframe allow="autoplay; fullscreen; clipboard-write" frameborder="0" data-video-url="<%= path %>"></iframe>
                     <% } %>
                     <% if (previewType == 'text') { %>
                         <pre><code><%- text %></code></pre>
