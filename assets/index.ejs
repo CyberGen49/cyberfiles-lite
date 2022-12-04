@@ -11,8 +11,11 @@
     <meta property="og:title" content="<%= title %>">
     <meta property="og:description" content="<%= desc %>">
     <meta name="description" content="<%= desc %>">
+    <link rel="icon" href="<%= icon %>">
     <link rel="stylesheet" href="https://src.simplecyber.org/base.css">
     <script defer src="https://src.simplecyber.org/base.js"></script>
+    <script defer src="https://src.simplecyber.org/tabbable.js"></script>
+    <script defer src="https://src.simplecyber.org/focus-trap.js"></script>
     <script defer src="https://src.simplecyber.org/dayjs.min.js"></script>
     <script src="https://src.simplecyber.org/prism.js"></script>
 </head>
@@ -38,7 +41,7 @@
                 </div>
                 <div id="fileList" class="body">
                     <% for (const file of files) { %>
-                        <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry">
+                        <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry" data-should-render="<%= file.shouldRender %>" data-is-dir="<%= file.isDir %>" data-path="<%= file.path %>">
                             <div class="icon"><%= file.icon %></div>
                             <div class="name col gap-2">
                                 <div><%= file.name %></div>
@@ -59,7 +62,7 @@
             </div>
         <% } %>
         <% if (readme) { %>
-            <div id="readmeCard" class="card">
+            <div id="readmeCard" class="card" data-preview-type="markdown">
                 <div class="header row no-wrap align-center" style="padding: 4px 15px">
                     <div class="flex-grow" style="margin-top: 1px;">README</div>
                     <a class="btn alt2 small noShadow iconOnly" href="<%= readme.path %>?render=true" title="Open this file">

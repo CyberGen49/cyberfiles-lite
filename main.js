@@ -63,22 +63,34 @@ module.exports = (opts = {}) => {
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirname, opts.root);
     if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
+    if (!opts.icon) opts.icon = `https://github.com/CyberGen49/cyberfiles-lite/blob/main/assets/icon-circle.png`;
+    const isPathHidden = filePath => {
+        for (const pattern of opts.hide_patterns) {
+            const regex = new RegExp(pattern);
+            if (filePath.match(regex)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /** @type {express.RequestHandler} */
     return async(req, res, next) => {
         // Set constants and variables
         const startTime = Date.now();
         try {
-            decodeURI(req.path)
+            decodeURI(req.path);
         } catch (error) {
-            return res.status(400).end(`400 Bad Request`)
+            return res.status(400).end(`400 Bad Request`);
         }
         const pathRel = path.normalize(decodeURI(req.path));
         const pathAbs = path.join(opts.root, pathRel);
+        if (isPathHidden(pathRel)) return res.status(404).end(`404 Not Found`)
         let data = {
             files: false,
             readme: false,
             previewType: false,
             dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
+            icon: opts.icon,
             // Not ideal, but we want this thing to be self-contained
             css: `<style>\n${fs.readFileSync('./assets/index.css')}\n</style>`,
             js: `<script>\n${fs.readFileSync('./assets/index.js')}\n</script>`
@@ -140,21 +152,15 @@ module.exports = (opts = {}) => {
         const filesWorking = { files: [], dirs: [] };
         for (const name of fileList) {
             const filePathAbs = path.join(pathAbs, name);
-            let isHidden = false;
-            for (const pattern of opts.hide_patterns) {
-                const regex = new RegExp(pattern);
-                if (filePathAbs.match(regex)) {
-                    isHidden = true;
-                    break;
-                }
-            }
+            const filePathRel = path.join(pathRel, name);
+            let isHidden = isPathHidden(filePathRel);
             if (isHidden) continue;
             const stats = fs.statSync(filePathAbs);
             const ext = path.extname(filePathAbs).substring(1).toLowerCase();
             const isDir = stats.isDirectory();
             const file = {
                 name: name,
-                path: encodeURI(path.join(pathRel, name)),
+                path: encodeURI(filePathRel),
                 isDir: stats.isDirectory(),
                 mtime: stats.mtimeMs,
                 icon: 'folder'
@@ -168,7 +174,7 @@ module.exports = (opts = {}) => {
             }
             filesWorking[(isDir) ? 'dirs':'files'].push(file);
             if (name.toLowerCase().match('readme.md'))
-                readme = { pathAbs: filePathAbs, pathRel: file.path };
+                readme = { pathAbs: filePathAbs, pathRel: filePathRel };
         }
         filesWorking.dirs.sort((a, b) => {
             return a.name.localeCompare(b.name, undefined, {
@@ -184,7 +190,7 @@ module.exports = (opts = {}) => {
         });
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
         if (tree.length > 1) files.unshift({
-            name: `Up to parent...`,
+            name: `Up to ${tree[tree.length-2].name}...`,
             isDir: true,
             path: tree[tree.length-2].path,
             icon: 'arrow_upward'
