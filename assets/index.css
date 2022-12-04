@@ -22,12 +22,17 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     padding: 3px 0px;
-    scrollbar-width: 0px;
+    padding-bottom: 6px;
 }
 #path::-webkit-scrollbar {
-    width: 0px;
-    height: 0px;
-    display: none;
+    height: 5px;
+}
+#path::-webkit-scrollbar-thumb {
+    background: var(--b30);
+    border-radius: 3px;
+}
+.canHover #path::-webkit-scrollbar-thumb:hover {
+    background: var(--b50) !important;
 }
 #path .part {
     font-family: 'Quicksand';
@@ -75,6 +80,7 @@ body {
     color: var(--b70);
     border-radius: 16px 16px 0px 0px;
     user-select: none;
+    word-break: break-word;
 }
 .card .body {
     padding: 20px 15px;
@@ -194,6 +200,13 @@ body {
 
 .btn:hover {
     cursor: pointer;
+}
+
+.headerLink {
+    padding: 0px 8px;
+    font-family: 'Material Symbols';
+    font-size: 0.8em;
+    color: var(--b50);
 }
 
 @media screen and ( max-width: 640px ) {

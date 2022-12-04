@@ -11,7 +11,7 @@ window.addEventListener('load', () => {
             if (!timestamp) continue;
             el.innerText = getRelativeDate(timestamp);
             const time = dayjs(timestamp);
-            el.dataset.dateFull = `${time.format(`YYYY-MM-DD`)} at ${time.format(`HH:mm`)}`;
+            el.dataset.dateFull = `${time.format(`MMM D YYYY`)} at ${time.format(`h:mm A`)}`;
         }
     };
     updateTimes();
@@ -21,7 +21,7 @@ window.addEventListener('load', () => {
         console.log(el.src);
     }
     for (const el of _qsa('#fileList .fileEntry')) {
-        const name = _qs('.name', el).innerText;
+        const name = _qs('.name div', el).innerText;
         const size = _qs('.size', el).innerText;
         const modified = _qs('.modified', el).dataset.dateFull;
         const shouldRender = (el.dataset.shouldRender == 'true');
@@ -89,6 +89,12 @@ window.addEventListener('load', () => {
             const tagName = el.tagName.toLowerCase();
             if (!tagName.toLowerCase().match(/^(h1|h2|h3|h4|h5|h6)$/))
                 return;
+            // const lnk = document.createElement('a');
+            // lnk.classList = 'headerLink';
+            // lnk.innerText = 'link';
+            // lnk.href = `#${el.id}`;
+            // lnk.title = `Anchor`;
+            // el.insertAdjacentElement('afterbegin', lnk);
             data.push({
                 type: 'item',
                 icon: `format_${tagName}`,

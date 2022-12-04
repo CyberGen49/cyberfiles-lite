@@ -121,7 +121,8 @@ module.exports = (opts = {}) => {
             js: `<script>\n${fs.readFileSync('./assets/index.js')}\n</script>`
         };
         data.title = data.dirName;
-        if (req.headers['user-agent'].match(/DiscordBot/gi))
+        // Change theme colour if Discord is requesting
+        if ((req.headers['user-agent'] || '').match(/DiscordBot/gi))
             data.theme_color = hslToHex(opts.hue, 75, 80);
         // Handle rendering
         const render = async() => {

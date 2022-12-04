@@ -23,16 +23,14 @@
     <div class="container col">
         <div id="head">
             <div id="title"><%= site_name %></div>
-            <% if (tree.length > 1) { %>
-                <div id="path" class="no-select">
-                    <% for (const part of tree) { %>
-                        <a href="<%= part.path %>" class="part">
-                            <%= part.name %>
-                        </a>
-                        <span class="sep"></span>
-                    <% } %>
-                </div>
-            <% } %>
+            <div id="path" class="no-select">
+                <% for (const part of tree) { %>
+                    <a href="<%= part.path %>" class="part">
+                        <%= part.name %>
+                    </a>
+                    <span class="sep"></span>
+                <% } %>
+            </div>
         </div>
         <% if (files) { %>
             <div class="card no-select">
@@ -94,7 +92,7 @@
                         <iframe allow="autoplay; fullscreen" frameborder="0" data-video-url="<%= path %>"></iframe>
                     <% } %>
                     <% if (previewType == 'text') { %>
-                        <pre class="language-<%= language %>"><code><%- text %></code></pre>
+                        <pre><code><%- text %></code></pre>
                     <% } %>
                 </div>
             </div>
