@@ -8,7 +8,7 @@ const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 const utils = require('web-resources');
 const { marked } = require('marked');
-const prismLangs = require('./prism-lang-exts.json');
+const prismLangs = require(path.join(__dirname, `prism-lang-exts.json`));
 
 loadLanguages();
 
@@ -79,7 +79,7 @@ function hslToHex(h, s, l) {
  * @param {CyberFilesLiteOptions} opts Options for the file index
  */
 module.exports = (opts = {}) => {
-    if (!opts.root) opts.root = __dirname;
+    if (!opts.root) opts.root = path.dirname(require.main.filename);
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirname, opts.root);
     if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
@@ -117,8 +117,8 @@ module.exports = (opts = {}) => {
             site_name: opts.site_name,
             theme_color: '17181c',
             // We want this thing to be self-contained
-            css: `<style>\n${fs.readFileSync('./assets/index.css')}\n</style>`,
-            js: `<script>\n${fs.readFileSync('./assets/index.js')}\n</script>`
+            css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
+            js: `<script>\n${fs.readFileSync(path.join(__dirname, `assets/index.js`))}\n</script>`
         };
         data.title = data.dirName;
         // Change theme colour if Discord is requesting
@@ -127,7 +127,7 @@ module.exports = (opts = {}) => {
         // Handle rendering
         const render = async() => {
             res.setHeader('content-type', 'text/html');
-            res.end(await ejs.renderFile('./assets/index.ejs', data));
+            res.end(await ejs.renderFile(path.join(__dirname, 'assets/index.ejs'), data));
         }
         // Make sure file exists
         if (!fs.existsSync(pathAbs)) return next();
