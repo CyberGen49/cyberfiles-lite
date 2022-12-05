@@ -123,10 +123,11 @@ window.addEventListener('load', () => {
                     const label = _qs('.label', item);
                     label.style.paddingLeft = `${(level-1)*15}px`;
                     let colour = `var(--f80)`;
-                    if (level == 2) colour = `var(--f85)`;
-                    if (level == 3) colour = `var(--b90)`;
-                    if (level == 4) colour = `var(--b80)`;
-                    if (level >= 5) colour = `var(--b75)`;
+                    if (level == 2) colour = `var(--f90)`;
+                    if (level == 3) colour = `var(--b95)`;
+                    if (level == 4) colour = `var(--b85)`;
+                    if (level == 5) colour = `var(--b75)`;
+                    if (level == 6) colour = `var(--b70)`;
                     label.style.color = colour;
                     i++;
                 }

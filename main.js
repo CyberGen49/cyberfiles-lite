@@ -4,6 +4,7 @@ const path = require('path');
 const express = require('express');
 const ejs = require('ejs');
 const mime = require('mime');
+const htmlParser = require('node-html-parser');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 const utils = require('web-resources');
@@ -79,13 +80,17 @@ function hslToHex(h, s, l) {
  * @param {CyberFilesLiteOptions} opts Options for the file index
  */
 module.exports = (opts = {}) => {
-    if (!opts.root) opts.root = path.dirname(require.main.filename);
-    if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirname, opts.root);
+    const __dirnameParent = path.dirname(require.main.filename);
+    // Set default options
+    if (!opts.root) opts.root = __dirnameParent;
+    if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirnameParent, opts.root);
     if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
     if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
     if (opts.hue === undefined) opts.hue = 210;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
+    // Checks of a file path should be hidden
+    // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
         for (const pattern of opts.hide_patterns) {
             const regex = new RegExp(pattern);
@@ -107,6 +112,7 @@ module.exports = (opts = {}) => {
         const pathRel = path.normalize(decodeURI(req.path));
         const pathAbs = path.join(opts.root, pathRel);
         if (isPathHidden(pathRel)) return next();
+        // Build data object
         let data = {
             files: false,
             readme: false,
@@ -115,6 +121,7 @@ module.exports = (opts = {}) => {
             icon: opts.icon,
             hue: opts.hue,
             site_name: opts.site_name,
+            site_name_meta: opts.site_name,
             theme_color: '17181c',
             // We want this thing to be self-contained
             css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
@@ -131,6 +138,8 @@ module.exports = (opts = {}) => {
         }
         // Make sure file exists
         if (!fs.existsSync(pathAbs)) return next();
+        // Save if the file is a directory
+        const isDir = fs.statSync(pathAbs).isDirectory();
         // Build file path tree
         const tree = [{ name: 'Root', path: '/' }];
         const parts = pathRel.split('/').filter(String);
@@ -143,8 +152,15 @@ module.exports = (opts = {}) => {
         }
         tree[tree.length-1].path = '';
         data.tree = tree;
+        // If we aren't at the root, change meta site name
+        if (tree.length > 2 && opts.site_name.length < 64) {
+            let tmp = [...parts];
+            tmp.pop();
+            const getSiteName = () => `${opts.site_name} > ${tmp.join(' > ')}`;
+            while (getSiteName() > 64) tmp.shift();
+            data.site_name_meta = getSiteName();
+        }
         // If the file isn't a directory...
-        const isDir = fs.statSync(pathAbs).isDirectory();
         if (!isDir) {
             if (!req.query.render) return res.sendFile(pathAbs);
             const ext = path.extname(pathAbs).substring(1).toLowerCase();
@@ -180,18 +196,22 @@ module.exports = (opts = {}) => {
             if (fileList.includes(name))
                 return res.sendFile(path.join(pathAbs, name));
         }
-        // Collect file details
+        // Get and iterate through directory contents
         let totalSize = 0;
         let readme = false;
         const filesWorking = { files: [], dirs: [] };
         for (const name of fileList) {
+            // Get paths
             const filePathAbs = path.join(pathAbs, name);
             const filePathRel = path.join(pathRel, name);
+            // If this file should be hidden, skip it
             let isHidden = isPathHidden(filePathRel);
             if (isHidden) continue;
+            // Get file stats
             const stats = fs.statSync(filePathAbs);
             const ext = path.extname(filePathAbs).substring(1).toLowerCase();
             const isDir = stats.isDirectory();
+            // Create file object
             const file = {
                 name: name,
                 path: encodeURI(filePathRel),
@@ -199,6 +219,7 @@ module.exports = (opts = {}) => {
                 mtime: stats.mtimeMs,
                 icon: 'folder'
             };
+            // Add more to file object if it's not a directory
             if (!isDir) {
                 file.size = stats.size;
                 file.sizeHuman = utils.formatSize(stats.size),
@@ -206,35 +227,47 @@ module.exports = (opts = {}) => {
                 file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov)$/) || prismLangs[ext]) ? true : false,
                 totalSize += stats.size;
             }
+            // Add file to list
             filesWorking[(isDir) ? 'dirs':'files'].push(file);
+            // If this is a readme file, save it
             if (name.toLowerCase().match('readme.md'))
                 readme = { pathAbs: filePathAbs, pathRel: filePathRel };
         }
+        // Sort directories
         filesWorking.dirs.sort((a, b) => {
             return a.name.localeCompare(b.name, undefined, {
                 numeric: true,
                 sensitivity: 'base'
             });
         });
+        // Sort files
         filesWorking.files.sort((a, b) => {
             return a.name.localeCompare(b.name, undefined, {
                 numeric: true,
                 sensitivity: 'base'
             });
         });
+        // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
-        if (tree.length > 1) files.unshift({
-            name: `Up to ${tree[tree.length-2].name}...`,
-            isDir: true,
-            path: tree[tree.length-2].path,
-            icon: 'arrow_upward'
-        });
+        // If we aren't at the root
+        if (tree.length > 1) {
+            // Add "up" entry
+            files.unshift({
+                name: `Up to ${tree[tree.length-2].name}...`,
+                isDir: true,
+                path: tree[tree.length-2].path,
+                icon: 'arrow_upward'
+            });
+        }
+        // Set files object
         data.files = files;
+        // Compile stats
         data.stats = {
             count: { files: filesWorking.files.length, dirs: filesWorking.dirs.length },
             totalSize: totalSize,
             duration: Math.round(Date.now()-startTime)
         };
+        // Count files and dirs and make a human-readable string
         let tmp = [];
         if (data.stats.count.dirs > 0)
             tmp.push(`${data.stats.count.dirs} ${(data.stats.count.dirs == 1) ? 'folder':'folders'}`);
@@ -242,12 +275,45 @@ module.exports = (opts = {}) => {
             tmp.push(`${data.stats.count.files} ${(data.stats.count.files == 1) ? 'file':'files'}`);
         if (tmp.length == 0) tmp.push(`0 files`);
         data.stats.count_string = tmp.join(' and ');
+        // Set meta description
         data.desc = `Browse ${data.stats.count_string} in this directory.`;
-
-        if (readme) data.readme = {
-            html: marked.parse(fs.readFileSync(readme.pathAbs).toString()),
-            path: readme.pathRel
-        };
+        // If a readme file exists
+        if (readme) {
+            // Parse readme
+            data.readme = {
+                html: marked.parse(fs.readFileSync(readme.pathAbs).toString()),
+                path: readme.pathRel
+            };
+            // Change meta description to readme contents
+            const getTextFromMarkdownHTML = html => {
+                const el = htmlParser.parse(html);
+                const children = el.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
+                let isParagraphFound = false;
+                let content = [];
+                for (const child of children) {
+                    let text = child.textContent.trim().replace(/\n/g, ' ');
+                    if (child.tagName.match(/(p|li)/gi) && text) {
+                        isParagraphFound = true;
+                        if (child.tagName == 'LI') text += ',';
+                        content.push(text);
+                    }
+                    if (isParagraphFound && child.tagName !== 'P') break;
+                }
+                content = content.join(' ');
+                const words = content.split(' ').filter(String);
+                content = '';
+                for (const word of words) {
+                    if (content.length > 250) {
+                        content = `${content.trim()}...`
+                        break;
+                    }
+                    content += `${word} `;
+                }
+                return content;
+            };
+            const text = getTextFromMarkdownHTML(data.readme.html);
+            if (text) data.desc = text;
+        }
         return render();
     };
 };

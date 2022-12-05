@@ -22,7 +22,8 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     padding: 3px 0px;
-    padding-bottom: 6px;
+    padding-bottom: 10px;
+    margin-bottom: -5px;
 }
 #path::-webkit-scrollbar {
     height: 5px;
