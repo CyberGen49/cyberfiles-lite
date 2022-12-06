@@ -53,6 +53,30 @@ function hslToHex(h, s, l) {
     return `${f(0)}${f(8)}${f(4)}`;
 }
 
+const sortOrder = {
+    name: {
+        f: (a, b) => {
+            return a.name.localeCompare(b.name, undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            });
+        },
+        display: 'Name'
+    },
+    mtime: {
+        f: (a, b) => {
+            return a.mtime-b.mtime
+        },
+        display: 'Modified'
+    },
+    size: {
+        f: (a, b) => {
+            return a.size-b.size
+        },
+        display: 'Size'
+    }
+}
+
 /**
  * @typedef CyberFilesLiteOptions
  * @type {object}
@@ -233,20 +257,19 @@ module.exports = (opts = {}) => {
             if (name.toLowerCase().match('readme.md'))
                 readme = { pathAbs: filePathAbs, pathRel: filePathRel };
         }
-        // Sort directories
-        filesWorking.dirs.sort((a, b) => {
-            return a.name.localeCompare(b.name, undefined, {
-                numeric: true,
-                sensitivity: 'base'
-            });
-        });
-        // Sort files
-        filesWorking.files.sort((a, b) => {
-            return a.name.localeCompare(b.name, undefined, {
-                numeric: true,
-                sensitivity: 'base'
-            });
-        });
+        // Sort directories and files
+        const sort = (sortOrder[req.query.sort]) ? req.query.sort : 'name';
+        const isDescending = (req.query.desc) ? true : false;
+        filesWorking.dirs.sort(sortOrder[sort].f);
+        filesWorking.files.sort(sortOrder[sort].f);
+        if (isDescending) {
+            filesWorking.dirs.reverse();
+            filesWorking.files.reverse();
+        }
+        data.sort = {
+            order: sortOrder[sort],
+            descending: isDescending
+        };
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
         // If we aren't at the root

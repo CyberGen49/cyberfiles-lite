@@ -34,8 +34,12 @@
         </div>
         <% if (files) { %>
             <div class="card no-select">
-                <div class="header">
-                    <%= stats.count_string %> • <%= stats.duration %>ms
+                <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
+                    <div class="flex-grow" style="margin-top: 1px;"><%= stats.count_string %> • <%= stats.duration %>ms</div>
+                    <button id="sort" class="btn alt2 small noShadow" title="Sort files...">
+                        <%= sort.order.display %>
+                        <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
+                    </button>
                 </div>
                 <div id="fileList" class="body">
                     <% for (const file of files) { %>

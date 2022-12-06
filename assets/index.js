@@ -135,6 +135,25 @@ window.addEventListener('load', () => {
             _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
     }
+    on($('#sort'), 'click', () => {
+        const orders = [
+            { name: 'A-Z', id: 'name', desc: false },
+            { name: 'Z-A', id: 'name', desc: true },
+            { name: 'Oldest to newest', id: 'mtime', desc: false },
+            { name: 'Newest to oldest', id: 'mtime', desc: true },
+            { name: 'Smallest to largest', id: 'size', desc: false },
+            { name: 'Largest to smallest', id: 'size', desc: true },
+        ];
+        const data = [];
+        for (const order of orders) {
+            data.push({
+                type: 'item',
+                name: order.name,
+                action: async() => window.location.href = `?sort=${order.id}${(order.desc) ? '&desc=true':''}`
+            });
+        }
+        showContext(data);
+    });
     const hash = window.location.hash;
     window.location.hash = '#';
     setTimeout(() => window.location.hash = hash, 100);
