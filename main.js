@@ -108,7 +108,9 @@ module.exports = (opts = {}) => {
     // Set default options
     if (!opts.root) opts.root = __dirnameParent;
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirnameParent, opts.root);
-    if (!opts.hide_patterns) opts.hide_patterns = [ /\/(\.|_).*?(\/|$)/ ];
+    const defaultHidePatterns = [ /\/(\.|_).*?(\/|$)/ ];
+    if (!opts.hide_patterns) opts.hide_patterns = defaultHidePatterns;
+    else opts.hide_patterns.shift(...defaultHidePatterns);
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
     if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
     if (opts.hue === undefined) opts.hue = 210;
