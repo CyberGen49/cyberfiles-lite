@@ -200,6 +200,9 @@ module.exports = (opts = {}) => {
             } else if (ext.match(/^(mp4|webm|mov)$/)) {
                 data.previewType = 'video';
                 return render();
+            } else if (ext.match(/^(mp3|weba|ogg|m4a)$/)) {
+                data.previewType = 'audio';
+                return render();
             } else if (prismLangs[ext] && fs.statSync(pathAbs).size < (1024*512)) {
                 data.previewType = 'text';
                 data.language = prismLangs[ext];
@@ -248,7 +251,7 @@ module.exports = (opts = {}) => {
                 file.size = stats.size;
                 file.sizeHuman = utils.formatSize(stats.size),
                 file.icon = iconFromExt(filePathAbs),
-                file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov)$/) || prismLangs[ext]) ? true : false,
+                file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
                 totalSize += stats.size;
             }
             // Add file to list

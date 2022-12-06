@@ -5,9 +5,10 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 ### Features
 * Easy and portable setup
 * Choose the root of your file index
-* Use RegEx to hide certain files and directories
+* Use RegEx to hide (and prevent access to) certain files and directories
 * Serve directory index files (like `index.html`) automatically
-* Add README.md files to directories to see their contents below the file list
+* Show a directory's README.md file below the file lists
+    * The contents of the README are also used in that directory's link preview in places like Discord
 * View text files, images, and videos without leaving your browser
     * Text files of [certain formats](/prism-lang-exts.json) are syntax-highlighted
     * Videos use a custom-made video player
@@ -17,7 +18,6 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 If your main goal is to get a simple file index up and running, a standalone CyberFiles Lite installation is the way to go!
 
 ### Preparation
-
 First, install [git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download/) (tested and working on `v18.12.1`).
 
 Next, create or choose a directory where the files you want to serve are stored. Open your terminal, and `cd` into it:

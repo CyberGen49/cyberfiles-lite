@@ -95,6 +95,9 @@
                     <% if (previewType == 'video') { %>
                         <iframe allow="autoplay; fullscreen; clipboard-write" frameborder="0" data-video-url="<%= path %>"></iframe>
                     <% } %>
+                    <% if (previewType == 'audio') { %>
+                        <iframe allow="autoplay; clipboard-write" frameborder="0" data-audio-url="<%= path %>"></iframe>
+                    <% } %>
                     <% if (previewType == 'text') { %>
                         <pre><code><%- text %></code></pre>
                     <% } %>

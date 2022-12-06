@@ -20,6 +20,10 @@ window.addEventListener('load', () => {
         el.src = `https://src.simplecyber.org/video/?hue=${document.body.style.getPropertyValue('--fgHue')}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
         console.log(el.src);
     }
+    for (const el of _qsa('[data-audio-url]')) {
+        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.style.getPropertyValue('--fgHue')}&url=${baseUrl}${el.dataset.audioUrl}`;
+        console.log(el.src);
+    }
     for (const el of _qsa('#fileList .fileEntry')) {
         const name = _qs('.name div', el).innerText;
         const size = _qs('.size', el).innerText;
@@ -135,7 +139,7 @@ window.addEventListener('load', () => {
             _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
     }
-    on($('#sort'), 'click', () => {
+    if ($('#sort')) on($('#sort'), 'click', () => {
         const orders = [
             { name: 'A-Z', id: 'name', desc: false },
             { name: 'Z-A', id: 'name', desc: true },
