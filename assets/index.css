@@ -149,8 +149,18 @@ body {
     color: inherit;
     background: var(--b25);
 }
+.canHover #fileList .fileEntry:hover .icon,
+#fileList .fileEntry:focus-visible .icon {
+    color: var(--f85);
+}
 .canHover #fileList .fileEntry:hover .name,
 #fileList .fileEntry:focus-visible .name {
+    color: var(--f95);
+}
+.canHover #fileList .fileEntry:hover .modified,
+#fileList .fileEntry:focus-visible .modified,
+.canHover #fileList .fileEntry:hover .size,
+#fileList .fileEntry:focus-visible .size {
     color: white;
 }
 #fileList .fileEntry > *,
