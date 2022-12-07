@@ -225,8 +225,11 @@ module.exports = (opts = {}) => {
                     data.text = utils.escapeHTML(contents.trim());
                 }
                 return render();
-            } else
-                return res.sendFile(pathAbs);
+            } else {
+                //return res.sendFile(pathAbs);
+                data.previewType = 'default';
+                return render();
+            }
         }
         // Send index file if it exists
         const fileList = fs.readdirSync(pathAbs);
@@ -264,7 +267,8 @@ module.exports = (opts = {}) => {
                 file.size = stats.size;
                 file.sizeHuman = utils.formatSize(stats.size),
                 file.icon = iconFromExt(filePathAbs),
-                file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
+                //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
+                file.shouldRender = true;
                 totalSize += stats.size;
             }
             // Add file to list

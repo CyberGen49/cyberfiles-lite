@@ -130,6 +130,12 @@ body {
 .card[data-preview-type="text"] .body pre code {
     background: none;
 }
+.card[data-preview-type="default"] .body .icon {
+    font-family: 'Material Symbols';
+    font-size: 56px;
+    color: var(--b50);
+    user-select: none;
+}
 
 #fileList {
     padding: 3px;

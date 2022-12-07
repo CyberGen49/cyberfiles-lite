@@ -96,18 +96,22 @@
                 <div class="body">
                     <% if (previewType == 'markdown') { %>
                         <%- html %>
-                    <% } %>
-                    <% if (previewType == 'image') { %>
+                    <% } else if (previewType == 'image') { %>
                         <img src="<%= path %>">
-                    <% } %>
-                    <% if (previewType == 'video') { %>
+                    <% } else if (previewType == 'video') { %>
                         <iframe allow="autoplay; fullscreen; clipboard-write" frameborder="0" data-video-url="<%= path %>"></iframe>
-                    <% } %>
-                    <% if (previewType == 'audio') { %>
+                    <% } else if (previewType == 'audio') { %>
                         <iframe allow="autoplay; clipboard-write" frameborder="0" data-audio-url="<%= path %>"></iframe>
-                    <% } %>
-                    <% if (previewType == 'text') { %>
+                    <% } else if (previewType == 'text') { %>
                         <pre><code><%- text %></code></pre>
+                    <% } else { %>
+                        <div class="col align-center gap-10">
+                            <div class="icon">draft</div>
+                            <p class="text-center" style="color: var(--b70)">
+                                You can't view this file in your browser.
+                                <br><a href="<%= path %>" download>Download it instead</a>
+                            </p>
+                        </div>
                     <% } %>
                 </div>
             </div>
