@@ -76,7 +76,16 @@ const sortOrder = {
         f: (a, b) => {
             return a.mtime-b.mtime
         },
-        display: 'Modified'
+        display: 'Date'
+    },
+    type: {
+        f: (a, b) => {
+            return a.ext.localeCompare(b.ext, undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            });
+        },
+        display: 'Type'
     },
     size: {
         f: (a, b) => {

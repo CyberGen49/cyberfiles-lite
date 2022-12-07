@@ -149,6 +149,8 @@ window.addEventListener('load', () => {
             { name: 'Z-A', id: 'name', desc: true },
             { name: 'Oldest to newest', id: 'mtime', desc: false },
             { name: 'Newest to oldest', id: 'mtime', desc: true },
+            { name: 'Extension A-Z', id: 'type', desc: false },
+            { name: 'Extension Z-A', id: 'type', desc: true },
             { name: 'Smallest to largest', id: 'size', desc: false },
             { name: 'Largest to smallest', id: 'size', desc: true },
         ];
