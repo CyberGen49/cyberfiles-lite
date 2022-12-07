@@ -5,6 +5,7 @@ const express = require('express');
 const ejs = require('ejs');
 const mime = require('mime');
 const htmlParser = require('node-html-parser');
+const dayjs = require('dayjs');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 loadLanguages();
@@ -134,6 +135,63 @@ module.exports = (opts = {}) => {
         }
         return false;
     }
+    // Get details about a file
+    const getFileObject = (filePathAbs, filePathRel) => {
+        // If this file should be hidden, return false
+        let isHidden = isPathHidden(filePathRel);
+        if (isHidden) return false;
+        // Get file stats
+        const stats = fs.statSync(filePathAbs);
+        const ext = path.extname(filePathAbs).substring(1).toLowerCase();
+        const isDir = stats.isDirectory();
+        // Create file object
+        const file = {
+            name: path.basename(filePathAbs),
+            path: encodeURI(filePathRel),
+            isDir: stats.isDirectory(),
+            mtime: stats.mtimeMs,
+            icon: 'folder',
+            ext: ext,
+            type: 'Folder'
+        };
+        // Add more to file object if it's not a directory
+        if (!isDir) {
+            file.type = typeFromExt(filePathAbs);
+            file.size = stats.size;
+            file.sizeHuman = utils.formatSize(stats.size),
+            file.icon = iconFromExt(filePathAbs),
+            //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
+            file.shouldRender = true;
+        }
+        return file;
+    }
+    // Extract starting text from Markdown HTML
+    const getTextFromMarkdownHTML = html => {
+        const el = htmlParser.parse(html);
+        const children = el.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
+        let isParagraphFound = false;
+        let content = [];
+        for (const child of children) {
+            let text = child.textContent.trim().replace(/\n/g, ' ');
+            if (child.tagName.match(/(p|li)/gi) && text) {
+                isParagraphFound = true;
+                if (child.tagName == 'LI') text += ',';
+                content.push(text);
+            }
+            if (isParagraphFound && child.tagName !== 'P') break;
+        }
+        content = content.join(' ');
+        const words = content.split(' ').filter(String);
+        content = '';
+        for (const word of words) {
+            if (content.length > 250) {
+                content = `${content.trim()}...`
+                break;
+            }
+            content += `${word} `;
+        }
+        return content;
+    };
     /** @type {express.RequestHandler} */
     return async(req, res, next) => {
         // Set constants and variables
@@ -196,27 +254,66 @@ module.exports = (opts = {}) => {
         }
         // If the file isn't a directory...
         if (!isDir) {
-            if (!req.query.render) return res.sendFile(pathAbs);
-            const ext = path.extname(pathAbs).substring(1).toLowerCase();
-            const type = typeFromExt(pathAbs);
-            data.desc = `Download this ${type} or view it right in your browser.`;
+            // If we aren't rendering, send the file
+            if (!req.query.render && !req.query.view) return res.sendFile(pathAbs);
+            // Get file details
+            const file = getFileObject(pathAbs, pathRel);
+            // Get file list
+            const dirAbs = path.dirname(pathAbs);
+            const dirRel = path.dirname(pathRel);
+            const fileList = fs.readdirSync(dirAbs);
+            const files = [];
+            for (const name of fileList) {
+                const filePathAbs = path.join(dirAbs, name);
+                const filePathRel = path.join(dirRel, name);
+                const file = getFileObject(filePathAbs, filePathRel);
+                if (file && !file.isDir) files.push(file);
+            }
+            if (files.length > 1) files.sort(sortOrder.name.f);
+            // Get current file index
+            let currentFileIndex;
+            let i = 0;
+            for (const entry of files) {
+                if (entry.name == file.name) {
+                    currentFileIndex = i;
+                    break;
+                }
+                i++;
+            }
+            // Set render data
+            data.file = file;
+            data.filePrev = files[currentFileIndex-1] || files[files.length-1];
+            data.fileNext = files[currentFileIndex+1] || files[0];
+            data.currentFileIndex = currentFileIndex+1;
+            data.fileCount = files.length;
+            data.desc = [
+                `Type: ${file.type}`,
+                `Modified: ${dayjs(file.mtime).format(`MMM D, YYYY`)}`,
+                `Size: ${file.sizeHuman}`
+            ].join('\n');
             data.path = encodeURI(pathRel);
-            if (ext.match(/^(md|markdown)$/)) {
+            // Markdown files
+            if (file.ext.match(/^(md|markdown)$/)) {
                 data.previewType = 'markdown';
                 data.html = marked.parse(fs.readFileSync(pathAbs).toString());
+                data.desc = getTextFromMarkdownHTML(data.html)
                 return render();
-            } else if (ext.match(/^(png|jpg|jpeg|gif|webp)$/)) {
+            // Images
+            } else if (file.ext.match(/^(png|jpg|jpeg|gif|webp)$/)) {
                 data.previewType = 'image';
                 return render();
-            } else if (ext.match(/^(mp4|webm|mov)$/)) {
+            // Videos
+            } else if (file.ext.match(/^(mp4|webm|mov)$/)) {
                 data.previewType = 'video';
                 return render();
-            } else if (ext.match(/^(mp3|weba|ogg|m4a)$/)) {
+            // Audio files
+            } else if (file.ext.match(/^(mp3|weba|ogg|m4a)$/)) {
                 data.previewType = 'audio';
                 return render();
-            } else if (prismLangs[ext] && fs.statSync(pathAbs).size < (1024*512)) {
+            // Text files
+            } else if (prismLangs[file.ext] && file.size < (1024*512)) {
                 data.previewType = 'text';
-                data.language = prismLangs[ext];
+                data.language = prismLangs[file.ext];
                 const contents = fs.readFileSync(pathAbs).toString();
                 try {
                     data.text = Prism.highlight(contents, Prism.languages[data.language], data.language).trim();
@@ -225,6 +322,7 @@ module.exports = (opts = {}) => {
                     data.text = utils.escapeHTML(contents.trim());
                 }
                 return render();
+            // Everything else
             } else {
                 //return res.sendFile(pathAbs);
                 data.previewType = 'default';
@@ -245,34 +343,12 @@ module.exports = (opts = {}) => {
             // Get paths
             const filePathAbs = path.join(pathAbs, name);
             const filePathRel = path.join(pathRel, name);
-            // If this file should be hidden, skip it
-            let isHidden = isPathHidden(filePathRel);
-            if (isHidden) continue;
-            // Get file stats
-            const stats = fs.statSync(filePathAbs);
-            const ext = path.extname(filePathAbs).substring(1).toLowerCase();
-            const isDir = stats.isDirectory();
-            // Create file object
-            const file = {
-                name: name,
-                path: encodeURI(filePathRel),
-                isDir: stats.isDirectory(),
-                mtime: stats.mtimeMs,
-                icon: 'folder',
-                type: 'Folder'
-            };
-            // Add more to file object if it's not a directory
-            if (!isDir) {
-                file.type = typeFromExt(filePathAbs);
-                file.size = stats.size;
-                file.sizeHuman = utils.formatSize(stats.size),
-                file.icon = iconFromExt(filePathAbs),
-                //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
-                file.shouldRender = true;
-                totalSize += stats.size;
-            }
+            // Get file details
+            const file = getFileObject(filePathAbs, filePathRel);
+            if (!file) continue;
+            totalSize += file.size;
             // Add file to list
-            filesWorking[(isDir) ? 'dirs':'files'].push(file);
+            filesWorking[(file.isDir) ? 'dirs':'files'].push(file);
             // If this is a readme file, save it
             if (name.toLowerCase().match('readme.md'))
                 readme = { pathAbs: filePathAbs, pathRel: filePathRel };
@@ -328,32 +404,6 @@ module.exports = (opts = {}) => {
                 path: readme.pathRel
             };
             // Change meta description to readme contents
-            const getTextFromMarkdownHTML = html => {
-                const el = htmlParser.parse(html);
-                const children = el.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
-                let isParagraphFound = false;
-                let content = [];
-                for (const child of children) {
-                    let text = child.textContent.trim().replace(/\n/g, ' ');
-                    if (child.tagName.match(/(p|li)/gi) && text) {
-                        isParagraphFound = true;
-                        if (child.tagName == 'LI') text += ',';
-                        content.push(text);
-                    }
-                    if (isParagraphFound && child.tagName !== 'P') break;
-                }
-                content = content.join(' ');
-                const words = content.split(' ').filter(String);
-                content = '';
-                for (const word of words) {
-                    if (content.length > 250) {
-                        content = `${content.trim()}...`
-                        break;
-                    }
-                    content += `${word} `;
-                }
-                return content;
-            };
             const text = getTextFromMarkdownHTML(data.readme.html);
             if (text) data.desc = text;
         }

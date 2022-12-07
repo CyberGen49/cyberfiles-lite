@@ -81,7 +81,7 @@
         <% } %>
         <% if (previewType) { %>
             <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
-                <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
+                <div class="header gap-10" style="padding: 4px 15px">
                     <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= tree[tree.length-2].path %>" title="Back to containing folder">
                         <div class="icon">arrow_back</div>
                     </a>
@@ -113,6 +113,18 @@
                             </p>
                         </div>
                     <% } %>
+                </div>
+                <div class="footer gap-10" style="padding: 4px 15px">
+                    <div class="flex-grow" style="margin-top: 1px;"><%= file.sizeHuman %> • <%= file.type %></div>
+                    <a id="filePrev" class="btn alt2 small noShadow iconOnly" href="<%= filePrev.path %>?render=true" title="<%= filePrev.name %>">
+                        <div class="icon">navigate_before</div>
+                    </a>
+                    <div style="margin-top: 1px;">
+                        <%= currentFileIndex %> of <%= fileCount %>
+                    </div>
+                    <a id="fileNext" class="btn alt2 small noShadow iconOnly" href="<%= fileNext.path %>?render=true" title="<%= fileNext.name %>">
+                        <div class="icon">navigate_next</div>
+                    </a>
                 </div>
             </div>
         <% } %>

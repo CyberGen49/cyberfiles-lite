@@ -71,7 +71,8 @@ body {
     filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2));
     border-radius: 16px;
 }
-.card .header {
+.card .header,
+.card .footer {
     display: flex;
     align-items: center;
     padding: 12px 15px 11px 15px;
@@ -82,12 +83,18 @@ body {
     border-radius: 16px 16px 0px 0px;
     user-select: none;
     word-break: break-word;
+    z-index: 1;
+}
+.card .footer {
+    box-shadow: 0px -16px 0px 0px var(--b18);
+    border-radius: 0px 0px 16px 16px;
 }
 .card .body {
     padding: 20px 15px;
     background: var(--b15);
     border-radius: 14px;
     overflow: hidden;
+    z-index: 2;
 }
 .card[data-preview-type="markdown"] .body img {
     max-width: 100%;

@@ -1,6 +1,6 @@
 {
   "name": "cyberfiles-lite",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A bare-bones file index built to work with Node.js Express and look like GitHub's file browser.",
   "main": "main.js",
   "scripts": {
@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "cyber-express-logger": "^1.0.3",
+    "dayjs": "^1.11.7",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "marked": "^4.2.3",
@@ -34,7 +35,6 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CyberGen49/cyberfiles-lite.git"
