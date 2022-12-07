@@ -36,10 +36,15 @@
             <div class="card no-select">
                 <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
                     <div class="flex-grow" style="margin-top: 1px;"><%= stats.count_string %> • <%= stats.duration %>ms</div>
-                    <button id="sort" class="btn alt2 small noShadow" title="Sort files...">
-                        <%= sort.order.display %>
-                        <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
-                    </button>
+                    <div class="row gap-5">
+                        <button id="sort" class="btn alt2 small noShadow" title="Sort files...">
+                            <%= sort.order.display %>
+                            <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
+                        </button>
+                        <button id="shareDir" class="btn alt2 small noShadow iconOnly" title="Share this folder...">
+                            <div class="icon">share</div>
+                        </button>
+                    </div>
                 </div>
                 <div id="fileList" class="body">
                     <% for (const file of files) { %>
@@ -81,6 +86,9 @@
                         <div class="icon">arrow_back</div>
                     </a>
                     <div class="flex-grow" style="margin-top: 1px;"><%= dirName %></div>
+                    <button id="shareFile" class="btn alt2 small noShadow iconOnly" title="Share this file...">
+                        <div class="icon">share</div>
+                    </button>
                     <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= path %>" download title="Download this file">
                         <div class="icon">download</div>
                     </a>

@@ -56,12 +56,14 @@ window.addEventListener('load', () => {
                     type: 'item',
                     icon: 'content_copy',
                     name: 'Copy file viewer URL',
+                    tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
                     action: () => window.navigator.clipboard.writeText(`${baseUrl}${el.dataset.path}?render=true`)
                 });
                 data.push({
                     type: 'item',
                     icon: 'content_copy',
                     name: 'Copy raw file URL',
+                    tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
                     action: () => window.navigator.clipboard.writeText(`${baseUrl}${el.dataset.path}`)
                 });
                 data.push({ type: 'sep' });
@@ -157,6 +159,30 @@ window.addEventListener('load', () => {
             });
         }
         showContext(data);
+    });
+    if ($('#shareDir')) on($('#shareDir'), 'click', () => {
+        showContext([{
+            type: 'item',
+            icon: 'content_copy',
+            name: `Copy folder URL`,
+            tooltip: `Copies a link to the current folder, without any sorting settings.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
+        }]);
+    });
+    if ($('#shareFile')) on($('#shareFile'), 'click', () => {
+        showContext([{
+            type: 'item',
+            icon: 'content_copy',
+            name: 'Copy file viewer URL',
+            tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}?render=true`)
+        }, {
+            type: 'item',
+            icon: 'content_copy',
+            name: 'Copy raw file URL',
+            tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
+        }]);
     });
     const hash = window.location.hash;
     window.location.hash = '#';
