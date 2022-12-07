@@ -7,11 +7,11 @@ const mime = require('mime');
 const htmlParser = require('node-html-parser');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
+loadLanguages();
 const utils = require('web-resources');
 const { marked } = require('marked');
 const prismLangs = require(path.join(__dirname, `prism-lang-exts.json`));
-
-loadLanguages();
+const fileTypes = require(path.join(__dirname, `file-types.json`));
 
 function iconFromExt(filePath) {
     const ext = path.extname(filePath).substring(1).trim();
@@ -39,6 +39,14 @@ function iconFromExt(filePath) {
     if (mimeType.match(/^application\/.*$/gi))
         return 'widgets';
     return 'draft';
+}
+
+function typeFromExt(filePath) {
+    const ext = path.extname(filePath).substring(1).toLowerCase();
+    if (ext)
+        return fileTypes[ext] || `${ext.toUpperCase()} File`;
+    else
+        return `File`;
 }
 
 // https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
@@ -190,7 +198,8 @@ module.exports = (opts = {}) => {
         if (!isDir) {
             if (!req.query.render) return res.sendFile(pathAbs);
             const ext = path.extname(pathAbs).substring(1).toLowerCase();
-            data.desc = `Download this file or preview it right in your browser.`;
+            const type = typeFromExt(pathAbs);
+            data.desc = `Download this ${type} or view it right in your browser.`;
             data.path = encodeURI(pathRel);
             if (ext.match(/^(md|markdown)$/)) {
                 data.previewType = 'markdown';
@@ -246,10 +255,12 @@ module.exports = (opts = {}) => {
                 path: encodeURI(filePathRel),
                 isDir: stats.isDirectory(),
                 mtime: stats.mtimeMs,
-                icon: 'folder'
+                icon: 'folder',
+                type: 'Folder'
             };
             // Add more to file object if it's not a directory
             if (!isDir) {
+                file.type = typeFromExt(filePathAbs);
                 file.size = stats.size;
                 file.sizeHuman = utils.formatSize(stats.size),
                 file.icon = iconFromExt(filePathAbs),

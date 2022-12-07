@@ -28,6 +28,7 @@ window.addEventListener('load', () => {
         const name = _qs('.name div', el).innerText;
         const size = _qs('.size', el).innerText;
         const modified = _qs('.modified', el).dataset.dateFull;
+        const type = el.dataset.type;
         const shouldRender = (el.dataset.shouldRender == 'true');
         const isDir = (el.dataset.isDir == 'true');
         let action = 'download this file';
@@ -35,6 +36,7 @@ window.addEventListener('load', () => {
         if (isDir) action = 'open this folder';
         el.title = `
             <span style="color: var(--f80)">${name}</span>
+            ${(type) ? `<br>Type: ${type}`:''}
             ${(modified) ? `<br>Modified: ${modified}`:''}
             ${(size !== '-') ? `<br>Size: ${size}`:''}
             <br><small>Click to ${action}</small>

@@ -48,7 +48,7 @@
                 </div>
                 <div id="fileList" class="body">
                     <% for (const file of files) { %>
-                        <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry" data-should-render="<%= file.shouldRender %>" data-is-dir="<%= file.isDir %>" data-path="<%= file.path %>">
+                        <a href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>" class="fileEntry" data-should-render="<%= file.shouldRender %>" data-is-dir="<%= file.isDir %>" data-type="<%= file.type %>" data-path="<%= file.path %>">
                             <div class="icon"><%= file.icon %></div>
                             <div class="name col gap-2">
                                 <div><%= file.name %></div>
