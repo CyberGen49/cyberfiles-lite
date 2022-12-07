@@ -204,6 +204,12 @@ module.exports = (opts = {}) => {
         const pathRel = path.normalize(decodeURI(req.path));
         const pathAbs = path.join(opts.root, pathRel);
         if (isPathHidden(pathRel)) return next();
+        // If this is an asset request, handle it
+        if (req.query.asset) {
+            const filePath = path.join(__dirname, 'assets', req.query.asset);
+            if (!fs.existsSync(filePath)) return res.status(404).end();
+            return res.sendFile(filePath);
+        }
         // Build data object
         let data = {
             files: false,
@@ -216,8 +222,8 @@ module.exports = (opts = {}) => {
             site_name_meta: opts.site_name,
             theme_color: '17181c',
             // We want this thing to be self-contained
-            css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
-            js: `<script>\n${fs.readFileSync(path.join(__dirname, `assets/index.js`))}\n</script>`
+            // css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
+            // js: `<script>\n${fs.readFileSync(path.join(__dirname, `assets/index.js`))}\n</script>`
         };
         data.title = data.dirName;
         // Change theme colour if Discord is requesting
