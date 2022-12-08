@@ -191,6 +191,7 @@ window.addEventListener('load', () => {
     if ($('#searchBtn')) {
         const head = $('#fileListHeader');
         const textbox = $('#searchInput');
+        const files = $$('#fileList .fileEntry');
         let isSearching = false;
         let timeout;
         on($('#searchBtn'), 'click', () => {
@@ -220,9 +221,9 @@ window.addEventListener('load', () => {
             clearTimeout(timeout);
             setTimeout(() => {
                 const input = textbox.value.trim().toLowerCase();
-                const files = $$('#fileList .fileEntry');
                 let foundCount = 0;
                 for (const file of files) {
+                    if ($('.icon', file).innerText == 'arrow_upward') continue;
                     const name = $('.name div', file).innerText.toLowerCase();
                     if (name.match(input) || !input) {
                         file.style.display = '';
@@ -233,7 +234,7 @@ window.addEventListener('load', () => {
                 if (foundCount == 0) {
                     $('#searchNoneFound').style.display = '';
                 }
-            }, 250);
+            }, clamp(files.length, 0, 500));
         });
     }
     const hash = window.location.hash;
