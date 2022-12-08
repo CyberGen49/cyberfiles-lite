@@ -192,6 +192,9 @@ window.addEventListener('load', () => {
         const head = $('#fileListHeader');
         const textbox = $('#searchInput');
         const files = $$('#fileList .fileEntry');
+        const qsBase = new URLSearchParams(window.location.search);
+        qsBase.delete('filter');
+        const qs = new URLSearchParams(window.location.search);
         let isSearching = false;
         let timeout;
         on($('#searchBtn'), 'click', () => {
@@ -234,8 +237,19 @@ window.addEventListener('load', () => {
                 if (foundCount == 0) {
                     $('#searchNoneFound').style.display = '';
                 }
+                qs.set('filter', input);
+                let queryStr;
+                if (input) queryStr = qs.toString();
+                else queryStr = qsBase.toString();
+                window.history.replaceState('', '', `?${queryStr}`);
             }, clamp(files.length, 0, 500));
         });
+        if (qs.get('filter')) {
+            const input = qs.get('filter');
+            if (!isSearching) $('#searchBtn').click();
+            textbox.value = input;
+            textbox.dispatchEvent(new Event('keydown'));
+        }
     }
     const hash = window.location.hash;
     window.location.hash = '#';
