@@ -81,6 +81,22 @@
                 <div id="readme" class="body"><%- readme.html %></div>
             </div>
         <% } %>
+        <% if (error) { %>
+            <div id="errorCard" class="card" data-preview-type="markdown">
+                <div class="header">
+                    Error <%= error %>
+                </div>
+                <div id="readme" class="body">
+                    <div class="col align-center gap-10">
+                        <div class="icon">help</div>
+                        <p class="text-center" style="color: var(--b70)">
+                            This file or folder can't be found!
+                            <br><a href="/" download>Go to the root</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
         <% if (previewType) { %>
             <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
                 <div class="header gap-10" style="padding: 4px 15px">

@@ -137,7 +137,8 @@ body {
 .card[data-preview-type="text"] .body pre code {
     background: none;
 }
-.card[data-preview-type="default"] .body .icon {
+.card[data-preview-type="default"] .body .icon,
+#errorCard .body .icon {
     font-family: 'Material Symbols';
     font-size: 56px;
     color: var(--b50);

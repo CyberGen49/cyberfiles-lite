@@ -145,7 +145,7 @@ A URL to use as the tab icon for the file index.
 
 Default: `"https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png"`
 
-### String `hue`
+### Number `hue`
 The hue to use as the accent colour around the file index, from 0 to 360.
 
 Default: `210`
@@ -163,3 +163,8 @@ The default will hide all files and directories whose paths contain a node start
 If storing these options in JSON, be sure to escape backslashes when escaping other characters.
 
 Default: `[ /\/(\.|_).*?(\/|$)/ ]`
+
+### Boolean `handle_404`
+If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
+
+Default: `false`

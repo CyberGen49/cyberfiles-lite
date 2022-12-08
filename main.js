@@ -115,6 +115,10 @@ const sortOrder = {
  * Defaults to `[ /\/(\.|_).*?(\/|$)/ ]`, which will hide all files and directories whose paths contain a node starting with `.` or `_`.
  * 
  * If storing these options in JSON, be sure to escape backslashes when escaping other characters.
+ * 
+ * @property {boolean} [handle_404] If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
+ * 
+ * Defaults to `false`
  */
 
 /**
@@ -133,6 +137,7 @@ module.exports = (opts = {}) => {
     if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
     if (opts.hue === undefined) opts.hue = 210;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
+    if (opts.handle_404 == 'undefined') opts.handle_404 = false;
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -211,14 +216,8 @@ module.exports = (opts = {}) => {
             return res.status(400).end(`400 Bad Request`);
         }
         const pathRel = path.normalize(decodeURI(req.path));
+        if (pathRel.length > 2048) return res.status(400).end();
         const pathAbs = path.join(opts.root, pathRel);
-        if (isPathHidden(pathRel)) return next();
-        // If this is an asset request, handle it
-        if (req.query.asset) {
-            const filePath = path.join(__dirname, 'assets', req.query.asset);
-            if (!fs.existsSync(filePath)) return res.status(404).end();
-            return res.sendFile(filePath);
-        }
         // Build data object
         let data = {
             files: false,
@@ -230,11 +229,11 @@ module.exports = (opts = {}) => {
             site_name: opts.site_name,
             site_name_meta: opts.site_name,
             theme_color: '17181c',
+            error: false,
             // We want this thing to be self-contained
             // css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
             // js: `<script>\n${fs.readFileSync(path.join(__dirname, `assets/index.js`))}\n</script>`
         };
-        data.title = data.dirName;
         // Change theme colour if Discord is requesting
         if ((req.headers['user-agent'] || '').match(/DiscordBot/gi))
             data.theme_color = hslToHex(opts.hue, 75, 80);
@@ -243,10 +242,23 @@ module.exports = (opts = {}) => {
             res.setHeader('content-type', 'text/html');
             res.end(await ejs.renderFile(path.join(__dirname, 'assets/index.ejs'), data));
         }
-        // Make sure file exists
-        if (!fs.existsSync(pathAbs)) return next();
-        // Save if the file is a directory
-        const isDir = fs.statSync(pathAbs).isDirectory();
+        // Handle 404s
+        const send404 = () => {
+            if (!opts.handle_404)
+                return next();
+            data.error = 404;
+            data.desc = `This file or directory doesn't exist!`;
+            data.dirName = 'Error 404';
+            res.status(404);
+            return render();
+        };
+        // If this is an asset request, handle it
+        if (req.query.asset) {
+            const filePath = path.join(__dirname, 'assets', req.query.asset);
+            if (!fs.existsSync(filePath)) return res.status(404).end();
+            return res.sendFile(filePath);
+        }
+        data.title = data.dirName;
         // Build file path tree
         const tree = [{ name: 'Root', path: '/' }];
         const parts = pathRel.split('/').filter(String);
@@ -259,6 +271,12 @@ module.exports = (opts = {}) => {
         }
         tree[tree.length-1].path = '';
         data.tree = tree;
+        // If this path is hidden, return 404
+        if (isPathHidden(pathRel)) return send404();
+        // If the path doesn't exist, return 404
+        if (!fs.existsSync(pathAbs)) return send404();
+        // Save if the file is a directory
+        const isDir = fs.statSync(pathAbs).isDirectory();
         // If we aren't at the root, change meta site name
         if (tree.length > 2 && opts.site_name.length < 64) {
             let tmp = [...parts];

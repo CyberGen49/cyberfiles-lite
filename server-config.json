@@ -1,6 +1,7 @@
 {
     "cyberfiles": {
-        "root": "../"
+        "root": "../",
+        "handle_404": true
     },
     "server": {
         "port": 8080,
