@@ -12,6 +12,8 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 * View text files, images, and videos without leaving your browser
     * Text files of [certain formats](/prism-lang-exts.json) are syntax-highlighted
     * Videos use a custom-made video player
+* Change the sort order of a directory
+* Filter files in a directory just by pressing Ctrl + F
 * Add to your existing [ExpressJS](https://github.com/expressjs/express) projects
 
 ## Running CyberFiles Lite standalone
