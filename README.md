@@ -9,11 +9,12 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 * Choose the root of your file index
 * Use RegEx to hide (and prevent access to) certain files and directories
 * Serve directory index files (like `index.html`) automatically
-* Show a directory's README.md file below the file lists
-    * The contents of the README are also used in that directory's link preview on places like Discord
-* View text files, images, and videos without leaving your browser
+* Render a directory's README.md file below the file list
+    * The contents of the README are also shown in that directory's link preview when sent on platforms like Discord
+* View text files, images, videos, and audio files without leaving your browser
     * Text files of [certain formats](/prism-lang-exts.json) are syntax-highlighted
-    * Videos use a custom-made video player
+    * Videos and audio files use embedded players provided by [@CyberGen49/web-resources](https://github.com/CyberGen49/web-resources) (undocumented)
+* Use the automatically-generated table of contents button to quickly jump to headings in markdown files
 * Conveniently move between files in the file viewer using the next/previous arrows
 * Change the sort order of a directory
 * Filter files in a directory just by pressing Ctrl + F
@@ -175,3 +176,11 @@ Default: `[ /\/(\.|_).*?(\/|$)/ ]`
 If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
 
 Default: `false`
+
+## Other projects that make this one possible
+CyberFiles Lite wouldn't be here without these amazing projects:
+* [Express](https://github.com/expressjs/express)
+* [EJS](https://ejs.co/)
+* [Marked](https://marked.js.org/)
+* [Day.js](https://day.js.org/)
+* [Prism](https://prismjs.com/)
