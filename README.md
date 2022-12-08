@@ -115,7 +115,7 @@ Add CyberFiles Lite as an Express middleware by `use`ing it:
 srv.use(cyberfiles());
 ```
 
-Without any options, the root of the file index will be set to the current directory (see the [root](#string-root) option). CyberFiles will serve static file URLs as expected, so additional handlers (like `express.static()`) aren't necessary, assuming they aren't hidden by one of your configured [hide_patterns](#string-or-regexp-hide_patterns).
+Without any options, the root of the file index will be set to the current directory (see the [root](#string-root) option). CyberFiles will serve static file URLs as expected, so additional handlers (like `express.static()`) aren't necessary, assuming the files aren't hidden by one of your configured [hide_patterns](#string-or-regexp-hide_patterns).
 
 By default, CyberFiles will respond with a directory's `index.html` file if it exists (see the [index_files](#string-index_files) option).
 
