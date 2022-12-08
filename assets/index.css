@@ -137,8 +137,7 @@ body {
 .card[data-preview-type="text"] .body pre code {
     background: none;
 }
-.card[data-preview-type="default"] .body .icon,
-#errorCard .body .icon {
+.bigIcon {
     font-family: 'Material Symbols';
     font-size: 56px;
     color: var(--b50);
@@ -212,6 +211,44 @@ body {
     width: 100px;
     color: var(--b80);
     flex-shrink: 0;
+}
+
+#fileListHeader:not(.search) .showOnSearch {
+    display: none;
+}
+#fileListHeader.search .ShowOnSearch {
+    display: flex;
+}
+#fileListHeader.search .hideOnSearch {
+    display: none;
+}
+#searchInput {
+    padding: 0px;
+    height: 34px;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    color: white;
+}
+#searchInput:focus {
+    border: none !important;
+    background: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* .canHover #counts:hover,
+#counts:focus-visible {
+    color: var(--f90);
+    cursor: pointer;
+} */
+#counts .num {
+    margin-top: 1px;
+}
+#counts .icon {
+    font-family: 'Material Symbols';
+    font-size: 20px;
+    line-height: 1;
 }
 
 #download {

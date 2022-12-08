@@ -188,6 +188,54 @@ window.addEventListener('load', () => {
             action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
         }]);
     });
+    if ($('#searchBtn')) {
+        const head = $('#fileListHeader');
+        const textbox = $('#searchInput');
+        let isSearching = false;
+        let timeout;
+        on($('#searchBtn'), 'click', () => {
+            if (head.classList.contains('search')) {
+                head.classList.remove('search');
+                textbox.value = '';
+                textbox.dispatchEvent(new Event('keydown'));
+                isSearching = false;
+            } else {
+                head.classList.add('search');
+                textbox.focus();
+                isSearching = true;
+            }
+        });
+        on(window, 'keydown', (e) => {
+            if (e.ctrlKey && e.code == 'KeyF') {
+                e.preventDefault();
+                if (!isSearching) $('#searchBtn').click();
+                textbox.focus();
+                head.scrollIntoView(true);
+            }
+            if (e.code == 'Escape' && isSearching) {
+                $('#searchBtn').click();
+            }
+        });
+        on(textbox, 'keydown', (e) => {
+            clearTimeout(timeout);
+            setTimeout(() => {
+                const input = textbox.value.trim().toLowerCase();
+                const files = $$('#fileList .fileEntry');
+                let foundCount = 0;
+                for (const file of files) {
+                    const name = $('.name div', file).innerText.toLowerCase();
+                    if (name.match(input) || !input) {
+                        file.style.display = '';
+                        foundCount++;
+                    } else file.style.display = 'none';
+                }
+                $('#searchNoneFound').style.display = 'none';
+                if (foundCount == 0) {
+                    $('#searchNoneFound').style.display = '';
+                }
+            }, 250);
+        });
+    }
     const hash = window.location.hash;
     window.location.hash = '#';
     setTimeout(() => window.location.hash = hash, 100);
