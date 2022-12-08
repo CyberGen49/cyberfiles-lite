@@ -89,6 +89,8 @@ The HTTP header containing the client's IP address, used only for logging to the
 
 Default: `req.socket.remoteAddress`
 
+**Don't forget to restart your server after changing any of these settings.**
+
 ## Adding CyberFiles Lite to an existing project
 If you have an existing ExpressJS project, you can add CyberFiles lite to it so your users can see directory listings on pages that don't have index files. 
 
