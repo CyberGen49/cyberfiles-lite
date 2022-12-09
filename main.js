@@ -6,6 +6,7 @@ const ejs = require('ejs');
 const mime = require('mime');
 const htmlParser = require('node-html-parser');
 const dayjs = require('dayjs');
+const fastFolderSize = require('fast-folder-size');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 loadLanguages();
@@ -119,6 +120,10 @@ const sortOrder = {
  * @property {boolean} [handle_404] If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
  * 
  * Defaults to `false`
+ * 
+ * @property {boolean} [get_dir_sizes] If `true`, the index will recurse through directories to get and display their total sizes. This will increase load times.
+ * 
+ * Defaults to `false`
  */
 
 /**
@@ -138,6 +143,7 @@ module.exports = (opts = {}) => {
     if (opts.hue === undefined) opts.hue = 210;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     if (opts.handle_404 == 'undefined') opts.handle_404 = false;
+    if (opts.get_dir_sizes == 'undefined') opts.get_dir_sizes = false;
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -150,7 +156,7 @@ module.exports = (opts = {}) => {
         return false;
     }
     // Get details about a file
-    const getFileObject = (filePathAbs, filePathRel) => {
+    const getFileObject = async(filePathAbs, filePathRel) => {
         // If this file should be hidden, return false
         let isHidden = isPathHidden(filePathRel);
         if (isHidden) return false;
@@ -176,6 +182,24 @@ module.exports = (opts = {}) => {
             file.icon = iconFromExt(filePathAbs),
             //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
             file.shouldRender = true;
+        }
+        // Add things for only folders
+        if (isDir) {
+            if (opts.get_dir_sizes) {
+                const size = await new Promise((resolve, reject) => {
+                    fastFolderSize(filePathAbs, (err, bytes) => {
+                        if (err) {
+                            console.error(`Error while getting folder size:`, err);
+                            return resolve(undefined);
+                        }
+                        resolve(bytes);
+                    });
+                });
+                if (size) {
+                    file.size = size;
+                    file.sizeHuman = utils.formatSize(file.size);
+                }
+            }
         }
         return file;
     }
@@ -290,7 +314,7 @@ module.exports = (opts = {}) => {
             // If we aren't rendering, send the file
             if (!req.query.render && !req.query.view) return res.sendFile(pathAbs);
             // Get file details
-            const file = getFileObject(pathAbs, pathRel);
+            const file = await getFileObject(pathAbs, pathRel);
             // Get file list
             const dirAbs = path.dirname(pathAbs);
             const dirRel = path.dirname(pathRel);
@@ -299,7 +323,7 @@ module.exports = (opts = {}) => {
             for (const name of fileList) {
                 const filePathAbs = path.join(dirAbs, name);
                 const filePathRel = path.join(dirRel, name);
-                const file = getFileObject(filePathAbs, filePathRel);
+                const file = await getFileObject(filePathAbs, filePathRel);
                 if (file && !file.isDir) files.push(file);
             }
             if (files.length > 1) files.sort(sortOrder.name.f);
@@ -377,7 +401,7 @@ module.exports = (opts = {}) => {
             const filePathAbs = path.join(pathAbs, name);
             const filePathRel = path.join(pathRel, name);
             // Get file details
-            const file = getFileObject(filePathAbs, filePathRel);
+            const file = await getFileObject(filePathAbs, filePathRel);
             if (!file) continue;
             totalSize += file.size;
             // Add file to list
@@ -399,6 +423,8 @@ module.exports = (opts = {}) => {
             order: sortOrder[sort],
             descending: isDescending
         };
+        const views = [ 'list', 'tiles' ];
+        data.view = (views.includes(req.query.view)) ? req.query.sort : 'list';
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
         // If we aren't at the root

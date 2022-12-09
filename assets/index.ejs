@@ -43,7 +43,7 @@
                     <div id="searchBar" class="row no-wrap flex-grow showOnSearch">
                         <input id="searchInput" class="textbox" type="text" placeholder="Search these files...">
                     </div>
-                    <div id="counts" class="row align-center flex-grow hideOnSearch" title="<%- `${stats.count_string}<br>Processed in ${stats.duration}ms` %>">
+                    <div id="counts" class="row align-center flex-grow hideOnSearch" title="<%- `${stats.count_string}<br><small>Processed in ${stats.duration}ms</small>` %>">
                         <% if (stats.count.dirs > 0) { %>
                             <div class="row gap-5 no-wrap">
                                 <div class="icon">folder</div>
