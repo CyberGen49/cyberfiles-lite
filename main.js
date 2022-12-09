@@ -8,6 +8,8 @@ const htmlParser = require('node-html-parser');
 const dayjs = require('dayjs');
 const fastFolderSize = require('fast-folder-size');
 const archiver = require('archiver');
+const sharp = require('sharp');
+const crypto = require('crypto');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 loadLanguages();
@@ -129,6 +131,10 @@ const sortOrder = {
  * @property {boolean} [max_zip_size] The max size, in megabytes, that directory zip files can be.
  * 
  * Defaults to `2000`
+ * 
+ * @property {boolean} [make_thumbs] If `true`, thumbnails will be generated for image files to show in the index.
+ * 
+ * Defaults to `false`
  */
 
 /**
@@ -150,6 +156,19 @@ module.exports = (opts = {}) => {
     if (opts.handle_404 == 'undefined') opts.handle_404 = false;
     if (opts.get_dir_sizes == 'undefined') opts.get_dir_sizes = false;
     if (!opts.max_zip_size) opts.max_zip_size = 2000;
+    if (opts.make_thumbs == 'undefined') opts.make_thumbs = false;
+    // Set variables
+    const zipFolder = path.join(__dirname, 'assets/zips');
+    fs.rmSync(zipFolder, { force: true, recursive: true });
+    const zipJobs = {};
+    const thumbQueue = [];
+    const thumbHandlers = {};
+    const thumbsDir = path.join(__dirname, 'thumbs');
+    const thumbMapFile = path.join(__dirname, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
+    let isThumbGenerating = false;
+    let thumbMap = {};
+    if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
+    if (fs.existsSync(thumbMapFile)) thumbMap = require(thumbMapFile);
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -188,6 +207,12 @@ module.exports = (opts = {}) => {
             file.icon = iconFromExt(filePathAbs),
             //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
             file.shouldRender = true;
+            file.hasThumb = false;
+            if (ext.match(/^(png|jpg|jpeg|gif|webp)$/) && opts.make_thumbs) {
+                file.hasThumb = true;
+                if (!thumbMap[filePathAbs])
+                    thumbQueue.push(filePathAbs);
+            }
         }
         // Add things for only folders
         if (isDir) {
@@ -237,9 +262,6 @@ module.exports = (opts = {}) => {
         return content;
     };
     // Handle zipping directories
-    const zipFolder = path.join(__dirname, 'assets/zips');
-    fs.rmSync(zipFolder, { force: true, recursive: true });
-    const zipJobs = {};
     const handleZip = async(pathRel, req, res) => {
         pathRel = path.join(pathRel, req.query.zip);
         const pathAbs = path.join(opts.root, pathRel);
@@ -283,7 +305,6 @@ module.exports = (opts = {}) => {
                     pathAbs: filePathAbs
                 };
                 files.push(file);
-                console.log(file)
             }
         };
         getFiles(pathRel);
@@ -343,6 +364,40 @@ module.exports = (opts = {}) => {
             }
         }
     }, 15000);
+    // Handle thumbnail generation
+    setInterval(async() => {
+        if (isThumbGenerating || thumbQueue.length == 0) return;
+        isThumbGenerating = true;
+        try {
+            const filePath = thumbQueue.shift();
+            const thumbName = `${utils.randomHex()}.png`;
+            const thumbPath = path.join(thumbsDir, thumbName);
+            const meta = await sharp(filePath).metadata();
+            if (!meta.width || !meta.height) return;
+            const isVertical = (meta.height > meta.width);
+            const resizeOpts = {};
+            (isVertical) ? resizeOpts.height = 128 : resizeOpts.width = 128;
+            await sharp(filePath).resize(resizeOpts).toFile(thumbPath);
+            thumbMap[filePath] = { name: thumbName };
+            fs.writeFileSync(thumbMapFile, JSON.stringify(thumbMap));
+            if (thumbHandlers[filePath]) thumbHandlers[filePath](thumbPath);
+        } catch (error) {
+            console.error(`Error while generating thumbnail:`, error);
+        }
+        isThumbGenerating = false;
+    }, 100);
+    // Handle thumbnail requests
+    const handleThumb = (pathRel, req, res) => {
+        const filePathRel = path.join(pathRel, req.query.thumb);
+        const filePathAbs = path.join(opts.root, filePathRel);
+        if (thumbMap[filePathAbs]) {
+            res.sendFile(path.join(thumbsDir, thumbMap[filePathAbs].name));
+        } else {
+            thumbHandlers[filePathAbs] = image => {
+                res.sendFile(image);
+            };
+        }
+    };
     /** @type {express.RequestHandler} */
     return async(req, res, next) => {
         // Set constants and variables
@@ -357,6 +412,8 @@ module.exports = (opts = {}) => {
         const pathAbs = path.join(opts.root, pathRel);
         // If this is a zip request, handle it
         if (req.query.zip) return handleZip(pathRel, req, res);
+        // If this is a thumbnail request, handle it
+        if (req.query.thumb) return handleThumb(pathRel, req, res);
         // Build data object
         let data = {
             files: false,
@@ -428,7 +485,7 @@ module.exports = (opts = {}) => {
         // If the file isn't a directory...
         if (!isDir) {
             // If we aren't rendering, send the file
-            if (!req.query.render && !req.query.view) return res.sendFile(pathAbs);
+            if (!req.query.render) return res.sendFile(pathAbs);
             // Get file details
             const file = await getFileObject(pathAbs, pathRel);
             // Get file list
@@ -540,7 +597,12 @@ module.exports = (opts = {}) => {
             descending: isDescending
         };
         const views = [ 'list', 'tiles' ];
-        data.view = (views.includes(req.query.view)) ? req.query.sort : 'list';
+        data.view = (views.includes(req.query.view)) ? req.query.view : 'list';
+        let countFilesWithThumbs = 0;
+        for (const file of filesWorking.files) {
+            if (file.hasThumb) countFilesWithThumbs++;
+        }
+        if ((countFilesWithThumbs/filesWorking.files.length) > 0.5) data.view = 'tiles';
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
         // If we aren't at the root

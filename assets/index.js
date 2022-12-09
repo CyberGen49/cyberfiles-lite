@@ -5,13 +5,15 @@ window.addEventListener('load', () => {
     //_qs('#domain').innerText = window.location.hostname;
     if (_qs('#path'))
         _qs('#path').scrollLeft = _qs('#path').scrollWidth;
+    const getDateFull = timestamp => {
+        const time = dayjs(timestamp);
+        return `${time.format(`MMM D YYYY`)} at ${time.format(`h:mm A`)}`;
+    };
     const updateTimes = () => {
         for (const el of _qsa('[data-timestamp]')) {
             const timestamp = parseInt(el.dataset.timestamp);
             if (!timestamp) continue;
             el.innerText = getRelativeDate(timestamp);
-            const time = dayjs(timestamp);
-            el.dataset.dateFull = `${time.format(`MMM D YYYY`)} at ${time.format(`h:mm A`)}`;
         }
     };
     updateTimes();
@@ -25,9 +27,9 @@ window.addEventListener('load', () => {
         console.log(el.src);
     }
     for (const el of _qsa('#fileList .fileEntry')) {
-        const name = _qs('.name div', el).innerText;
-        const size = _qs('.size', el).innerText;
-        const modified = _qs('.modified', el).dataset.dateFull;
+        const name = el.dataset.name;
+        const size = el.dataset.size;
+        const modified = (el.dataset.mtime) ? getDateFull(parseInt(el.dataset.mtime)):'';
         const type = el.dataset.type;
         const shouldRender = (el.dataset.shouldRender == 'true');
         const isDir = (el.dataset.isDir == 'true');
@@ -38,7 +40,7 @@ window.addEventListener('load', () => {
             <span style="color: var(--f80)">${name}</span>
             ${(type) ? `<br>Type: ${type}`:''}
             ${(modified) ? `<br>Modified: ${modified}`:''}
-            ${(size !== '-') ? `<br>Size: ${size}`:''}
+            ${(size && size !== '-') ? `<br>Size: ${size}`:''}
             <br><small>Click to ${action}</small>
             <br><small>Right-click for more options...</small>
         `;
@@ -85,6 +87,15 @@ window.addEventListener('load', () => {
             });
             showContext(data);
         });
+        if ($('.thumb', el)) {
+            const thumb = $('.thumb', el);
+            const loaded = () => {
+                $('.icon', el).remove();
+                thumb.classList.add('visible');
+            };
+            if (thumb.complete) loaded();
+            else thumb.addEventListener('load', loaded);
+        }
     }
     const markdownContainer = _qs(`.card[data-preview-type="markdown"]`);
     if (markdownContainer) {

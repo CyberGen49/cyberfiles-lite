@@ -182,6 +182,11 @@ If `true`, we'll get the total size of directories and display them. This will i
 
 Default: `false`
 
+### Boolean `make_thumbs`
+If `true`, thumbnails will be generated for image files to show in the index.
+
+Default: `false`
+
 ## Other projects that make this one possible
 CyberFiles Lite wouldn't be here without these amazing projects:
 * [Express](https://github.com/expressjs/express)

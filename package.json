@@ -1,6 +1,6 @@
 {
   "name": "cyberfiles-lite",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "A bare-bones file index built to work with Node.js Express and look like GitHub's file browser.",
   "main": "main.js",
   "scripts": {
@@ -31,6 +31,7 @@
     "mime": "^3.0.0",
     "node-html-parser": "^6.1.4",
     "prismjs": "^1.29.0",
+    "sharp": "^0.31.2",
     "web-resources": "^1.8.2"
   },
   "directories": {

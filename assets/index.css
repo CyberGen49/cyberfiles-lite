@@ -147,16 +147,33 @@ body {
 #fileList {
     padding: 3px;
 }
-#fileList .fileEntry {
-    height: 40px;
-    padding: 0px 8px;
+#fileList.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 3px;
+}
+#fileList div.outer {
     display: flex;
+    flex-direction: column;
+}
+#fileList .fileEntry {
+    display: flex;
+    color: var(--b90);
+    line-height: 1.2;
+    transition: 0.1s var(--bezier);
+    border-radius: 12px;
+}
+#fileList.list .fileEntry {
     gap: 5px;
     align-items: center;
-    border-radius: 12px;
-    color: var(--b90);
-    transition: 0.1s var(--bezier);
+    height: 40px;
+    padding: 0px 8px;
 }
+#fileList.tiles .fileEntry {
+    flex-direction: column;
+}
+.canHover #fileList .fileEntry:hover,
+#fileList .fileEntry:focus-visible,
 .canHover #fileList .fileEntry:hover,
 #fileList .fileEntry:focus-visible {
     color: inherit;
@@ -176,15 +193,13 @@ body {
 #fileList .fileEntry:focus-visible .size {
     color: white;
 }
-#fileList .fileEntry > *,
-#fileList .fileEntry .name > * {
+#fileList.list .fileEntry > *,
+#fileList.list .fileEntry .name > * {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    line-height: 1.2;
 }
 #fileList .fileEntry .icon {
-    width: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,22 +207,49 @@ body {
     font-size: 28px;
     color: var(--b70);
     line-height: 1;
+}
+#fileList.list .fileEntry .icon {
+    width: 40px;
     flex-shrink: 0;
 }
-#fileList .fileEntry .name {
+#fileList.tiles .fileEntry .icon {
+    width: calc(100% - 12px);
+    margin: 6px;
+    margin-bottom: 0px;
+    font-size: 64px;
+}
+#fileList.tiles .fileEntry .thumb {
+    display: none;
+    width: calc(100% - 12px);
+    max-height: 200%;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 6px;
+    margin-bottom: 0px;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.2);
+}
+#fileList.tiles .fileEntry .thumb.visible {
+    display: block;
+}
+#fileList.list .fileEntry .name {
     flex-grow: 1;
 }
-#fileList .fileEntry .name .lower {
+#fileList.tiles .fileEntry .name {
+    padding: 5px 10px 10px 10px;
+    text-align: center;
+    word-break: break-word;
+}
+#fileList.list .fileEntry .name .lower {
     display: none;
     color: var(--b70);
     font-size: 15px;
 }
-#fileList .fileEntry .modified {
+#fileList.list .fileEntry .modified {
     width: 160px;
     color: var(--b80);
     flex-shrink: 0;
 }
-#fileList .fileEntry .size {
+#fileList.list .fileEntry .size {
     width: 100px;
     color: var(--b80);
     flex-shrink: 0;
@@ -285,18 +327,18 @@ body {
     #head {
         padding: 0px 10px;
     }
-    #fileList .fileEntry {
+    #fileList.list .fileEntry {
         height: 60px;
     }
-    #fileList .fileEntry .name .lower {
+    #fileList.list .fileEntry .name .lower {
         display: block;
     }
-    #fileList .fileEntry .icon {
+    #fileList.list .fileEntry .icon {
         width: 48px;
         font-size: 36px;
     }
-    #fileList .fileEntry .modified,
-    #fileList .fileEntry .size {
+    #fileList.list .fileEntry .modified,
+    #fileList.list .fileEntry .size {
         display: none;
     }
 }
