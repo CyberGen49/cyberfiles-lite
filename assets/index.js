@@ -164,15 +164,6 @@ window.addEventListener('load', () => {
         }
         showContext(data);
     });
-    if ($('#shareDir')) on($('#shareDir'), 'click', () => {
-        showContext([{
-            type: 'item',
-            icon: 'content_copy',
-            name: `Copy folder URL`,
-            tooltip: `Copies a link to the current folder, without any sorting settings.`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
-        }]);
-    });
     if ($('#shareFile')) on($('#shareFile'), 'click', () => {
         showContext([{
             type: 'item',
@@ -251,6 +242,68 @@ window.addEventListener('load', () => {
             textbox.dispatchEvent(new Event('keydown'));
         }
     }
+    const downloadFolder = path => {
+        const popup = showPopup(`Zipping folder`, `
+            <p>Your zip file is being prepared. The status below will keep you up to date on the process, and the download will start automatically when it's ready.</p>
+            <p style="color: var(--b70)">Status: <span id="zipStatus"></span></p>
+            <p>Keep this page open.</p>
+        `, [{
+            label: 'Cancel',
+            action: () => {
+                clearInterval(interval);
+                hidePopup(popup);
+                fetch(`?zip=${path}&cancel=true`);
+            }
+        }]);
+        let interval;
+        const update = async() => {
+            const res = await (await fetch(`?zip=${path}`)).json();
+            $('#zipStatus').innerText = res.message;
+            if (res.status == 'ready') {
+                clearInterval(interval);
+                const url = `?asset=/zips/${res.zip_name}`;
+                const name = `${res.folder_name}.zip`;
+                downloadFile(url, name);
+                hidePopup(popup);
+                showPopup(`Folder download ready`, `
+                    <p>
+                        Your download has started.
+                        <br><a href="${url}" download="${name}">Click here if it didn't</a>
+                    </p>
+                `, [{
+                    label: 'Okay',
+                    primary: true
+                }]);
+            }
+            if (res.status == 'failed') {
+                clearInterval(interval);
+                hidePopup(popup);
+                showPopup(`Folder download failed`, `
+                    <p>Something went wrong while zipping this folder:</p>
+                    <p>${res.message}</p>
+                `, [{
+                    label: 'Okay',
+                    primary: true
+                }]);
+            }
+        };
+        update();
+        interval = setInterval(update, 3000);
+    }
+    if ($('#dirMenu')) on($('#dirMenu'), 'click', () => {
+        showContext([{
+            type: 'item',
+            icon: 'content_copy',
+            name: `Copy folder URL`,
+            tooltip: `Copies a link to the current folder, without any sorting settings.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
+        }, { type: 'sep' }, {
+            type: 'item',
+            icon: 'download',
+            name: `Download folder as zip`,
+            action: () => downloadFolder('./')
+        }]);
+    });
     const hash = window.location.hash;
     window.location.hash = '#';
     setTimeout(() => window.location.hash = hash, 100);

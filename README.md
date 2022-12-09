@@ -178,7 +178,7 @@ If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404
 Default: `false`
 
 ### Boolean `get_dir_sizes`
-If `true`, the index will get the total size of directories and display them. This will increase load times.
+If `true`, we'll get the total size of directories and display them. This will increase load times, especially with lots of files.
 
 Default: `false`
 
