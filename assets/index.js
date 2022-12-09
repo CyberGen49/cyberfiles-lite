@@ -175,6 +175,22 @@ window.addEventListener('load', () => {
         }
         showContext(data);
     });
+    if ($('#viewMenu')) on($('#viewMenu'), 'click', () => {
+        const views = [
+            { name: 'Details', id: 'list', icon: 'list' },
+            { name: 'Tiles', id: 'tiles', icon: 'grid_view' }
+        ];
+        const data = [];
+        for (const view of views) {
+            data.push({
+                type: 'item',
+                icon: view.icon,
+                name: view.name,
+                action: async() => window.location.href = `?view=${view.id}`
+            });
+        }
+        showContext(data);
+    });
     if ($('#shareFile')) on($('#shareFile'), 'click', () => {
         showContext([{
             type: 'item',

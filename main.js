@@ -597,12 +597,16 @@ module.exports = (opts = {}) => {
             descending: isDescending
         };
         const views = [ 'list', 'tiles' ];
-        data.view = (views.includes(req.query.view)) ? req.query.view : 'list';
-        let countFilesWithThumbs = 0;
-        for (const file of filesWorking.files) {
-            if (file.hasThumb) countFilesWithThumbs++;
+        const isUserViewValid = views.includes(req.query.view);
+        data.view = (isUserViewValid) ? req.query.view : 'list';
+        if (!isUserViewValid) {
+            let countFilesWithThumbs = 0;
+            for (const file of filesWorking.files) {
+                if (file.hasThumb) countFilesWithThumbs++;
+            }
+            if ((countFilesWithThumbs/filesWorking.files.length) > 0.5)
+                data.view = 'tiles';
         }
-        if ((countFilesWithThumbs/filesWorking.files.length) > 0.5) data.view = 'tiles';
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
         // If we aren't at the root

@@ -57,15 +57,18 @@
                             </div>
                         <% } %>
                     </div>
-                    <div class="row gap-5 no-wrap hideOnSearch">
+                    <div class="row gap-3 no-wrap hideOnSearch">
                         <button id="sort" class="btn alt2 small noShadow" title="Sort files...">
                             <%= sort.order.display %>
                             <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
                         </button>
-                        <button id="dirMenu" class="btn alt2 small noShadow iconOnly" title="Folder options...">
-                            <div class="icon">more_vert</div>
+                        <button id="viewMenu" class="btn alt2 small noShadow iconOnly" title="View...">
+                            <div class="icon">visibility</div>
                         </button>
                     </div>
+                    <button id="dirMenu" class="btn alt2 small noShadow iconOnly" title="Folder options...">
+                        <div class="icon">more_vert</div>
+                    </button>
                 </div>
                 <div id="fileList" class="body <%= view %>">
                     <% for (const file of files) { %>
