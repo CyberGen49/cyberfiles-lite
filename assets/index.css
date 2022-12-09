@@ -239,6 +239,13 @@ body {
     text-align: center;
     word-break: break-word;
 }
+#fileList.tiles .fileEntry .name > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
 #fileList.list .fileEntry .name .lower {
     display: none;
     color: var(--b70);

@@ -327,7 +327,7 @@ window.addEventListener('load', () => {
         }, { type: 'sep' }, {
             type: 'item',
             icon: 'download',
-            name: `Download folder as zip`,
+            name: `Download zip...`,
             action: () => downloadFolder('./')
         }]);
     });
