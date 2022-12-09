@@ -18,6 +18,10 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 * Conveniently move between files in the file viewer using the next/previous arrows
 * Change the sort order of a directory
 * Filter files in a directory just by pressing Ctrl + F
+* See image previews before clicking with thumbnails
+    * Only in tile view
+* Get a better look at your files with tile view
+    * Directories where more than 50% of the contents have thumbnails will use tile view automatically
 * Add to your existing [ExpressJS](https://github.com/expressjs/express) projects
 
 ## Running CyberFiles Lite standalone
