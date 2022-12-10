@@ -169,7 +169,6 @@ module.exports = (opts = {}) => {
     const thumbMapFile = path.join(__dirname, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
     logDebug(`Thumbs directory:`, thumbsDir);
     logDebug(`Thumbs map file:`, thumbMapFile);
-    let isThumbGenerating = false;
     let thumbMap = {};
     if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
     if (fs.existsSync(thumbMapFile)) {
@@ -322,9 +321,10 @@ module.exports = (opts = {}) => {
         archive.finalize();
     };
     // Handle thumbnail generation
+    let thumbsInProgress = 0;
     setInterval(async() => {
-        if (isThumbGenerating || thumbQueue.length == 0) return;
-        isThumbGenerating = true;
+        if (thumbsInProgress > 3 || thumbQueue.length == 0) return;
+        thumbsInProgress++;
         try {
             let filePath = thumbQueue.shift();
             let tmpPath = '';
@@ -354,7 +354,7 @@ module.exports = (opts = {}) => {
         } catch (error) {
             logDebug(`Error while generating thumbnail:`, error);
         }
-        isThumbGenerating = false;
+        thumbsInProgress--;
     }, 100);
     // Handle thumbnail requests
     const handleThumb = (pathRel, req, res) => {
@@ -362,7 +362,7 @@ module.exports = (opts = {}) => {
         const filePathAbs = path.join(opts.root, filePathRel);
         if (thumbMap[filePathAbs]) {
             res.sendFile(path.join(thumbsDir, thumbMap[filePathAbs].name));
-        } else if (thumbQueue[filePathAbs]) {
+        } else if (thumbQueue.includes(filePathAbs)) {
             res.setHeader('content-type', 'image/png');
             thumbHandlers[filePathAbs] = image => {
                 res.sendFile(image);
