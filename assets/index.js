@@ -2,7 +2,6 @@
 const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
 window.addEventListener('load', () => {
-    //_qs('#domain').innerText = window.location.hostname;
     if (_qs('#path'))
         _qs('#path').scrollLeft = _qs('#path').scrollWidth;
     const getDateFull = timestamp => {
@@ -18,14 +17,6 @@ window.addEventListener('load', () => {
     };
     updateTimes();
     setInterval(updateTimes, 1000*60);
-    for (const el of _qsa('[data-video-url]')) {
-        el.src = `https://src.simplecyber.org/video/?hue=${document.body.style.getPropertyValue('--fgHue')}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
-        console.log(el.src);
-    }
-    for (const el of _qsa('[data-audio-url]')) {
-        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.style.getPropertyValue('--fgHue')}&url=${baseUrl}${el.dataset.audioUrl}`;
-        console.log(el.src);
-    }
     for (const el of _qsa('#fileList .fileEntry')) {
         const name = el.dataset.name;
         const size = el.dataset.size;
@@ -184,35 +175,41 @@ window.addEventListener('load', () => {
         }
         showContext(data);
     });
-    if ($('#viewMenu')) on($('#viewMenu'), 'click', () => {
-        const views = [
-            { name: 'Details', id: 'list', icon: 'list' },
-            { name: 'Tiles', id: 'tiles', icon: 'grid_view' }
-        ];
-        const data = [];
-        for (const view of views) {
-            data.push({
-                type: 'item',
-                icon: view.icon,
-                name: view.name,
-                action: async() => window.location.href = `?view=${view.id}`
-            });
-        }
-        showContext(data);
+    if ($('#dirView')) on($('#dirView'), 'click', () => {
+        const currentView = $('#dirView').dataset.currentView;
+        let newView;
+        if (currentView == 'list') newView = 'tiles';
+        if (currentView == 'tiles') newView = 'list';
+        window.location.href = `?view=${newView}`;
     });
-    if ($('#shareFile')) on($('#shareFile'), 'click', () => {
+    if ($('#dirShare')) on($('#dirShare'), 'click', () => {
         showContext([{
             type: 'item',
             icon: 'content_copy',
-            name: 'Copy file viewer URL',
-            tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}?render=true`)
-        }, {
-            type: 'item',
-            icon: 'content_copy',
-            name: 'Copy raw file URL',
-            tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
+            name: `Copy folder URL`,
             action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
+        }]);
+    });
+    if ($('#dirDownload')) on($('#dirDownload'), 'click', () => {
+        const name = `${[...$$('#path .part')].pop().innerText}.zip`;
+        downloadFile(`?zip=./`, name);
+    });
+    if ($('#dirMenu')) on($('#dirMenu'), 'click', () => {
+        showContext([{
+            type: 'item',
+            icon: $('#dirView .icon').innerText,
+            name: `Change folder view`,
+            action: () => $('#dirView').click()
+        }, { type: 'sep' }, {
+            type: 'item',
+            icon: 'share',
+            name: `Share this folder...`,
+            action: () => $('#dirShare').click()
+        }, { type: 'sep' }, {
+            type: 'item',
+            icon: 'download',
+            name: `Download as zip`,
+            action: () => $('#dirDownload').click()
         }]);
     });
     if ($('#searchBtn')) {
@@ -278,22 +275,29 @@ window.addEventListener('load', () => {
             textbox.dispatchEvent(new Event('keydown'));
         }
     }
-    if ($('#dirMenu')) on($('#dirMenu'), 'click', () => {
+    if ($('#shareFile')) on($('#shareFile'), 'click', () => {
         showContext([{
             type: 'item',
             icon: 'content_copy',
-            name: `Copy folder URL`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
-        }, { type: 'sep' }, {
+            name: 'Copy file viewer URL',
+            tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}?render=true`)
+        }, {
             type: 'item',
-            icon: 'download',
-            name: `Download as zip`,
-            action: () => {
-                const name = `${[...$$('#path .part')].pop().innerText}.zip`;
-                downloadFile(`?zip=./`, name);
-            }
+            icon: 'content_copy',
+            name: 'Copy raw file URL',
+            tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
+            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
         }]);
     });
+    for (const el of _qsa('[data-video-url]')) {
+        el.src = `https://src.simplecyber.org/video/?hue=${document.body.style.getPropertyValue('--fgHue')}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
+        console.log(el.src);
+    }
+    for (const el of _qsa('[data-audio-url]')) {
+        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.style.getPropertyValue('--fgHue')}&url=${baseUrl}${el.dataset.audioUrl}`;
+        console.log(el.src);
+    }
     const hash = window.location.hash;
     window.location.hash = '#';
     setTimeout(() => window.location.hash = hash, 100);

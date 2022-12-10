@@ -62,12 +62,18 @@
                             <%= sort.order.display %>
                             <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
                         </button>
-                        <button id="viewMenu" class="btn alt2 small noShadow iconOnly" title="View...">
-                            <div class="icon">visibility</div>
+                        <button id="dirMenu" class="btn alt2 small noShadow iconOnly" title="Folder options...">
+                            <div class="icon">more_vert</div>
                         </button>
                     </div>
-                    <button id="dirMenu" class="btn alt2 small noShadow iconOnly" title="Folder options...">
-                        <div class="icon">more_vert</div>
+                    <button id="dirView" class="btn alt2 small noShadow iconOnly" title="Change view" data-current-view="<%= view %>">
+                        <div class="icon"><%= (view == 'tiles') ? 'format_list_bulleted' : 'apps' %></div>
+                    </button>
+                    <button id="dirShare" class="btn alt2 small noShadow iconOnly" title="Share this folder...">
+                        <div class="icon">share</div>
+                    </button>
+                    <button id="dirDownload" class="btn alt2 small noShadow iconOnly" title="Download folder as zip">
+                        <div class="icon">download</div>
                     </button>
                 </div>
                 <div id="fileList" class="body <%= view %>">

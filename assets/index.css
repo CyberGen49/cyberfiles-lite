@@ -144,6 +144,13 @@ body {
     user-select: none;
 }
 
+#dirMenu { display: none }
+
+@media only screen and (max-width: 480px) {
+    #dirMenu { display: inherit }
+    #dirView, #dirShare, #dirDownload { display: none }
+}
+
 #fileList {
     padding: 3px;
 }
