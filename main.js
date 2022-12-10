@@ -199,7 +199,7 @@ module.exports = (opts = {}) => {
                 const stats = fs.statSync(filePathAbs);
                 if (stats.isDirectory()) {
                     recurse(filePathAbs);
-                    break;
+                    continue;
                 }
                 totalSize += stats.size;
             }
