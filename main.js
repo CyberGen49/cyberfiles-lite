@@ -7,7 +7,6 @@ const ejs = require('ejs');
 const mime = require('mime');
 const htmlParser = require('node-html-parser');
 const dayjs = require('dayjs');
-const fastFolderSize = require('fast-folder-size');
 const archiver = require('archiver');
 const sharp = require('sharp');
 const ffmpegExtractFrame = require('ffmpeg-extract-frame');
@@ -143,6 +142,7 @@ module.exports = (opts = {}) => {
     // Set default options
     if (!opts.root) opts.root = __dirnameParent;
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirnameParent, opts.root);
+    opts.root = path.normalize(opts.root);
     const defaultHidePatterns = [ /\/(\.|_).*?(\/|$)/ ];
     if (!opts.hide_patterns) opts.hide_patterns = defaultHidePatterns;
     else opts.hide_patterns.unshift(...defaultHidePatterns);
@@ -172,6 +172,26 @@ module.exports = (opts = {}) => {
             }
         }
         return false;
+    }
+    // Get the total size of a folder
+    const getFolderSize = basePathAbs => {
+        let totalSize = 0;
+        const recurse = (pathAbs) => {
+            const files = fs.readdirSync(pathAbs);
+            for (const name of files) {
+                const filePathAbs = path.join(pathAbs, name);
+                const filePathRel = path.join('/', filePathAbs.replace(opts.root, ''));
+                if (isPathHidden(filePathRel)) continue;
+                const stats = fs.statSync(filePathAbs);
+                if (stats.isDirectory()) {
+                    recurse(filePathAbs);
+                    break;
+                }
+                totalSize += stats.size;
+            }
+        }
+        recurse(basePathAbs);
+        return totalSize;
     }
     // Get details about a file
     const getFileObject = async(filePathAbs, filePathRel, folderSizes = opts.get_dir_sizes) => {
@@ -210,15 +230,7 @@ module.exports = (opts = {}) => {
         // Add things for only folders
         if (isDir) {
             if (folderSizes) {
-                const size = await new Promise((resolve, reject) => {
-                    fastFolderSize(filePathAbs, (err, bytes) => {
-                        if (err) {
-                            console.error(`Error while getting folder size:`, err);
-                            return resolve(undefined);
-                        }
-                        resolve(bytes);
-                    });
-                });
+                const size = getFolderSize(filePathAbs);
                 if (size) {
                     file.size = size;
                     file.sizeHuman = utils.formatSize(file.size);
@@ -330,6 +342,7 @@ module.exports = (opts = {}) => {
         if (thumbMap[filePathAbs]) {
             res.sendFile(path.join(thumbsDir, thumbMap[filePathAbs].name));
         } else {
+            res.setHeader('content-type', 'image/png');
             thumbHandlers[filePathAbs] = image => {
                 res.sendFile(image);
             };
@@ -337,7 +350,6 @@ module.exports = (opts = {}) => {
     };
     /** @type {express.RequestHandler} */
     return async(req, res, next) => {
-        // Set constants and variables
         const startTime = Date.now();
         try {
             decodeURI(req.path);
@@ -363,9 +375,6 @@ module.exports = (opts = {}) => {
             site_name_meta: opts.site_name,
             theme_color: '17181c',
             error: false,
-            // We want this thing to be self-contained
-            // css: `<style>\n${fs.readFileSync(path.join(__dirname, `assets/index.css`))}\n</style>`,
-            // js: `<script>\n${fs.readFileSync(path.join(__dirname, `assets/index.js`))}\n</script>`
         };
         // Change theme colour if Discord is requesting
         if ((req.headers['user-agent'] || '').match(/DiscordBot/gi))
@@ -491,7 +500,6 @@ module.exports = (opts = {}) => {
                 return render();
             // Everything else
             } else {
-                //return res.sendFile(pathAbs);
                 data.previewType = 'default';
                 return render();
             }
@@ -533,22 +541,25 @@ module.exports = (opts = {}) => {
             order: sortOrder[sort],
             descending: isDescending
         };
+        // Set view
         const views = [ 'list', 'tiles' ];
         const isUserViewValid = views.includes(req.query.view);
         data.view = (isUserViewValid) ? req.query.view : 'list';
+        // If the view isn't manually set
         if (!isUserViewValid) {
+            // Count the number of files with thumbnails
             let countFilesWithThumbs = 0;
             for (const file of filesWorking.files) {
                 if (file.hasThumb) countFilesWithThumbs++;
             }
+            // If more than 50% of the files have thumbs, set view to tiles
             if ((countFilesWithThumbs/filesWorking.files.length) > 0.5)
                 data.view = 'tiles';
         }
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
-        // If we aren't at the root
+        // Add "up" entry if we aren't at the root
         if (tree.length > 1) {
-            // Add "up" entry
             files.unshift({
                 name: `Up to ${tree[tree.length-2].name}...`,
                 isDir: true,
