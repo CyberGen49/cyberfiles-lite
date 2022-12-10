@@ -237,8 +237,13 @@ module.exports = (opts = {}) => {
             file.hasThumb = false;
             if (ext.match(/^(png|jpg|jpeg|gif|webp|mp4|mov|webm)$/) && opts.make_thumbs) {
                 file.hasThumb = true;
-                if (!thumbMap[filePathAbs])
-                    thumbQueue.push(filePathAbs);
+                const mapEntry = thumbMap[filePathAbs];
+                if (!mapEntry || mapEntry.mtime !== file.mtime) {
+                    thumbQueue.push({
+                        path: filePathAbs,
+                        mtime: file.mtime
+                    });
+                }
             }
         }
         // Add things for only folders
@@ -326,7 +331,8 @@ module.exports = (opts = {}) => {
         if (thumbsInProgress > 3 || thumbQueue.length == 0) return;
         thumbsInProgress++;
         try {
-            let filePath = thumbQueue.shift();
+            const entry = thumbQueue.shift();
+            const filePath = entry.path;
             let tmpPath = '';
             const thumbName = `${utils.randomHex()}.png`;
             const thumbPath = path.join(thumbsDir, thumbName);
@@ -347,9 +353,8 @@ module.exports = (opts = {}) => {
             (isVertical) ? resizeOpts.height = 128 : resizeOpts.width = 128;
             await sharp(tmpPath || filePath).resize(resizeOpts).toFile(thumbPath);
             if (tmpPath) fs.unlinkSync(tmpPath);
-            thumbMap[filePath] = { name: thumbName };
+            thumbMap[filePath] = { name: thumbName, mtime: entry.mtime };
             fs.writeFileSync(thumbMapFile, JSON.stringify(thumbMap));
-            logDebug(`Updated thumb map, adding:`, thumbMap[filePath]);
             if (thumbHandlers[filePath]) thumbHandlers[filePath](thumbPath);
         } catch (error) {
             logDebug(`Error while generating thumbnail:`, error);
