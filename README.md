@@ -191,6 +191,12 @@ If `true`, thumbnails to show in the index will be generated for image and video
 
 Default: `false`
 
+Thumbnails are stored in a `thumbs` folder inside of the module folder. So reinstalling the module will most likely wipe all stored thumbnail information.
+
+Each instance of CyberFiles has its own `thumb-map-*.json` file inside of the thumbs folder, where the `*` is an MD5 hash of that instance's root (as set by [opts.root](#string-root), but normalized). These thumb map files contain a property for each absolute file path, and each property contains the associated thumbnail file name, along with the file's modification time.
+
+The server's thumb map file is loaded into memory on startup and rewritten whenever changes are made. Don't make manual changes to these files.
+
 ### Boolean `debug`
 If `true`, debug messages will be logged to the console.
 
