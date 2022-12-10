@@ -95,7 +95,7 @@
                                 <div class="col gap-0 flex-grow justify-center">
                                     <div class="icon flex-grow"><%= file.icon %></div>
                                     <% if (file.hasThumb) { %>
-                                        <img class="thumb" src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
+                                        <img class="thumb" src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>" loading="lazy">
                                     <% } %>
                                 </div>
                                 <div class="name col gap-2 justify-center">
