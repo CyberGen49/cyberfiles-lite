@@ -356,11 +356,13 @@ module.exports = (opts = {}) => {
         const filePathAbs = path.join(opts.root, filePathRel);
         if (thumbMap[filePathAbs]) {
             res.sendFile(path.join(thumbsDir, thumbMap[filePathAbs].name));
-        } else {
+        } else if (thumbQueue[filePathAbs]) {
             res.setHeader('content-type', 'image/png');
             thumbHandlers[filePathAbs] = image => {
                 res.sendFile(image);
             };
+        } else {
+            res.status(404).end(`404 Not Found`);
         }
     };
     /** @type {express.RequestHandler} */
