@@ -1,6 +1,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const ejs = require('ejs');
 const mime = require('mime');
@@ -9,14 +10,14 @@ const dayjs = require('dayjs');
 const fastFolderSize = require('fast-folder-size');
 const archiver = require('archiver');
 const sharp = require('sharp');
-const crypto = require('crypto');
+const ffmpegExtractFrame = require('ffmpeg-extract-frame');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
-loadLanguages();
 const utils = require('web-resources');
 const { marked } = require('marked');
 const prismLangs = require(path.join(__dirname, `prism-lang-exts.json`));
 const fileTypes = require(path.join(__dirname, `file-types.json`));
+loadLanguages();
 
 function iconFromExt(filePath) {
     const ext = path.extname(filePath).substring(1).trim();
@@ -106,7 +107,7 @@ const sortOrder = {
  * 
  * @property {string} [site_name] The name of this file index, used in various places around the site. Defaults to `CyberFiles Lite`.
  * 
- * @property {string} [icon] A URL to use as the tab icon for the file index.
+ * @property {string} [icon] A URL to use as the tab icon for the file index. Defaults to `"?asset=icon.png"`.
  * 
  * @property {number} [hue] The hue to use as the accent colour around the file index, 0-360. Defaults to 210.
  * 
@@ -128,7 +129,7 @@ const sortOrder = {
  * 
  * Defaults to `false`
  * 
- * @property {boolean} [make_thumbs] If `true`, thumbnails will be generated for image files to show in the index.
+ * @property {boolean} [make_thumbs] If `true`, thumbnails to show in the index will be generated for image and video files. `ffmpeg` needs to be installed for video thumbnail generation.
  * 
  * Defaults to `false`
  */
@@ -146,7 +147,7 @@ module.exports = (opts = {}) => {
     if (!opts.hide_patterns) opts.hide_patterns = defaultHidePatterns;
     else opts.hide_patterns.unshift(...defaultHidePatterns);
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
-    if (!opts.icon) opts.icon = `https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png`;
+    if (!opts.icon) opts.icon = `?asset=icon.png`;
     if (opts.hue === undefined) opts.hue = 210;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     if (opts.handle_404 == 'undefined') opts.handle_404 = false;
@@ -200,7 +201,7 @@ module.exports = (opts = {}) => {
             //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
             file.shouldRender = true;
             file.hasThumb = false;
-            if (ext.match(/^(png|jpg|jpeg|gif|webp)$/) && opts.make_thumbs) {
+            if (ext.match(/^(png|jpg|jpeg|gif|webp|mp4|mov|webm)$/) && opts.make_thumbs) {
                 file.hasThumb = true;
                 if (!thumbMap[filePathAbs])
                     thumbQueue.push(filePathAbs);
@@ -257,8 +258,10 @@ module.exports = (opts = {}) => {
     const handleZip = async(pathRel, req, res) => {
         pathRel = path.join(pathRel, req.query.zip);
         const pathAbs = path.join(opts.root, pathRel);
-        if (!fs.existsSync(pathAbs) || isPathHidden(pathRel)) return res.end(`This directory doesn't exist.`);
-        if (!fs.statSync(pathAbs).isDirectory()) return res.end(`This isn't a directory.`);
+        if (!fs.existsSync(pathAbs) || isPathHidden(pathRel))
+            return res.end(`This directory doesn't exist.`);
+        if (!fs.statSync(pathAbs).isDirectory())
+            return res.end(`This isn't a directory.`);
         const files = [];
         const getFiles = folderPathRel => {
             const folderPathAbs = path.join(opts.root, folderPathRel);
@@ -293,15 +296,25 @@ module.exports = (opts = {}) => {
         if (isThumbGenerating || thumbQueue.length == 0) return;
         isThumbGenerating = true;
         try {
-            const filePath = thumbQueue.shift();
+            let filePath = thumbQueue.shift();
+            let tmpPath = '';
             const thumbName = `${utils.randomHex()}.png`;
             const thumbPath = path.join(thumbsDir, thumbName);
-            const meta = await sharp(filePath).metadata();
+            if ((mime.getType(filePath) || '').match(/^video\/.*/)) {
+                tmpPath = path.join(thumbsDir, `tmp-${utils.randomHex()}.png`);
+                await ffmpegExtractFrame({
+                    input: filePath,
+                    output: tmpPath,
+                    offset: 1000
+                });
+            }
+            const meta = await sharp(tmpPath || filePath).metadata();
             if (!meta.width || !meta.height) return;
             const isVertical = (meta.height > meta.width);
             const resizeOpts = {};
             (isVertical) ? resizeOpts.height = 128 : resizeOpts.width = 128;
-            await sharp(filePath).resize(resizeOpts).toFile(thumbPath);
+            await sharp(tmpPath || filePath).resize(resizeOpts).toFile(thumbPath);
+            if (tmpPath) fs.unlinkSync(tmpPath);
             thumbMap[filePath] = { name: thumbName };
             fs.writeFileSync(thumbMapFile, JSON.stringify(thumbMap));
             if (thumbHandlers[filePath]) thumbHandlers[filePath](thumbPath);

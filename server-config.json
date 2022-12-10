@@ -1,7 +1,9 @@
 {
     "cyberfiles": {
+        "site_name": "My File Index",
         "root": "../",
-        "handle_404": true
+        "handle_404": true,
+        "make_thumbs": true
     },
     "server": {
         "port": 8080,

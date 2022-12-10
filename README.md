@@ -155,7 +155,7 @@ Default: `"CyberFiles Lite"`
 ### String `icon`
 A URL to use as the tab icon for the file index.
 
-Default: `"https://raw.githubusercontent.com/CyberGen49/cyberfiles-lite/main/assets/icon-circle.png"`
+Default: `"?asset=icon.png"`
 
 ### Number `hue`
 The hue to use as the accent colour around the file index, from 0 to 360.
@@ -187,7 +187,7 @@ If `true`, we'll get the total size of directories and display them. This will i
 Default: `false`
 
 ### Boolean `make_thumbs`
-If `true`, thumbnails will be generated for image files to show in the index.
+If `true`, thumbnails to show in the index will be generated for image and video files. `ffmpeg` needs to be installed for video thumbnail generation.
 
 Default: `false`
 
