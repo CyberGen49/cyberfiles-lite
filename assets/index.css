@@ -226,7 +226,6 @@ body {
     font-size: 64px;
 }
 #fileList.tiles .fileEntry .thumb {
-    display: none;
     width: calc(100% - 12px);
     max-height: 200%;
     object-fit: cover;
@@ -235,13 +234,16 @@ body {
     margin-bottom: 0px;
     filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2));
 }
+#fileList.tiles .fileEntry .thumb:not(.visible) {
+    visibility: none;
+    height: 0px;
+    width: 0px;
+}
 #fileList.tiles .fileEntry .thumb.visible {
-    display: block;
     opacity: 0%;
     animation-timing-function: var(--bezier);
     animation-name: thumbFadeIn;
     animation-duration: 300ms;
-    animation-delay: 300ms;
     animation-fill-mode: forwards;
 }
 @keyframes thumbFadeIn {
