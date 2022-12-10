@@ -191,6 +191,11 @@ If `true`, thumbnails to show in the index will be generated for image and video
 
 Default: `false`
 
+### Boolean `debug`
+If `true`, debug messages will be logged to the console.
+
+Default: `false`
+
 ## Other projects that make this one possible
 CyberFiles Lite wouldn't be here without these amazing projects:
 * [Express](https://github.com/expressjs/express)

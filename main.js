@@ -131,6 +131,10 @@ const sortOrder = {
  * @property {boolean} [make_thumbs] If `true`, thumbnails to show in the index will be generated for image and video files. `ffmpeg` needs to be installed for video thumbnail generation.
  * 
  * Defaults to `false`
+ * 
+ * @property {boolean} [debug] If `true`, debug messages will be logged to the console.
+ * 
+ * Defaults to `false`
  */
 
 /**
@@ -162,6 +166,11 @@ module.exports = (opts = {}) => {
     let thumbMap = {};
     if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
     if (fs.existsSync(thumbMapFile)) thumbMap = require(thumbMapFile);
+    const logDebug = (...params) => {
+        if (opts.debug) console.log(`[CyberFiles]`, ...params);
+    }
+    logDebug(`Debug logs are enabled`);
+    logDebug(`Configuration:`, opts);
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -175,6 +184,7 @@ module.exports = (opts = {}) => {
     }
     // Get the total size of a folder
     const getFolderSize = basePathAbs => {
+        logDebug(`Getting total size of`, basePathAbs);
         let totalSize = 0;
         const recurse = (pathAbs) => {
             const files = fs.readdirSync(pathAbs);
@@ -241,6 +251,7 @@ module.exports = (opts = {}) => {
     }
     // Extract starting text from Markdown HTML
     const getTextFromMarkdownHTML = html => {
+        logDebug(`Extracting text from markdown file`);
         const el = htmlParser.parse(html);
         const children = el.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
         let isParagraphFound = false;
@@ -270,6 +281,7 @@ module.exports = (opts = {}) => {
     const handleZip = async(pathRel, req, res) => {
         pathRel = path.join(pathRel, req.query.zip);
         const pathAbs = path.join(opts.root, pathRel);
+        logDebug(`Scanning files of`, pathAbs, `for zip`);
         if (!fs.existsSync(pathAbs) || isPathHidden(pathRel))
             return res.end(`This directory doesn't exist.`);
         if (!fs.statSync(pathAbs).isDirectory())
@@ -295,6 +307,7 @@ module.exports = (opts = {}) => {
             }
         };
         getFiles(pathRel);
+        logDebug(`Zipping selected contents of`, pathAbs);
         const archive = archiver('zip');
         res.setHeader('content-type', 'application/zip');
         archive.pipe(res);
@@ -313,6 +326,7 @@ module.exports = (opts = {}) => {
             const thumbName = `${utils.randomHex()}.png`;
             const thumbPath = path.join(thumbsDir, thumbName);
             if ((mime.getType(filePath) || '').match(/^video\/.*/)) {
+                logDebug(`Extracting video frame from`, filePath);
                 tmpPath = path.join(thumbsDir, `tmp-${utils.randomHex()}.png`);
                 await ffmpegExtractFrame({
                     input: filePath,
@@ -320,6 +334,7 @@ module.exports = (opts = {}) => {
                     offset: 1000
                 });
             }
+            logDebug(`Generating thumbnail for`, tmpPath || filePath);
             const meta = await sharp(tmpPath || filePath).metadata();
             if (!meta.width || !meta.height) return;
             const isVertical = (meta.height > meta.width);
@@ -431,12 +446,17 @@ module.exports = (opts = {}) => {
         // If the file isn't a directory...
         if (!isDir) {
             // If we aren't rendering, send the file
-            if (!req.query.render) return res.sendFile(pathAbs);
+            if (!req.query.render) {
+                logDebug(`Handling raw request for`, pathAbs);
+                return res.sendFile(pathAbs);
+            }
             // Get file details
+            logDebug(`Getting file details for`, pathAbs);
             const file = await getFileObject(pathAbs, pathRel);
             // Get file list
             const dirAbs = path.dirname(pathAbs);
             const dirRel = path.dirname(pathRel);
+            logDebug(`Scanning directory`, dirAbs);
             const fileList = fs.readdirSync(dirAbs);
             const files = [];
             for (const name of fileList) {
@@ -507,10 +527,13 @@ module.exports = (opts = {}) => {
         // Send index file if it exists
         const fileList = fs.readdirSync(pathAbs);
         for (const name of opts.index_files) {
-            if (fileList.includes(name))
+            if (fileList.includes(name)) {
+                logDebug(`Sending index file`, pathAbs);
                 return res.sendFile(path.join(pathAbs, name));
+            }
         }
         // Get and iterate through directory contents
+        logDebug(`Scanning directory`, pathAbs);
         let totalSize = 0;
         let readme = false;
         const filesWorking = { files: [], dirs: [] };
@@ -529,6 +552,7 @@ module.exports = (opts = {}) => {
                 readme = { pathAbs: filePathAbs, pathRel: filePathRel };
         }
         // Sort directories and files
+        logDebug(`Sorting files`);
         const sort = (sortOrder[req.query.sort]) ? req.query.sort : 'name';
         const isDescending = (req.query.desc) ? true : false;
         filesWorking.dirs.sort(sortOrder[sort].f);
@@ -553,8 +577,12 @@ module.exports = (opts = {}) => {
                 if (file.hasThumb) countFilesWithThumbs++;
             }
             // If more than 50% of the files have thumbs, set view to tiles
-            if ((countFilesWithThumbs/filesWorking.files.length) > 0.5)
+            if ((countFilesWithThumbs/filesWorking.files.length) > 0.5) {
+                logDebug(countFilesWithThumbs, 'of', filesWorking.files.length, `have thumbs, using tiles view`);
                 data.view = 'tiles';
+            }
+        } else {
+            logDebug(`Using manually set view`, req.query.view);
         }
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
