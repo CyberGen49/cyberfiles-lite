@@ -128,10 +128,6 @@ const sortOrder = {
  * 
  * Defaults to `false`
  * 
- * @property {boolean} [max_zip_size] The max size, in megabytes, that directory zip files can be.
- * 
- * Defaults to `2000`
- * 
  * @property {boolean} [make_thumbs] If `true`, thumbnails will be generated for image files to show in the index.
  * 
  * Defaults to `false`
@@ -155,12 +151,8 @@ module.exports = (opts = {}) => {
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     if (opts.handle_404 == 'undefined') opts.handle_404 = false;
     if (opts.get_dir_sizes == 'undefined') opts.get_dir_sizes = false;
-    if (!opts.max_zip_size) opts.max_zip_size = 2000;
     if (opts.make_thumbs == 'undefined') opts.make_thumbs = false;
     // Set variables
-    const zipFolder = path.join(__dirname, 'assets/zips');
-    fs.rmSync(zipFolder, { force: true, recursive: true });
-    const zipJobs = {};
     const thumbQueue = [];
     const thumbHandlers = {};
     const thumbsDir = path.join(__dirname, 'thumbs');
@@ -265,27 +257,8 @@ module.exports = (opts = {}) => {
     const handleZip = async(pathRel, req, res) => {
         pathRel = path.join(pathRel, req.query.zip);
         const pathAbs = path.join(opts.root, pathRel);
-        if (!fs.existsSync(pathAbs) || isPathHidden(pathRel)) return res.json({
-            status: 'failed',
-            message: `This directory doesn't exist.`
-        });
-        if (!fs.statSync(pathAbs).isDirectory()) return res.json({
-            status: 'failed',
-            message: `This isn't a directory.`
-        });
-        if (zipJobs[pathAbs]) {
-            if (req.query.cancel) {
-                delete zipJobs[pathAbs];
-                return res.json({ status: 'cancelled' });
-            } else return res.json(zipJobs[pathAbs]);
-        }
-        zipJobs[pathAbs] = {
-            status: 'working',
-            message: 'Getting ready...',
-            start_time: Date.now()
-        };
-        res.json(zipJobs[pathAbs]);
-        let totalSize = 0;
+        if (!fs.existsSync(pathAbs) || isPathHidden(pathRel)) return res.end(`This directory doesn't exist.`);
+        if (!fs.statSync(pathAbs).isDirectory()) return res.end(`This isn't a directory.`);
         const files = [];
         const getFiles = folderPathRel => {
             const folderPathAbs = path.join(opts.root, folderPathRel);
@@ -299,7 +272,6 @@ module.exports = (opts = {}) => {
                     getFiles(path.join(folderPathRel, name));
                     continue;
                 }
-                totalSize += stats.size;
                 const file = {
                     pathRel: filePathRel.replace(pathRel, ''),
                     pathAbs: filePathAbs
@@ -308,62 +280,14 @@ module.exports = (opts = {}) => {
             }
         };
         getFiles(pathRel);
-        if (totalSize/1000/1000 > opts.max_zip_size) return zipJobs[pathAbs] = {
-            status: 'failed',
-            message: 'Directory too large to zip'
-        };
-        const zipName = `${utils.randomHex()}.zip`;
-        fs.mkdirSync(zipFolder, { recursive: true });
-        const zipPath = path.join(zipFolder, zipName);
-        const output = fs.createWriteStream(zipPath);
-        output.on('close', () => {
-            if (!zipJobs[pathAbs]) return;
-            zipJobs[pathAbs] = {
-                status: 'ready',
-                message: 'Done!',
-                finish_time: Date.now(),
-                zip_name: zipName,
-                folder_name: path.basename(pathAbs)
-            };
-        });
         const archive = archiver('zip');
-        archive.on('progress', (e) => {
-            if (!zipJobs[pathAbs]) {
-                archive.abort();
-                try {
-                    fs.unlinkSync(zipPath);
-                } catch (error) {}
-                return;
-            }
-            zipJobs[pathAbs].message = `${e.entries.processed} of ${e.entries.total} files zipped, ${Math.round((e.fs.processedBytes/e.fs.totalBytes)*100)}% complete...`;
-        });
-        archive.pipe(output);
+        res.setHeader('content-type', 'application/zip');
+        archive.pipe(res);
         for (const file of files) {
             archive.file(file.pathAbs, { name: file.pathRel });
         }
         archive.finalize();
     };
-    // Check for zips older than 6 hours old and delete them
-    setInterval(() => {
-        const maxAge = (1000*60*60*6);
-        for (const path in zipJobs) {
-            const job = zipJobs[path];
-            if ((Date.now()-job.end_time) > maxAge) {
-                fs.unlinkSync(path.join(zipFolder, job.zip_name));
-                delete zipJobs[path];
-            }
-        }
-        if (!fs.existsSync(zipFolder)) return;
-        const zips = fs.readdirSync(zipFolder);
-        for (const name of zips) {
-            const filePathAbs = path.join(zipFolder, name);
-            const stats = fs.statSync(filePathAbs);
-            if ((Date.now()-stats.mtimeMs) > maxAge) {
-                fs.unlinkSync(path.join(zipFolder, job.zip_name));
-                delete zipJobs[path];
-            }
-        }
-    }, 15000);
     // Handle thumbnail generation
     setInterval(async() => {
         if (isThumbGenerating || thumbQueue.length == 0) return;
