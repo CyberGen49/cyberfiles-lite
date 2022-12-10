@@ -157,20 +157,25 @@ module.exports = (opts = {}) => {
     if (opts.handle_404 == 'undefined') opts.handle_404 = false;
     if (opts.get_dir_sizes == 'undefined') opts.get_dir_sizes = false;
     if (opts.make_thumbs == 'undefined') opts.make_thumbs = false;
-    // Set variables
-    const thumbQueue = [];
-    const thumbHandlers = {};
-    const thumbsDir = path.join(__dirname, 'thumbs');
-    const thumbMapFile = path.join(__dirname, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
-    let isThumbGenerating = false;
-    let thumbMap = {};
-    if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
-    if (fs.existsSync(thumbMapFile)) thumbMap = require(thumbMapFile);
     const logDebug = (...params) => {
         if (opts.debug) console.log(`[CyberFiles]`, ...params);
     }
     logDebug(`Debug logs are enabled`);
     logDebug(`Configuration:`, opts);
+    // Set variables
+    const thumbQueue = [];
+    const thumbHandlers = {};
+    const thumbsDir = path.join(__dirname, 'thumbs');
+    const thumbMapFile = path.join(__dirname, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
+    logDebug(`Thumbs directory:`, thumbsDir);
+    logDebug(`Thumbs map file:`, thumbMapFile);
+    let isThumbGenerating = false;
+    let thumbMap = {};
+    if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
+    if (fs.existsSync(thumbMapFile)) {
+        thumbMap = require(thumbMapFile);
+        logDebug(`Loaded`, Object.keys(thumbMap).length, `entries from thumb map`);
+    } else logDebug(`Starting a fresh thumb map`);
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -344,9 +349,10 @@ module.exports = (opts = {}) => {
             if (tmpPath) fs.unlinkSync(tmpPath);
             thumbMap[filePath] = { name: thumbName };
             fs.writeFileSync(thumbMapFile, JSON.stringify(thumbMap));
+            logDebug(`Updated thumb map, adding:`, thumbMap[filePath]);
             if (thumbHandlers[filePath]) thumbHandlers[filePath](thumbPath);
         } catch (error) {
-            console.error(`Error while generating thumbnail:`, error);
+            logDebug(`Error while generating thumbnail:`, error);
         }
         isThumbGenerating = false;
     }, 100);
