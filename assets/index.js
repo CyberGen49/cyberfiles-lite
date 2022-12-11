@@ -328,6 +328,11 @@ async function main() {
         window.scrollTo(0, window.scrollY-50);
         lazyLoadImages();
     }, 100);
+
+    // Wipe query params from URL if sort, view, or direction are set
+    if (params.get('sort') || params.get('view') || params.get('direction')) {
+        window.history.replaceState({}, '', window.location.pathname);
+    }
 }
 
 window.addEventListener('DOMContentLoaded', main);
