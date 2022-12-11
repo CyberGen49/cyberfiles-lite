@@ -115,9 +115,19 @@ async function main() {
             });
         }, 50);
     };
-    on(document, 'scroll', lazyLoadImages);
-    on(window, ['resize', 'orientationChange'], lazyLoadImages);
     lazyLoadImages();
+    on(window, ['resize', 'orientationChange'], lazyLoadImages);
+    on(document, 'scroll', () => {
+        lazyLoadImages();
+        const cardHeaders = $$('.card .header');
+        for (const header of cardHeaders) {
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop <= 0)
+                header.classList.add('sticky');
+            else
+                header.classList.remove('sticky');
+        }
+    });
 
     const markdownContainer = _qs(`.card[data-preview-type="markdown"]`);
     if (markdownContainer) {
@@ -137,6 +147,9 @@ async function main() {
                 action: async () => {
                     await sleep(100);
                     window.location.hash = `#${el.id}`;
+                    setTimeout(() => {
+                        window.scrollTo(0, window.scrollY-50);
+                    }, 100);
                 }
             });
             levels.push(tagName.replace('h', ''));
@@ -257,7 +270,6 @@ async function main() {
                 e.preventDefault();
                 if (!isSearching) $('#searchBtn').click();
                 textbox.focus();
-                head.scrollIntoView(true);
             }
             if (e.code == 'Escape' && isSearching) {
                 $('#searchBtn').click();
@@ -269,7 +281,9 @@ async function main() {
                 const input = textbox.value.trim().toLowerCase();
                 let foundCount = 0;
                 for (const file of files) {
-                    if ($('.icon', file).innerText == 'arrow_upward') continue;
+                    if ($('.icon', file)) {
+                        if ($('.icon', file).innerText == 'arrow_upward') continue;
+                    }
                     const name = $('.name div', file).innerText.toLowerCase();
                     if (name.match(input) || !input) {
                         file.style.display = '';
@@ -325,6 +339,7 @@ async function main() {
     window.location.hash = '#';
     setTimeout(() => {
         window.location.hash = hash;
+        window.scrollTo(0, window.scrollY-50);
         lazyLoadImages();
     }, 100);
 }
