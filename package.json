@@ -1,7 +1,7 @@
 {
   "name": "cyberfiles-lite",
-  "version": "1.12.11",
-  "description": "A bare-bones file index built to work with Node.js Express and look like GitHub's file browser.",
+  "version": "1.13.0",
+  "description": "A (not so) bare-bones file index built to work with Node.js Express and look like GitHub's file browser.",
   "main": "main.js",
   "scripts": {
     "start": "node server.js"
@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "archiver": "^5.3.1",
+    "cookie": "^0.5.0",
     "cyber-express-logger": "^1.0.3",
     "dayjs": "^1.11.7",
     "ejs": "^3.1.8",
@@ -33,9 +34,6 @@
     "prismjs": "^1.29.0",
     "sharp": "^0.31.2",
     "web-resources": "^1.8.2"
-  },
-  "directories": {
-    "test": "test"
   },
   "repository": {
     "type": "git",

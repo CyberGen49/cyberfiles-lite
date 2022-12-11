@@ -188,6 +188,9 @@ body {
     height: 40px;
     padding: 0px 8px;
 }
+.isTouch #fileList.list .fileEntry {
+    height: 50px;
+}
 #fileList.tiles .fileEntry {
     flex-direction: column;
 }
@@ -230,6 +233,10 @@ body {
 #fileList.list .fileEntry .icon {
     width: 40px;
     flex-shrink: 0;
+}
+.isTouch #fileList.list .fileEntry .icon {
+    width: 48px;
+    font-size: 32px;
 }
 #fileList.tiles .fileEntry .icon {
     width: calc(100% - 12px);
@@ -366,14 +373,14 @@ body {
         padding: 0px 10px;
     }
     #fileList.list .fileEntry {
-        height: 60px;
+        height: 60px !important;
     }
     #fileList.list .fileEntry .name .lower {
         display: block;
     }
     #fileList.list .fileEntry .icon {
         width: 48px;
-        font-size: 36px;
+        font-size: 36px !important;
     }
     #fileList.list .fileEntry .modified,
     #fileList.list .fileEntry .size {

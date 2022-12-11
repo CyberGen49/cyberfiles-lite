@@ -183,21 +183,21 @@ async function main() {
 
     if ($('#sort')) on($('#sort'), 'click', () => {
         const orders = [
-            { name: 'A-Z', id: 'name', desc: false },
-            { name: 'Z-A', id: 'name', desc: true },
-            { name: 'Oldest to newest', id: 'mtime', desc: false },
-            { name: 'Newest to oldest', id: 'mtime', desc: true },
-            { name: 'Extension A-Z', id: 'type', desc: false },
-            { name: 'Extension Z-A', id: 'type', desc: true },
-            { name: 'Smallest to largest', id: 'size', desc: false },
-            { name: 'Largest to smallest', id: 'size', desc: true },
+            { name: 'A-Z', id: 'name', dir: 'asc' },
+            { name: 'Z-A', id: 'name', dir: 'desc' },
+            { name: 'Oldest to newest', id: 'mtime', dir: 'asc' },
+            { name: 'Newest to oldest', id: 'mtime', dir: 'desc' },
+            { name: 'Extension A-Z', id: 'type', dir: 'asc' },
+            { name: 'Extension Z-A', id: 'type', dir: 'desc' },
+            { name: 'Smallest to largest', id: 'size', dir: 'asc' },
+            { name: 'Largest to smallest', id: 'size', dir: 'desc' },
         ];
         const data = [];
         for (const order of orders) {
             data.push({
                 type: 'item',
                 name: order.name,
-                action: async () => window.location.href = `?sort=${order.id}${(order.desc) ? '&desc=true' : ''}`
+                action: async () => window.location.href = `?sort=${order.id}&direction=${order.dir.toString()}`
             });
         }
         showContext(data);
@@ -248,9 +248,6 @@ async function main() {
         const head = $('#fileListHeader');
         const textbox = $('#searchInput');
         const files = $$('#fileList .fileEntry');
-        const qsBase = new URLSearchParams(window.location.search);
-        qsBase.delete('filter');
-        const qs = new URLSearchParams(window.location.search);
         let isSearching = false;
         let timeout;
         on($('#searchBtn'), 'click', () => {
@@ -294,19 +291,8 @@ async function main() {
                 if (foundCount == 0) {
                     $('#searchNoneFound').style.display = '';
                 }
-                qs.set('filter', input);
-                let queryStr;
-                if (input) queryStr = qs.toString();
-                else queryStr = qsBase.toString();
-                window.history.replaceState('', '', `?${queryStr}`);
             }, clamp(files.length, 0, 500));
         });
-        if (qs.get('filter')) {
-            const input = qs.get('filter');
-            if (!isSearching) $('#searchBtn').click();
-            textbox.value = input;
-            textbox.dispatchEvent(new Event('keydown'));
-        }
     }
 
     if ($('#shareFile')) on($('#shareFile'), 'click', () => {
