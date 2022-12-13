@@ -149,6 +149,9 @@ body {
     color: var(--b50);
     user-select: none;
 }
+.errorDesc {
+    color: var(--b70);
+}
 
 .search #dirMenu,
 .search #dirView,

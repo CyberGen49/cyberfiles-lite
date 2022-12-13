@@ -15,7 +15,9 @@
     <meta name="description" content="<%= desc %>">
     <link rel="icon" href="<%= icon %>">
     <link rel="stylesheet" href="https://src.simplecyber.org/base.css">
+    <!-- <link rel="stylesheet" href="https://src.simplecyber.org/base.light.css"> -->
     <link rel="stylesheet" href="?asset=index.css">
+    <!-- <link rel="stylesheet" href="?asset=index.light.css"> -->
     <script defer src="https://src.simplecyber.org/base.js"></script>
     <script defer src="https://src.simplecyber.org/tabbable.js"></script>
     <script defer src="https://src.simplecyber.org/focus-trap.js"></script>
@@ -147,7 +149,7 @@
                 <div id="readme" class="body">
                     <div class="col align-center gap-10">
                         <div class="bigIcon">help</div>
-                        <p class="text-center" style="color: var(--b70)">
+                        <p class="text-center errorDesc">
                             This file or folder can't be found!
                             <br><a href="/">Go to the root</a>
                         </p>
@@ -183,7 +185,7 @@
                     <% } else { %>
                         <div class="col align-center gap-10">
                             <div class="bigIcon"><%= file.icon %></div>
-                            <p class="text-center" style="color: var(--b70)">
+                            <p class="text-center errorDesc">
                                 You can't view this file in your browser.
                                 <br><a href="<%= path %>" download>Download it instead</a>
                             </p>
