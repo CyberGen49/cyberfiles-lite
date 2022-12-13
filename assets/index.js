@@ -20,6 +20,7 @@ async function main() {
     setInterval(updateTimes, 1000 * 60);
 
     for (const el of _qsa('#fileList .fileEntry')) {
+        const icon = $('.icon', el).innerText;
         const name = el.dataset.name;
         const size = el.dataset.size;
         const modified = (el.dataset.mtime) ? getDateFull(parseInt(el.dataset.mtime)) : '';
@@ -34,7 +35,7 @@ async function main() {
             ${(type) ? `<br>Type: ${type}` : ''}
             ${(modified) ? `<br>Modified: ${modified}` : ''}
             ${(size && size !== '-') ? `<br>Size: ${size}` : ''}
-            <br><small>Click to ${action}</small>
+            ${(icon == 'arrow_upward') ? '' : `<br><small>Click to ${action}</small>`}
             <br><small>Right-click for more options...</small>
         `;
         on(el, 'contextmenu', (e) => {
@@ -87,6 +88,7 @@ async function main() {
                 name: 'Open in new tab...',
                 action: () => window.open(el.href, '_blank')
             });
+            if (icon == 'arrow_upward') data.splice(0, data.length-1);
             showContext(data);
         });
         if ($('.thumb', el)) {
@@ -196,7 +198,7 @@ async function main() {
             updateScrollButton();
         };
         const updateScrollButton = () => {
-            if (head.getBoundingClientRect().top < window.innerHeight) {
+            if (body.getBoundingClientRect().top < window.innerHeight) {
                 $('.icon', scrollButton).innerText = 'arrow_upward';
                 scrollButton.title = 'Scroll up to view files';
             } else {
