@@ -177,6 +177,21 @@ module.exports = (opts = {}) => {
         thumbMap = require(thumbMapFile);
         logDebug(`Loaded`, Object.keys(thumbMap).length, `entries from thumb map`);
     } else logDebug(`Starting a fresh thumb map`);
+    // Delete old or unused sessions
+    setInterval(() => {
+        const now = Date.now();
+        for (const id in sessions) {
+            const session = sessions[id];
+            if (now-session.lastRequestTime > 1000*60*15 && session.requestCount == 1) {
+                logDebug(`Deleting unused session`, id);
+                delete sessions[id];
+            }
+            if (now-session.lastRequestTime > 1000*60*60*24*2) {
+                logDebug(`Deleting old session`, id);
+                delete sessions[id];
+            }
+        }
+    }, 1000);
     // Checks of a file path should be hidden
     // As determined by opts.hide_patterns
     const isPathHidden = filePath => {
@@ -400,10 +415,15 @@ module.exports = (opts = {}) => {
             sessionId = cookies['cyberfiles-session'];
         if (!sessions[sessionId]) {
             sessionId = utils.randomHex(32);
-            sessions[sessionId] = { dir: {} };
+            sessions[sessionId] = {
+                requestCount: 0,
+                dir: {}
+            };
             logDebug(`Created new session`, sessionId);
         }
         const session = sessions[sessionId];
+        session.requestCount++;
+        session.lastRequestTime = Date.now();
         // Set session cookie
         res.setHeader('set-cookie', cookie.serialize('cyberfiles-session', sessionId, {
             expires: 0,
@@ -529,12 +549,14 @@ module.exports = (opts = {}) => {
             for (const name of fileList) {
                 const filePathAbs = path.join(dirAbs, name);
                 const filePathRel = path.join(dirRel, name);
-                const file = await getFileObject(filePathAbs, filePathRel);
+                const file = await getFileObject(filePathAbs, filePathRel, false);
                 if (file && !file.isDir) files.push(file);
             }
-            if (files.length > 1) files.sort(sortOrder.name.f);
+            const sessionDir = session.dir[dirRel] || {};
+            files.sort(sortOrder[sessionDir.order || 'name'].f);
+            if (sessionDir.direction == 'desc') files.reverse();
             // Get current file index
-            let currentFileIndex;
+            let currentFileIndex = 0;
             let i = 0;
             for (const entry of files) {
                 if (entry.name == file.name) {

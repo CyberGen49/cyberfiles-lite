@@ -125,7 +125,7 @@ async function main() {
             if (headerTop <= 0)
                 header.classList.add('sticky');
             else
-                header.classList.remove('sticky');
+            header.classList.remove('sticky');
         }
     });
 
@@ -137,6 +137,7 @@ async function main() {
         const idEls = _qsa('[id]', body);
         let data = [];
         let levels = [];
+        // Build table of contents
         for (const el of idEls) {
             const tagName = el.tagName.toLowerCase();
             if (!tagName.toLowerCase().match(/^(h1|h2|h3|h4|h5|h6)$/))
@@ -179,6 +180,39 @@ async function main() {
             });
             _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
+        // Determine if we need to show the scroll button
+        const scrollButton = $('#scrollButton');
+        const fileList = $('#fileList');
+        const fileListCard = $('#fileListCard');
+        const checkShowScrollButton = () => {
+            if (fileList.getBoundingClientRect().height > window.innerHeight) {
+                scrollButton.classList.remove('hidden');
+                scrollButton.classList.remove('ani');
+                setTimeout(() => {
+                    scrollButton.classList.add('ani');
+                }, 500);
+            } else
+                scrollButton.classList.add('hidden');
+            updateScrollButton();
+        };
+        const updateScrollButton = () => {
+            if (head.getBoundingClientRect().top < window.innerHeight) {
+                $('.icon', scrollButton).innerText = 'arrow_upward';
+                scrollButton.title = 'Scroll up to view files';
+            } else {
+                $('.icon', scrollButton).innerText = 'arrow_downward';
+                scrollButton.title = 'Scroll down to read README';
+            }
+        };
+        checkShowScrollButton();
+        on(window, 'resize', checkShowScrollButton);
+        on(window, 'scroll', updateScrollButton);
+        on(scrollButton, 'click', () => {
+            if ($('.icon', scrollButton).innerText == 'arrow_downward')
+                head.scrollIntoView({ behavior: 'smooth' });
+            else
+                fileListCard.scrollIntoView({ behavior: 'smooth' });
+        });
     }
 
     if ($('#sort')) on($('#sort'), 'click', () => {
