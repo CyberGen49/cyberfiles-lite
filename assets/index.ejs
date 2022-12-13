@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#<%= theme_color %>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title><%= dirName %> | <%= site_name %></title>
+    <title><%= (dirName == 'Root') ? site_name : dirName %></title>
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="<%= site_name_meta %>">
-    <meta property="og:title" content="<%= title %>">
+    <meta property="og:title" content="<%= (dirName == 'Root') ? site_name : dirName %>">
     <meta property="og:description" content="<%= desc %>">
     <meta name="description" content="<%= desc %>">
     <link rel="icon" href="<%= icon %>">

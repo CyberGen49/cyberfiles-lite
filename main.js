@@ -484,7 +484,6 @@ module.exports = (opts = {}) => {
             if (!fs.existsSync(filePath)) return res.status(404).end();
             return res.sendFile(filePath);
         }
-        data.title = data.dirName;
         // Build file path tree
         const tree = [{ name: 'Root', path: '/' }];
         const parts = pathRel.split('/').filter(String);
