@@ -6,6 +6,7 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 
 ## Features
 * Easy and portable setup
+* A minimalistic, modern, and responsive design
 * Choose the root of your file index
 * Use RegEx to hide (and prevent access to) certain files and directories
 * Serve directory index files (like `index.html`) automatically
