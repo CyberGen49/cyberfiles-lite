@@ -388,12 +388,64 @@ module.exports = (opts = {}) => {
             return res.status(400).end(`400 Bad Request`);
         }
         const pathRel = path.normalize(decodeURI(req.path));
-        if (pathRel.length > 2048) return res.status(400).end();
         const pathAbs = path.join(opts.root, pathRel);
         // If this is a zip request, handle it
         if (req.query.zip) return handleZip(pathRel, req, res);
         // If this is a thumbnail request, handle it
         if (req.query.thumb) return handleThumb(pathRel, req, res);
+        // Parse session cookie
+        const cookies = cookie.parse(req.headers.cookie || '');
+        let sessionId = '';
+        if (cookies['cyberfiles-session'])
+            sessionId = cookies['cyberfiles-session'];
+        if (!sessions[sessionId]) {
+            sessionId = utils.randomHex(32);
+            sessions[sessionId] = { dir: {} };
+            logDebug(`Created new session`, sessionId);
+        }
+        const session = sessions[sessionId];
+        // Set session cookie
+        res.setHeader('set-cookie', cookie.serialize('cyberfiles-session', sessionId, {
+            expires: 0,
+            path: '/'
+        }));
+        // For debugging, return session data as JSON if requested
+        if (req.query.session) return res.json(session);
+        // Redirect without query params
+        const redirect = () => {
+            res.redirect(pathRel);
+        };
+        // Update session if parameters are supplied
+        let isSessionChanged = false;
+        if (req.query.sort) {
+            const values = Object.keys(sortOrder);
+            if (values.includes(req.query.sort)) {
+                session.dir[pathRel] = session.dir[pathRel] || {};
+                session.dir[pathRel].order = req.query.sort;
+                isSessionChanged = true;
+                logDebug(`Session`, sessionId, `set sort order to`, req.query.sort, `in`, pathRel);
+            }
+        }
+        if (req.query.direction) {
+            const values = [ 'asc', 'desc' ];
+            if (values.includes(req.query.direction)) {
+                session.dir[pathRel] = session.dir[pathRel] || {};
+                session.dir[pathRel].direction = req.query.direction;
+                isSessionChanged = true;
+                logDebug(`Session`, sessionId, `set sort direction to`, req.query.direction, `in`, pathRel);
+            }
+        }
+        if (req.query.view) {
+            const values = [ 'list', 'tiles' ];
+            if (values.includes(req.query.view)) {
+                session.dir[pathRel] = session.dir[pathRel] || {};
+                session.dir[pathRel].view = req.query.view;
+                isSessionChanged = true;
+                logDebug(`Session`, sessionId, `set view to`, req.query.view, `in`, pathRel);
+            }
+        }
+        if (isSessionChanged) return redirect();
+        const sessionDir = session.dir[pathRel] || {};
         // Build data object
         let data = {
             files: false,
@@ -410,26 +462,9 @@ module.exports = (opts = {}) => {
         // Change theme colour if Discord is requesting
         if ((req.headers['user-agent'] || '').match(/DiscordBot/gi))
             data.theme_color = hslToHex(opts.hue, 75, 80);
-        // Parse session cookie
-        const cookies = cookie.parse(req.headers.cookie || '');
-        let sessionId = '';
-        if (cookies['cyberfiles-session'])
-            sessionId = cookies['cyberfiles-session'];
-        if (!sessions[sessionId]) {
-            sessionId = utils.randomHex(32);
-            sessions[sessionId] = { dir: {} };
-            logDebug(`Created new session`, sessionId);
-        }
-        const session = sessions[sessionId];
-        session.dir[pathRel] = session.dir[pathRel] || {};
-        const sessionDir = session.dir[pathRel];
         // Handle rendering
         const render = async() => {
             res.setHeader('content-type', 'text/html');
-            res.setHeader('set-cookie', cookie.serialize('cyberfiles-session', sessionId, {
-                expires: 0,
-                path: '/'
-            }));
             res.end(await ejs.renderFile(path.join(__dirname, 'assets/index.ejs'), data));
         }
         // Handle 404s
@@ -586,12 +621,8 @@ module.exports = (opts = {}) => {
         }
         // Sort directories and files
         logDebug(`Sorting files`);
-        const sortOrders = [ 'name', 'mtime', 'size', 'type', 'ext' ];
-        const userSortOrder = req.query.sort || sessionDir.sort?.order;
-        const userSortDirection = req.query.direction || sessionDir.sort?.direction;
-        const isUserSortOrderValid = sortOrders.includes(userSortOrder);
-        const sort = (isUserSortOrderValid) ? userSortOrder : 'name';
-        const isDescending = (userSortDirection == 'desc') ? true : false;
+        const sort = sessionDir.order || 'name';
+        const isDescending = (sessionDir.direction == 'desc') ? true : false;
         filesWorking.dirs.sort(sortOrder[sort].f);
         filesWorking.files.sort(sortOrder[sort].f);
         if (isDescending) {
@@ -602,26 +633,11 @@ module.exports = (opts = {}) => {
             order: sortOrder[sort],
             descending: isDescending
         };
-        // If the user has manually set the sort order, save it to their session
-        if (req.query.sort) {
-            sessionDir.sort = {
-                order: sort,
-                direction: userSortDirection
-            };
-            logDebug(`Session`, sessionId, `set sort to`, sessionDir.sort, `in directory`, pathRel);
-        }
         // Set view
-        const views = [ 'list', 'tiles' ];
-        const userView = req.query.view || sessionDir.view;
-        const isUserViewValid = views.includes(userView);
-        data.view = (isUserViewValid) ? userView : 'list';
-        // If the user has manually set the view, save it to their session
-        if (req.query.view && isUserViewValid) {
-            sessionDir.view = data.view;
-            logDebug(`Session`, sessionId, `set view to`, sessionDir.view, `in directory`, pathRel);
-        }
+        const isViewSetByUser = (sessionDir.view) ? true : false;
+        data.view = sessionDir.view || 'list';
         // If the view isn't manually set
-        if (!isUserViewValid) {
+        if (!isViewSetByUser) {
             // Count the number of files with thumbnails
             let countFilesWithThumbs = 0;
             for (const file of filesWorking.files) {
@@ -632,8 +648,6 @@ module.exports = (opts = {}) => {
                 logDebug(countFilesWithThumbs, 'of', filesWorking.files.length, `have thumbs, using tiles view`);
                 data.view = 'tiles';
             }
-        } else {
-            logDebug(`Using manually set view`, (req.query.view || sessionDir.view));
         }
         // Combine files and directories
         const files = [ ...filesWorking.dirs, ...filesWorking.files ];
