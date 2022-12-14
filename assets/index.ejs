@@ -82,7 +82,7 @@
                 </div>
                 <div id="fileList" class="body <%= view %>">
                     <% for (const file of files) { %>
-                        <a
+                        <div><a
                             href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>"
                             class="fileEntry"
                             data-should-render="<%= file.shouldRender %>"
@@ -94,8 +94,8 @@
                             data-path="<%= file.path %>"
                         >
                             <% if (view == 'tiles') { %>
-                                <div class="col gap-0 flex-grow justify-center">
-                                    <div class="icon flex-grow"><%= file.icon %></div>
+                                <div class="row gap-0 align-end justify-center thumbCont">
+                                    <div class="icon"><%= file.icon %></div>
                                     <% if (file.hasThumb) { %>
                                         <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
                                     <% } %>
@@ -119,7 +119,7 @@
                                 <div class="modified" data-timestamp="<%= file.mtime %>">-</div>
                                 <div class="size"><%= file.sizeHuman || '-' %></div>
                             <% } %>
-                        </a>
+                        </a></div>
                     <% } %>
                     <div id="searchNoneFound" class="col align-center gap-10" style="display: none; padding: 17px 12px;">
                         <div class="bigIcon">help</div>

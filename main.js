@@ -133,6 +133,14 @@ const sortOrder = {
  * 
  * Defaults to `false`
  * 
+ * @property {boolean} [auto_view] If this and `make_thumbs` are `true`, and if more than 50% (or the value of `auto_view_threshold`) of the files in a directory have thumbnails, the directory will automatically be switched to `tiles` view.
+ * 
+ * Defaults to `true`
+ * 
+ * @property {number} [auto_view_threshold] A float between 0 and 1, representing the percentage of files in a directory that need to have thumbnails for the directory to be switched to `tiles` view.
+ * 
+ * Defaults to `0.5`
+ * 
  * @property {boolean} [debug] If `true`, debug messages will be logged to the console.
  * 
  * Defaults to `false`
@@ -155,9 +163,11 @@ module.exports = (opts = {}) => {
     if (!opts.icon) opts.icon = `?asset=icon.png`;
     if (opts.hue === undefined) opts.hue = 210;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
-    if (opts.handle_404 == 'undefined') opts.handle_404 = false;
-    if (opts.get_dir_sizes == 'undefined') opts.get_dir_sizes = false;
-    if (opts.make_thumbs == 'undefined') opts.make_thumbs = false;
+    if (opts.handle_404 == undefined) opts.handle_404 = false;
+    if (opts.get_dir_sizes == undefined) opts.get_dir_sizes = false;
+    if (opts.make_thumbs == undefined) opts.make_thumbs = false;
+    if (opts.auto_view == undefined) opts.auto_view = true;
+    if (!opts.auto_view_threshold) opts.auto_view_threshold = 0.5;
     const logDebug = (...params) => {
         if (opts.debug) console.log(`[CyberFiles]`, ...params);
     }
@@ -658,14 +668,14 @@ module.exports = (opts = {}) => {
         const isViewSetByUser = (sessionDir.view) ? true : false;
         data.view = sessionDir.view || 'list';
         // If the view isn't manually set
-        if (!isViewSetByUser) {
+        if (opts.auto_view && !isViewSetByUser) {
             // Count the number of files with thumbnails
             let countFilesWithThumbs = 0;
             for (const file of filesWorking.files) {
                 if (file.hasThumb) countFilesWithThumbs++;
             }
             // If more than 50% of the files have thumbs, set view to tiles
-            if ((countFilesWithThumbs/filesWorking.files.length) > 0.5) {
+            if ((countFilesWithThumbs/filesWorking.files.length) > opts.auto_view_threshold) {
                 logDebug(countFilesWithThumbs, 'of', filesWorking.files.length, `have thumbs, using tiles view`);
                 data.view = 'tiles';
             }

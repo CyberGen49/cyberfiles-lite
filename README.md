@@ -198,6 +198,16 @@ Each instance of CyberFiles has its own `thumb-map-*.json` file inside of the th
 
 The server's thumb map file is loaded into memory on startup and rewritten whenever changes are made. Don't make manual changes to these files.
 
+### Boolean `auto_view`
+If this and `make_thumbs` are `true`, and if more than 50% (or the value of `auto_view_threshold`) of the files in a directory have thumbnails, the directory will automatically be switched to `tiles` view.
+
+Default: `true`
+
+### Number `auto_view_threshold`
+A float between 0 and 1, representing the percentage of files in a directory that need to have thumbnails for the directory to be switched to `tiles` view.
+
+Defaults to `0.5`
+
 ### Boolean `debug`
 If `true`, debug messages will be logged to the console.
 

@@ -245,16 +245,20 @@ body {
     width: calc(100% - 12px);
     margin: 6px;
     margin-bottom: 0px;
-    font-size: 64px;
+    font-size: 72px;
 }
-#fileList.tiles .fileEntry .thumb {
+#fileList.tiles .fileEntry .thumbCont {
     width: calc(100% - 12px);
-    max-height: 150%;
-    object-fit: cover;
-    border-radius: 8px;
+    aspect-ratio: 4 / 3;
     margin: 6px;
     margin-bottom: 0px;
     filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2));
+    overflow: hidden;
+}
+#fileList.tiles .fileEntry .thumbCont .thumb {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
 }
 #fileList.tiles .fileEntry .thumb:not(.visible) {
     visibility: none;
@@ -276,7 +280,7 @@ body {
     flex-grow: 1;
 }
 #fileList.tiles .fileEntry .name {
-    padding: 5px 10px 10px 10px;
+    padding: 8px 10px 8px 10px;
     text-align: center;
     word-break: break-word;
 }
@@ -284,7 +288,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
 }
 #fileList.list .fileEntry .name .lower {
