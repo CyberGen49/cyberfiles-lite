@@ -104,7 +104,12 @@
                                     <div><%= file.name %></div>
                                 </div>
                             <% } else { %>
-                                <div class="icon"><%= file.icon %></div>
+                                <div class="row gap-0 align-center justify-center thumbCont">
+                                    <div class="icon"><%= file.icon %></div>
+                                    <% if (file.hasThumb) { %>
+                                        <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
+                                    <% } %>
+                                </div>
                                 <div class="name col gap-2">
                                     <div><%= file.name %></div>
                                     <% if (file.icon !== 'arrow_upward') { %>

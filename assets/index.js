@@ -186,15 +186,21 @@ async function main() {
         const scrollButton = $('#scrollButton');
         const fileList = $('#fileList');
         const fileListCard = $('#fileListCard');
+        let isScrollButtonVisible = false;
         const checkShowScrollButton = () => {
             if (fileList.getBoundingClientRect().height > window.innerHeight) {
-                scrollButton.classList.remove('hidden');
-                scrollButton.classList.remove('ani');
-                setTimeout(() => {
-                    scrollButton.classList.add('ani');
-                }, 500);
-            } else
+                if (!isScrollButtonVisible) {
+                    scrollButton.classList.remove('hidden');
+                    scrollButton.classList.remove('ani');
+                    setTimeout(() => {
+                        scrollButton.classList.add('ani');
+                        isScrollButtonVisible = true;
+                    }, 500);
+                }
+            } else {
                 scrollButton.classList.add('hidden');
+                isScrollButtonVisible = false;
+            }
             updateScrollButton();
         };
         const updateScrollButton = () => {

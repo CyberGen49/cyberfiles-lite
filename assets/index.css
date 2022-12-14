@@ -233,12 +233,15 @@ body {
     color: var(--b70);
     line-height: 1;
 }
-#fileList.list .fileEntry .icon {
+#fileList.list .fileEntry .thumbCont {
+    height: 100%;
     width: 40px;
     flex-shrink: 0;
 }
-.isTouch #fileList.list .fileEntry .icon {
+.isTouch #fileList.list .fileEntry .thumbCont {
     width: 48px;
+}
+.isTouch #fileList.list .fileEntry .icon {
     font-size: 32px;
 }
 #fileList.tiles .fileEntry .icon {
@@ -255,17 +258,27 @@ body {
     filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2));
     overflow: hidden;
 }
-#fileList.tiles .fileEntry .thumbCont .thumb {
+#fileList .thumb {
     max-width: 100%;
     max-height: 100%;
     border-radius: 8px;
 }
-#fileList.tiles .fileEntry .thumb:not(.visible) {
+#fileList .thumb:not(.visible) {
     visibility: none;
     height: 0px;
     width: 0px;
 }
-#fileList.tiles .fileEntry .thumb.visible {
+#fileList.list .thumb {
+    aspect-ratio: 1 / 1;
+    max-height: calc(100% - 6px);
+    border-radius: 4px;
+    object-fit: cover;
+}
+#fileList.list .thumb.visible {
+    margin: 3px;
+    margin-right: 5px;
+}
+#fileList .thumb.visible {
     opacity: 0%;
     animation-timing-function: var(--bezier);
     animation-name: thumbFadeIn;
@@ -416,8 +429,10 @@ body {
     #fileList.list .fileEntry .name .lower {
         display: block;
     }
-    #fileList.list .fileEntry .icon {
+    #fileList.list .fileEntry .iconCont {
         width: 48px;
+    }
+    #fileList.list .fileEntry .icon {
         font-size: 36px !important;
     }
     #fileList.list .fileEntry .modified,
