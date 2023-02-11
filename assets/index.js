@@ -430,12 +430,12 @@ async function main() {
     }
 
     for (const el of $$('[data-video-url]')) {
-        el.src = `https://src.simplecyber.org/video/?hue=${document.body.dataset.hue}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
+        el.src = `https://src.simplecyber.org/v1/video/?hue=${document.body.dataset.hue}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
         console.log(el.src);
     }
 
     for (const el of $$('[data-audio-url]')) {
-        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.dataset.hue}&url=${baseUrl}${el.dataset.audioUrl}`;
+        el.src = `https://src.simplecyber.org/v1/audio/?hue=${document.body.dataset.hue}&url=${baseUrl}${el.dataset.audioUrl}`;
         console.log(el.src);
     }
 
