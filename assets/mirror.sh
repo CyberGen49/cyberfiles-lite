@@ -1,5 +1,6 @@
 
-# This script downloads remote assets so CyberFiles doesn't have to rely on other servers
+# This script downloads remote assets
+# Links to fonts are made absolute
 
 download() {
     wget -q --show-progress -O $1 https://src.simplecyber.org/$2
