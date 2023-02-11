@@ -1,0 +1,52 @@
+{
+    "lightpurple": {
+        "themeColor": "#d5b3e6",
+        "name": "Orchid",
+        "hue": 320
+    },
+    "lightblue": {
+        "themeColor": "#b8e0de",
+        "name": "Ocean",
+        "hue": 175
+    },
+    "lightgreen": {
+        "themeColor": "#b3e6b3",
+        "name": "Pistachio",
+        "hue": 130
+    },
+    "lightyellow": {
+        "themeColor": "#e6ccb3",
+        "name": "Sand",
+        "hue": 30
+    },
+    "lightmuted": {
+        "themeColor": "#c7cfd1",
+        "name": "Overcast",
+        "hue": 200
+    },
+    "darkpurple": {
+        "themeColor": "#4d3663",
+        "name": "Twilight",
+        "hue": 320
+    },
+    "darkblue": {
+        "themeColor": "#242942",
+        "name": "Midnight",
+        "hue": 190
+    },
+    "darkgreen": {
+        "themeColor": "#24423d",
+        "name": "Seaweed",
+        "hue": 150
+    },
+    "darkyellow": {
+        "themeColor": "#423824",
+        "name": "Walnut",
+        "hue": 30
+    },
+    "darkmuted": {
+        "themeColor": "#22262a",
+        "name": "Charcoal",
+        "hue": 230
+    }
+}

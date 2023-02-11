@@ -1,12 +1,13 @@
 
 # CyberFiles Lite
-A bare-bones file index built to work with Node.js Express and look like GitHub's file browser.
+A (not-so) bare-bones file index built to work with Node.js Express and look like GitHub's file browser.
 
 ![CyberFiles Light promotional image](/promo.png)
 
 ## Features
 * Easy and portable setup
 * A minimalistic, modern, and responsive design
+* Customizable themes with several built-in options
 * Choose the root of your file index
 * Use RegEx to hide (and prevent access to) certain files and directories
 * Serve directory index files (like `index.html`) automatically
@@ -19,10 +20,11 @@ A bare-bones file index built to work with Node.js Express and look like GitHub'
 * Conveniently move between files in the file viewer using the next/previous arrows
 * Change the sort order of a directory
 * Filter files in a directory just by pressing Ctrl + F
+* View the file extension breakdown of a directory in the **File info** pane
 * Quickly download whole directories as zip files
 * See image previews before clicking with thumbnails
 * Get a better look at your files with tile view
-    * Directories where more than 50% of the contents have thumbnails will use tile view automatically
+    * Directories where more than 50% of the contents have thumbnails will use tile view automatically (see [auto_view](#boolean-auto_view) and [auto_view_threshold](#number-auto_view_threshold))
 * Add to your existing [ExpressJS](https://github.com/expressjs/express) projects
 
 ## Running CyberFiles Lite standalone
@@ -144,9 +146,18 @@ srv.listen(port, () => console.log(`Listening on port ${port}`));
 These are all the configuration options for CyberFiles Lite.
 
 ### String `root`
-A directory path to serve as the root of your file index. Defaults to the current directory.
+A directory path to serve as the root of your file index.
 
-Default: The current directory
+Default: The directory of the parent module
+
+Relative paths are relative to the directory of the parent module.
+
+### String `data_dir`
+A separate directory where thumbnails should be stored to prevent them from being deleted when updating. A `thumbs` directory will be created inside this directory.
+
+Default: `cyberfiles-lite`'s installation directory
+
+Relative paths are relative to `cyberfiles-lite`'s installation directory.
 
 ### String `site_name`
 The name of this file index, used in various places around the site.
@@ -158,10 +169,10 @@ A URL to use as the tab icon for the file index.
 
 Default: `"?asset=icon.png"`
 
-### Number `hue`
-The hue to use as the accent colour around the file index, from 0 to 360.
+### Number `theme`
+A theme to use for the file index. This value must be the same as one of the keys in [`themes.json`](/themes.json).
 
-Default: `210`
+Default: `"darkmuted"`
 
 ### String[] `index_files`
 An array of file names to checked for and sent when a directory is accessed. If one of these files exist in a directory, they'll be sent instead of the file index.
@@ -178,7 +189,7 @@ If storing these options in JSON, be sure to escape backslashes when escaping ot
 Default: `[ /\/(\.|_).*?(\/|$)/ ]`
 
 ### Boolean `handle_404`
-If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
+If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s) and show the user an error page. If `false`, `next()` will be called, passing control to the next middleware.
 
 Default: `false`
 

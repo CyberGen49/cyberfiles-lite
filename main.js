@@ -67,6 +67,8 @@ function hslToHex(h, s, l) {
     return `${f(0)}${f(8)}${f(4)}`;
 }
 
+const themes = require('./themes.json');
+
 const sortOrder = {
     name: {
         f: (a, b) => {
@@ -103,25 +105,41 @@ const sortOrder = {
 /**
  * @typedef CyberFilesLiteOptions
  * @type {object}
- * @property {string} [root] A directory path to serve as the root of your file index. Defaults to the current directory.
+ * @property {string} [root] A directory path to serve as the root of your file index. 
  * 
- * @property {string} [site_name] The name of this file index, used in various places around the site. Defaults to `CyberFiles Lite`.
+ * Defaults to the directory of the parent module.
  * 
- * @property {string} [icon] A URL to use as the tab icon for the file index. Defaults to `"?asset=icon.png"`.
+ * Relative paths are relative to the directory of the parent module.
  * 
- * @property {number} [hue] The hue to use as the accent colour around the file index, 0-360. Defaults to 210.
+ * @property {string} [data_dir] A separate directory where thumbnails and user data should be stored to prevent them from being deleted when updating.
+ * 
+ * Defaults to where `cyberfiles-lite` is installed.
+ * 
+ * Relative paths are relative to `cyberfiles-lite`'s installation directory.
+ * 
+ * @property {string} [site_name] The name of this file index, used in various places around the site.
+ * 
+ * Defaults to `"CyberFiles Lite"`
+ * 
+ * @property {string} [icon] A URL to use as the tab icon for the file index.
+ * 
+ * Defaults to `"?asset=icon.png"`
+ * 
+ * @property {string} [theme] A theme to use for the file index. This value must be the same as one of the keys in `themes.json`.
+ * 
+ * Defaults to `"darkmuted"`
  * 
  * @property {string[]} [index_files] An array of file names to checked for and sent when a directory is accessed. If one of these files exist in a directory, they'll be sent instead of the file index.
  * 
- * Defaults to `[ 'index.html' ]`.
+ * Defaults to `[ "index.html" ]`
  * 
  * @property {string[]} [hide_patterns] An array of RegEx strings to be checked against the absolute file/directory path of each request. If the pattern matches, the file/directory will be hidden from view.
  * 
- * Defaults to `[ /\/(\.|_).*?(\/|$)/ ]`, which will hide all files and directories whose paths contain a node starting with `.` or `_`.
+ * Defaults to `[ /\/(\.|_).*?(\/|$)/ ]`, which will hide all files and directories whose paths contain a node/segment starting with `.` or `_`.
  * 
  * If storing these options in JSON, be sure to escape backslashes when escaping other characters.
  * 
- * @property {boolean} [handle_404] If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s). If `false`, `next()` will be called, passing control to the next middleware.
+ * @property {boolean} [handle_404] If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s) and show the user an error page. If `false`, `next()` will be called, passing control to the next middleware.
  * 
  * Defaults to `false`
  * 
@@ -157,11 +175,16 @@ module.exports = (opts = {}) => {
     if (!path.isAbsolute(opts.root)) opts.root = path.join(__dirnameParent, opts.root);
     opts.root = path.normalize(opts.root);
     const defaultHidePatterns = [ /\/(\.|_).*?(\/|$)/ ];
+    if (!opts.data_dir) opts.data_dir = __dirname;
+    if (!path.isAbsolute(opts.data_dir)) opts.data_dir = path.join(__dirname, opts.data_dir);
+    opts.data_dir = path.normalize(opts.data_dir);
     if (!opts.hide_patterns) opts.hide_patterns = defaultHidePatterns;
     else opts.hide_patterns.unshift(...defaultHidePatterns);
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
     if (!opts.icon) opts.icon = `?asset=icon.png`;
-    if (opts.hue === undefined) opts.hue = 210;
+    if (!opts.theme) opts.theme = 'darkmuted';
+    const theme = themes[opts.theme];
+    if (!theme) throw new Error(`[CyberFiles] Invalid theme! Make sure your provided theme matches one of the keys in themes.json.`);
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     if (opts.handle_404 == undefined) opts.handle_404 = false;
     if (opts.get_dir_sizes == undefined) opts.get_dir_sizes = false;
@@ -177,8 +200,8 @@ module.exports = (opts = {}) => {
     const sessions = {};
     const thumbQueue = [];
     const thumbHandlers = {};
-    const thumbsDir = path.join(__dirname, 'thumbs');
-    const thumbMapFile = path.join(__dirname, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
+    const thumbsDir = path.join(opts.data_dir, 'thumbs');
+    const thumbMapFile = path.join(opts.data_dir, 'thumbs', `thumb-map-${crypto.createHash('md5').update(opts.root).digest('hex')}.json`);
     logDebug(`Thumbs directory:`, thumbsDir);
     logDebug(`Thumbs map file:`, thumbMapFile);
     let thumbMap = {};
@@ -277,10 +300,8 @@ module.exports = (opts = {}) => {
         if (isDir) {
             if (folderSizes) {
                 const size = getFolderSize(filePathAbs);
-                if (size) {
-                    file.size = size;
-                    file.sizeHuman = utils.formatSize(file.size);
-                }
+                file.size = size;
+                file.sizeHuman = utils.formatSize(file.size);
             }
         }
         return file;
@@ -483,15 +504,14 @@ module.exports = (opts = {}) => {
             previewType: false,
             dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
             icon: opts.icon,
-            hue: opts.hue,
+            theme: opts.theme,
+            theme_hue: theme.hue,
+            themes: themes,
             site_name: opts.site_name,
             site_name_meta: opts.site_name,
-            theme_color: '17181c',
+            theme_color: themes[opts.theme].themeColor,
             error: false,
         };
-        // Change theme colour if Discord is requesting
-        if ((req.headers['user-agent'] || '').match(/DiscordBot/gi))
-            data.theme_color = hslToHex(opts.hue, 75, 80);
         // Handle rendering
         const render = async() => {
             res.setHeader('content-type', 'text/html');
@@ -531,7 +551,8 @@ module.exports = (opts = {}) => {
         // If the path doesn't exist, return 404
         if (!fs.existsSync(pathAbs)) return send404();
         // Save if the file is a directory
-        const isDir = fs.statSync(pathAbs).isDirectory();
+        const dirStats = fs.statSync(pathAbs);
+        const isDir = dirStats.isDirectory();
         // If we aren't at the root, change meta site name
         if (tree.length > 2 && opts.site_name.length < 64) {
             let tmp = [...parts];
@@ -643,7 +664,8 @@ module.exports = (opts = {}) => {
             // Get file details
             const file = await getFileObject(filePathAbs, filePathRel);
             if (!file) continue;
-            totalSize += file.size;
+            if (parseInt(file.size))
+                totalSize += file.size;
             // Add file to list
             filesWorking[(file.isDir) ? 'dirs':'files'].push(file);
             // If this is a readme file, save it
@@ -697,6 +719,9 @@ module.exports = (opts = {}) => {
         data.stats = {
             count: { files: filesWorking.files.length, dirs: filesWorking.dirs.length },
             totalSize: totalSize,
+            totalSizeHuman: utils.formatSize(totalSize),
+            totalSizeIncludesSubdirs: opts.get_dir_sizes,
+            mtime: dirStats.mtimeMs,
             duration: Math.round(Date.now()-startTime)
         };
         // Count files and dirs and make a human-readable string

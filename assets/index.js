@@ -1,25 +1,100 @@
 
 const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
-async function main() {
-    if (_qs('#path'))
-        _qs('#path').scrollLeft = _qs('#path').scrollWidth;
+dayjs.extend(window.dayjs_plugin_advancedFormat);
 
-    const getDateFull = timestamp => {
+async function main() {
+    if ($('#path'))
+        $('#path').scrollLeft = $('#path').scrollWidth;
+
+    function clamp(num, min, max) {
+        if (num < min) return min;
+        if (num > max) return max;
+        return num;
+    }
+    function downloadFile(url, name) {
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.download = name || url.split('/').reverse()[0];
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+    function on(el, type, callback) {
+        if (!Array.isArray(type)) type = [type];
+        type.forEach((type) => {
+            el.addEventListener(type, callback);
+        });
+    }
+    const getDateFull = (timestamp, mode = 0) => {
         const time = dayjs(timestamp);
-        return `${time.format(`MMM D YYYY`)} at ${time.format(`h:mm A`)}`;
+        if (mode == 0)
+            return `${time.format(`MMM D YYYY`)} at ${time.format(`h:mm A`)}`;
+        if (mode == 1)
+            return time.format(`dddd, MMMM D, YYYY, h:mm:ss A`);
     };
+    function getRelativeDate(target, anchor = Date.now()) {
+        const isFuture = (anchor-target < 0) ? true : false;
+        let diff = Math.abs(anchor-target);
+        diff = Math.round(diff/1000);
+        if (diff < 120) // Less than 120 seconds
+            return (isFuture) ? `In a moment` : `Moments ago`;
+        diff = Math.round(diff/60);
+        if (diff < 120) // Less than 120 minutes
+            return (isFuture) ? `${diff} mins from now` : `${diff} mins ago`;
+        diff = Math.round(diff/60);
+        if (diff < 72) // Less than 72 hours
+            return (isFuture) ? `${diff} hours from now` : `${diff} hours ago`;
+        diff = Math.round(diff/24);
+        const days = diff;
+        if (diff < 90) // Less than 90 days
+            return (isFuture) ? `${diff} days from now` : `${diff} days ago`;
+        diff = Math.round(diff/30.43685);
+        if (diff < 36) // Less than 36 months
+            return (isFuture) ? `${diff} months from now` : `${diff} months ago`;
+        diff = Math.round(days/365.2422);
+        return (isFuture) ? `${diff} years from now` : `${diff} years ago`;
+    }
     const updateTimes = () => {
-        for (const el of _qsa('[data-timestamp]')) {
+        for (const el of $$('[data-timestamp]')) {
             const timestamp = parseInt(el.dataset.timestamp);
+            const mode = el.dataset.mode || 'relative';
             if (!timestamp) continue;
-            el.innerText = getRelativeDate(timestamp);
+            if (mode == 'relative')
+                el.innerText = getRelativeDate(timestamp);
+            if (mode == 'absolute')
+                el.innerText = getDateFull(timestamp);
+            if (mode == 'absoluteLong')
+                el.innerText = getDateFull(timestamp, 1);
         }
     };
     updateTimes();
     setInterval(updateTimes, 1000 * 60);
 
-    for (const el of _qsa('#fileList .fileEntry')) {
+    const toasts = new ToastOverlay('left', 'bottom');
+    const copyText = async(text) => {
+        try {
+            await window.navigator.clipboard.writeText(text);
+            toasts.showToast(toast => toast
+                .setIcon('content_copy')
+                .setBodyHTML(`
+                    <p>Copied text to clipboard.</p>
+                `))
+        } catch (error) {
+            toasts.showToast(toast => toast
+                .setIcon('error')
+                .setBodyHTML(`
+                    <p>Failed to copy text to clipboard! ${error}</p>
+                    <p>Here's what we tried copying:</p>
+                    <code>${text}</code>
+                `)
+                .setCloseDelay(0))
+        }
+    };
+
+    for (const el of $$('#fileList .fileEntry')) {
         const icon = $('.icon', el).innerText;
         const name = el.dataset.name;
         const size = el.dataset.size;
@@ -31,7 +106,7 @@ async function main() {
         if (shouldRender) action = 'view this file';
         if (isDir) action = 'open this folder';
         el.title = `
-            <span style="color: var(--f80)">${name}</span>
+            <span style="color: var(--f2)">${name}</span>
             ${(type) ? `<br>Type: ${type}` : ''}
             ${(modified) ? `<br>Modified: ${modified}` : ''}
             ${(size && size !== '-') ? `<br>Size: ${size}` : ''}
@@ -41,55 +116,42 @@ async function main() {
         on(el, 'contextmenu', (e) => {
             if (e.shiftKey) return;
             e.preventDefault();
-            const data = [];
-            if (isDir) {
-                data.push({
-                    type: 'item',
-                    icon: 'content_copy',
-                    name: 'Copy folder URL',
-                    action: () => window.navigator.clipboard.writeText(`${baseUrl}${el.dataset.path}`)
-                });
-                data.push({ type: 'sep' });
-                data.push({
-                    type: 'item',
-                    icon: 'download',
-                    name: 'Download as zip',
-                    action: () => {
-                        downloadFile(`?zip=./${encodeURI(name)}`, `${name}.zip`);
-                    }
-                });
-            } else {
-                if (shouldRender) data.push({
-                    type: 'item',
-                    icon: 'content_copy',
-                    name: 'Copy file viewer URL',
-                    tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
-                    action: () => window.navigator.clipboard.writeText(`${baseUrl}${el.dataset.path}?render=true`)
-                });
-                data.push({
-                    type: 'item',
-                    icon: 'content_copy',
-                    name: 'Copy raw file URL',
-                    tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
-                    action: () => window.navigator.clipboard.writeText(`${baseUrl}${el.dataset.path}`)
-                });
-                data.push({ type: 'sep' });
-                data.push({
-                    type: 'item',
-                    icon: 'download',
-                    name: 'Download file',
-                    action: () => downloadFile(el.dataset.path)
-                });
+            const isUp = icon == 'arrow_upward';
+            const menu = new ContextMenuBuilder();
+            if (isDir && !isUp) {
+                menu.addItem(item => item
+                    .setIcon('content_copy')
+                    .setLabel('Copy folder URL')
+                    .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
+                menu.addSeparator();
+                menu.addItem(item => item
+                    .setIcon('download')
+                    .setLabel('Download as zip')
+                    .setClickHandler(() => downloadFile(`?zip=./${encodeURI(name)}`, `${name}.zip`)));
+            } else if (!isUp) {
+                if (shouldRender) menu.addItem(item => item
+                    .setIcon('content_copy')
+                    .setLabel('Copy file viewer URL')
+                    .setTooltip(`Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`)
+                    .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}?render=true`)));
+                menu.addItem(item => item
+                    .setIcon('content_copy')
+                    .setLabel('Copy raw file URL')
+                    .setTooltip(`Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`)
+                    .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
+                menu.addSeparator();
+                menu.addItem(item => item
+                    .setIcon('download')
+                    .setLabel('Download file')
+                    .setClickHandler(() => downloadFile(el.dataset.path)));
             }
-            data.push({ type: 'sep' });
-            data.push({
-                type: 'item',
-                icon: 'open_in_new',
-                name: 'Open in new tab...',
-                action: () => window.open(el.href, '_blank')
-            });
-            if (icon == 'arrow_upward') data.splice(0, data.length-1);
-            showContext(data);
+            if (!isUp)
+                menu.addSeparator();
+            menu.addItem(item => item
+                .setIcon('open_in_new')
+                .setLabel('Open in new tab...')
+                .setClickHandler(() => window.open(el.href, '_blank')));
+            menu.showAtCursor();
         });
         if ($('.thumb', el)) {
             const thumb = $('.thumb', el);
@@ -117,110 +179,118 @@ async function main() {
             });
         }, 50);
     };
-    lazyLoadImages();
     on(window, ['resize', 'orientationChange'], lazyLoadImages);
     on(document, 'scroll', () => {
         lazyLoadImages();
         const cardHeaders = $$('.card .header');
+        const cardFooters = $$('.card .footer');
         for (const header of cardHeaders) {
             const headerTop = header.getBoundingClientRect().top;
             if (headerTop <= 0)
                 header.classList.add('sticky');
             else
-            header.classList.remove('sticky');
+                header.classList.remove('sticky');
+        }
+        for (const footer of cardFooters) {
+            const footerTop = footer.getBoundingClientRect().bottom;
+            if (footerTop >= window.innerHeight)
+                footer.classList.add('sticky');
+            else
+                footer.classList.remove('sticky');
         }
     });
+    document.dispatchEvent(new Event('scroll'));
 
-    const markdownContainer = _qs(`.card[data-preview-type="markdown"]`);
+    const markdownContainer = $(`.card[data-preview-type="markdown"]`);
     if (markdownContainer) {
         Prism.highlightAll();
-        const head = _qs('.header', markdownContainer);
-        const body = _qs('.body', markdownContainer);
-        const idEls = _qsa('[id]', body);
-        let data = [];
-        let levels = [];
+        const head = $('.header', markdownContainer);
+        const body = $('.body', markdownContainer);
+        const idEls = $$('[id]', body);
+        const menu = new ContextMenuBuilder().setIconVisibility(false);
         // Build table of contents
+        let shouldShow = false;
         for (const el of idEls) {
             const tagName = el.tagName.toLowerCase();
             if (!tagName.toLowerCase().match(/^(h1|h2|h3|h4|h5|h6)$/))
                 continue;
-            data.push({
-                type: 'item',
-                name: el.innerText,
-                action: async () => {
-                    await sleep(100);
-                    window.location.hash = `#${el.id}`;
+            /* el.addEventListener('contextmenu', (e) => {
+                if (e.shiftKey) return;
+                e.preventDefault();
+                new ContextMenuBuilder()
+                    .addItem(item => item
+                        .setIcon('content_copy')
+                        .setLabel('Copy link to heading')
+                        .setClickHandler(() => copyText(`${window.location.href}#${el.id}`)))
+                    .showAtCursor()
+            }); */
+            const item = new ContextMenuItemBuilder(menu)
+                .setLabel(el.innerText)
+                .setClickHandler(() => {
                     setTimeout(() => {
-                        window.scrollTo(0, window.scrollY-50);
+                        window.location.hash = `#${el.id}`;
+                        setTimeout(() => {
+                            window.scrollTo(0, window.scrollY-50);
+                        }, 100);
                     }, 100);
-                }
-            });
-            levels.push(tagName.replace('h', ''));
+                });
+            const level = parseInt(tagName.replace('h', ''));
+            item.el.style.marginLeft = `${20*(level-1)}px`;
+            if (level == 4 || level == 5) item.el.style.marginLeft = 'var(--f2)';
+            if (level == 6) item.el.style.marginLeft = 'var(--f3)';
+            menu.addItem(() => item);
+            shouldShow = true;
         }
-        if (data.length > 0) {
+        if (shouldShow) {
             const el = document.createElement('button');
-            el.classList = `btn alt2 small noShadow iconOnly`;
+            el.classList = `btn tertiary small iconOnly`;
             el.title = `Table of contents`;
             el.innerHTML = `<div class="icon">segment</div>`;
-            on(el, 'click', () => {
-                const id = showContext(data);
-                const items = _qsa(`.item`, _id(id));
-                let i = 0;
-                for (const item of items) {
-                    const level = levels[i];
-                    const label = _qs('.label', item);
-                    label.style.paddingLeft = `${(level - 1) * 15}px`;
-                    let colour = `var(--f80)`;
-                    if (level == 2) colour = `var(--f90)`;
-                    if (level == 3) colour = `var(--b95)`;
-                    if (level == 4) colour = `var(--b85)`;
-                    if (level == 5) colour = `var(--b75)`;
-                    if (level == 6) colour = `var(--b70)`;
-                    label.style.color = colour;
-                    i++;
-                }
-            });
-            _qs(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
+            el.style.marginRight = `12px`;
+            el.addEventListener('click', () => menu.showAtElement(el));
+            $(`.flex-grow`, head).insertAdjacentElement(`beforebegin`, el);
         }
         // Determine if we need to show the scroll button
         const scrollButton = $('#scrollButton');
         const fileList = $('#fileList');
         const fileListCard = $('#fileListCard');
-        let isScrollButtonVisible = false;
-        const checkShowScrollButton = () => {
-            if (fileList.getBoundingClientRect().height > window.innerHeight) {
-                if (!isScrollButtonVisible) {
-                    scrollButton.classList.remove('hidden');
-                    scrollButton.classList.remove('ani');
-                    setTimeout(() => {
-                        scrollButton.classList.add('ani');
-                        isScrollButtonVisible = true;
-                    }, 500);
+        if (fileList) {
+            let isScrollButtonVisible = false;
+            const checkShowScrollButton = () => {
+                if (fileList.getBoundingClientRect().height > window.innerHeight) {
+                    if (!isScrollButtonVisible) {
+                        scrollButton.classList.remove('hidden');
+                        scrollButton.classList.remove('ani');
+                        setTimeout(() => {
+                            scrollButton.classList.add('ani');
+                            isScrollButtonVisible = true;
+                        }, 500);
+                    }
+                } else {
+                    scrollButton.classList.add('hidden');
+                    isScrollButtonVisible = false;
                 }
-            } else {
-                scrollButton.classList.add('hidden');
-                isScrollButtonVisible = false;
-            }
-            updateScrollButton();
-        };
-        const updateScrollButton = () => {
-            if (body.getBoundingClientRect().top < window.innerHeight) {
-                $('.icon', scrollButton).innerText = 'arrow_upward';
-                scrollButton.title = 'Scroll up to view files';
-            } else {
-                $('.icon', scrollButton).innerText = 'arrow_downward';
-                scrollButton.title = 'Scroll down to read README';
-            }
-        };
-        checkShowScrollButton();
-        on(window, 'resize', checkShowScrollButton);
-        on(window, 'scroll', updateScrollButton);
-        on(scrollButton, 'click', () => {
-            if ($('.icon', scrollButton).innerText == 'arrow_downward')
-                head.scrollIntoView({ behavior: 'smooth' });
-            else
-                fileListCard.scrollIntoView({ behavior: 'smooth' });
-        });
+                updateScrollButton();
+            };
+            const updateScrollButton = () => {
+                if (body.getBoundingClientRect().top < window.innerHeight) {
+                    $('.icon', scrollButton).innerText = 'arrow_upward';
+                    scrollButton.title = 'Scroll up to view files';
+                } else {
+                    $('.icon', scrollButton).innerText = 'arrow_downward';
+                    scrollButton.title = 'Scroll down to read README';
+                }
+            };
+            checkShowScrollButton();
+            on(window, 'resize', checkShowScrollButton);
+            on(window, 'scroll', updateScrollButton);
+            on(scrollButton, 'click', () => {
+                if ($('.icon', scrollButton).innerText == 'arrow_downward')
+                    head.scrollIntoView({ behavior: 'smooth' });
+                else
+                    fileListCard.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
     }
 
     if ($('#sort')) on($('#sort'), 'click', () => {
@@ -234,15 +304,14 @@ async function main() {
             { name: 'Smallest to largest', id: 'size', dir: 'asc' },
             { name: 'Largest to smallest', id: 'size', dir: 'desc' },
         ];
-        const data = [];
+        const menu = new ContextMenuBuilder();
         for (const order of orders) {
-            data.push({
-                type: 'item',
-                name: order.name,
-                action: async () => window.location.href = `?sort=${order.id}&direction=${order.dir.toString()}`
-            });
+            menu.addItem(item => item
+                .setLabel(order.name)
+                .setClickHandler(() => window.location.href = `?sort=${order.id}&direction=${order.dir.toString()}`));
         }
-        showContext(data);
+        menu.setIconVisibility(false);
+        menu.showAtElement($('#sort'));
     });
 
     if ($('#dirView')) on($('#dirView'), 'click', () => {
@@ -253,37 +322,42 @@ async function main() {
         window.location.href = `?view=${newView}`;
     });
 
-    if ($('#dirShare')) on($('#dirShare'), 'click', () => {
-        showContext([{
-            type: 'item',
-            icon: 'content_copy',
-            name: `Copy folder URL`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
-        }]);
-    });
+    const shareMenu = new ContextMenuBuilder();
+    const copyFolderURL = () => copyText(`${baseUrl}${window.location.pathname}`);
+    if ($('#dirShare')) {
+        shareMenu.addItem(item => item
+            .setIcon('content_copy')
+            .setLabel('Copy folder URL')
+            .setClickHandler(copyFolderURL));
+        on($('#dirShare'), 'click', () => shareMenu.showAtElement($('#dirShare')));
+        on($('#infoDirShare'), 'click', copyFolderURL);
+    }
 
-    if ($('#dirDownload')) on($('#dirDownload'), 'click', () => {
-        const name = `${[...$$('#path .part')].pop().innerText}.zip`;
-        downloadFile(`?zip=./`, name);
-    });
+    if ($('#dirDownload')) {
+        const downloadFolderZip = () => {
+            const name = `${[...$$('#path .part')].pop().innerText}.zip`;
+            downloadFile(`?zip=./`, name);
+        };
+        on($('#dirDownload'), 'click', downloadFolderZip);
+    }
 
     if ($('#dirMenu')) on($('#dirMenu'), 'click', () => {
-        showContext([{
-            type: 'item',
-            icon: $('#dirView .icon').innerText,
-            name: `Change folder view`,
-            action: () => $('#dirView').click()
-        }, { type: 'sep' }, {
-            type: 'item',
-            icon: 'share',
-            name: `Share this folder...`,
-            action: () => $('#dirShare').click()
-        }, { type: 'sep' }, {
-            type: 'item',
-            icon: 'download',
-            name: `Download as zip`,
-            action: () => $('#dirDownload').click()
-        }]);
+        new ContextMenuBuilder()
+            .addItem(item => item
+                .setIcon($('#dirView .icon').innerText)
+                .setLabel(`Change folder view`)
+                .setClickHandler(() => $('#dirView').click()))
+            .addSeparator()
+            .addItem(item => item
+                .setIcon('share')
+                .setLabel(`Share this folder...`)
+                .setClickHandler(() => shareMenu.showAtCursor()))
+            .addSeparator()
+            .addItem(item => item
+                .setIcon('download')
+                .setLabel(`Download as zip`)
+                .setClickHandler(() => $('#dirDownload').click()))
+            .showAtElement($('#dirMenu'));
     });
 
     if ($('#searchBtn')) {
@@ -323,11 +397,12 @@ async function main() {
                     if ($('.icon', file)) {
                         if ($('.icon', file).innerText == 'arrow_upward') continue;
                     }
+                    const parent = file.parentNode;
                     const name = $('.name div', file).innerText.toLowerCase();
                     if (name.match(input) || !input) {
-                        file.style.display = '';
+                        parent.style.display = '';
                         foundCount++;
-                    } else file.style.display = 'none';
+                    } else parent.style.display = 'none';
                 }
                 $('#searchNoneFound').style.display = 'none';
                 if (foundCount == 0) {
@@ -337,31 +412,97 @@ async function main() {
         });
     }
 
-    if ($('#shareFile')) on($('#shareFile'), 'click', () => {
-        showContext([{
-            type: 'item',
-            icon: 'content_copy',
-            name: 'Copy file viewer URL',
-            tooltip: `Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}?render=true`)
-        }, {
-            type: 'item',
-            icon: 'content_copy',
-            name: 'Copy raw file URL',
-            tooltip: `Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`,
-            action: () => window.navigator.clipboard.writeText(`${baseUrl}${window.location.pathname}`)
-        }]);
+    if ($('#shareFile')) {
+        const copyPreviewURL = () => copyText(`${baseUrl}${window.location.pathname}?render=true`);
+        const menu = new ContextMenuBuilder()
+            .addItem(item => item
+                .setIcon('content_copy')
+                .setLabel('Copy file viewer URL')
+                .setTooltip(`Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`)
+                .setClickHandler(copyPreviewURL))
+            .addItem(item => item
+                .setIcon('content_copy')
+                .setLabel('Copy raw file URL')
+                .setTooltip(`Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`)
+                .setClickHandler(() => copyText(`${baseUrl}${window.location.pathname}`)));
+        on($('#shareFile'), 'click', () => menu.showAtElement($('#shareFile')));
+        on($('#infoShareFile'), 'click', copyPreviewURL);
+    }
+
+    for (const el of $$('[data-video-url]')) {
+        el.src = `https://src.simplecyber.org/video/?hue=${document.body.dataset.hue}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
+        console.log(el.src);
+    }
+
+    for (const el of $$('[data-audio-url]')) {
+        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.dataset.hue}&url=${baseUrl}${el.dataset.audioUrl}`;
+        console.log(el.src);
+    }
+
+    $('#settingsOpen').addEventListener('click', () => {
+        const popup = new PopupBuilder()
+            .setTitle(`Settings`)
+            .addAction(action => action.setLabel(`Done`).setIsPrimary(true))
+            .setClickOutside(false)
+            .addBodyHTML(`
+                <p>These settings are saved in your browser and will only take effect on this device.</p>
+                <h4>Theme</h4>
+                <div class="row gap-10 flex-wrap">${(() => {
+                    const html = [];
+                    for (const id in themes) {
+                        const theme = themes[id];
+                        html.push(`
+                            <button class="btn secondary small" data-theme="${id}" title="Theme ID: ${id}">
+                                <div class="icon" style="display: none">done</div>
+                                ${theme.name}
+                            </button>
+                        `);
+                    }
+                    return html.join('');
+                })()}</div>
+                <!-- <h5>Date format</h5>
+                <div class="col gap-10">
+                    <div style="max-width: 400px">
+                        <label>Absolute short</label>
+                        <input id="inputDateAbsShort" type="text" class="textbox" style="width: 100%" value="...">
+                    </div>
+                    <div style="max-width: 400px">
+                        <label>Absolute long</label>
+                        <input id="inputDateAbsLong" type="text" class="textbox" style="width: 100%" value="...">
+                    </div>
+                </div> -->
+                <h4>Reset</h4>
+                <div class="col gap-10">
+                    <div class="row">
+                        <button id="settingsReset" class="btn danger">
+                            Reset settings
+                        </button>
+                    </div>
+                    <small>This will reset all CyberFiles settings to their defaults, and delete any saved video progress.</small>
+                </div>
+            `);
+        popup.show();
+        const currentTheme = document.body.dataset.theme;
+        const themeButtons = $$('button[data-theme]');
+        $(`button[data-theme="${currentTheme}"] .icon`).style.display = '';
+        $(`button[data-theme="${currentTheme}"]`).classList.remove('secondary');
+        for (const btn of themeButtons) {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                setTheme(theme);
+                for (const btn of themeButtons) {
+                    btn.classList.add('secondary');
+                    $('.icon', btn).style.display = 'none';
+                }
+                btn.classList.remove('secondary');
+                $('.icon', btn).style.display = '';
+            });
+        }
+        $('#settingsReset').addEventListener('click', () => {
+            window.localStorage.clear();
+            window.location.reload();
+        });
     });
-
-    for (const el of _qsa('[data-video-url]')) {
-        el.src = `https://src.simplecyber.org/video/?hue=${document.body.style.getPropertyValue('--fgHue')}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
-        console.log(el.src);
-    }
-
-    for (const el of _qsa('[data-audio-url]')) {
-        el.src = `https://src.simplecyber.org/audio/?hue=${document.body.style.getPropertyValue('--fgHue')}&url=${baseUrl}${el.dataset.audioUrl}`;
-        console.log(el.src);
-    }
 
     const hash = window.location.hash;
     window.location.hash = '#';

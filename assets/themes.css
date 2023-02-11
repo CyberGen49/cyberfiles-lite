@@ -1,0 +1,317 @@
+
+/*
+
+Below is a JSON object with some metadata about each theme.
+ - The `themeColor` property is the suggested value for the `theme-color` meta tag.
+    - Equal to the theme's `--b3` color.
+ - The `name` property is the theme's canonical name.
+ - The `hue` property is the suggested hue to use for colouring custom elements
+
+{
+    "lightpurple": {
+        "themeColor": "#e6b3dd",
+        "name": "Orchid",
+        "hue": 320
+    },
+    "lightblue": {
+        "themeColor": "#b8e0de",
+        "name": "Ocean",
+        "hue": 175
+    },
+    "lightgreen": {
+        "themeColor": "#b3e6b3",
+        "name": "Pistachio",
+        "hue": 130
+    },
+    "lightyellow": {
+        "themeColor": "#e6ccb3",
+        "name": "Sand",
+        "hue": 30
+    },
+    "lightmuted": {
+        "themeColor": "#c7cfd1",
+        "name": "Overcast",
+        "hue": 200
+    },
+    "darkpurple": {
+        "themeColor": "#5c3663",
+        "name": "Twilight",
+        "hue": 320
+    },
+    "darkblue": {
+        "themeColor": "#243342",
+        "name": "Midnight",
+        "hue": 190
+    },
+    "darkgreen": {
+        "themeColor": "#244238",
+        "name": "Seaweed",
+        "hue": 150
+    },
+    "darkyellow": {
+        "themeColor": "#423324",
+        "name": "Walnut",
+        "hue": 30
+    },
+    "darkmuted": {
+        "themeColor": "#22262a",
+        "name": "Charcoal",
+        "hue": 230
+    }
+}
+
+*/
+
+.lightblue,
+.lightyellow,
+.lightgreen,
+.lightmuted,
+.lightpurple {
+    /* Background and foreground */
+    --b0: hsl(180, 60%, 95%);
+    --b1: hsl(180, 60%, 90%);
+    --b2: hsl(180, 50%, 85%);
+    --b3: hsl(180, 40%, 80%);
+    --b4: hsl(180, 40%, 70%);
+    --b5: hsl(180, 40%, 60%);
+    --f4: hsl(180, 30%, 50%);
+    --f3: hsl(180, 30%, 35%);
+    --f2: hsl(180, 30%, 15%);
+    --f1: black;
+    /* Green accent */
+    --green0: hsl(120, 60%, 50%);
+    --green1: hsl(120, 60%, 70%);
+    --green2: hsl(120, 60%, 80%);
+    --green3: hsl(120, 60%, 85%);
+    --green4: hsl(120, 60%, 90%);
+    --green5: hsl(120, 60%, 95%);
+    /* Orange accent */
+    --orange0: hsl(20, 100%, 40%);
+    --orange1: hsl(20, 100%, 70%);
+    --orange2: hsl(20, 100%, 80%);
+    --orange3: hsl(20, 100%, 85%);
+    --orange4: hsl(20, 100%, 90%);
+    --orange5: hsl(20, 100%, 95%);
+    /* Yellow accent */
+    --yellow0:  hsl(40, 100%, 50%);
+    --yellow1:  hsl(40, 100%, 70%);
+    --yellow2:  hsl(40, 100%, 80%);
+    --yellow3:  hsl(40, 100%, 85%);
+    --yellow4:  hsl(40, 100%, 90%);
+    --yellow5:  hsl(40, 100%, 95%);
+    /* Danger */
+    --red0: hsl(355, 80%, 55%);
+    --red1: hsl(355, 80%, 75%);
+    --red2: hsl(355, 80%, 80%);
+    --red3: hsl(355, 80%, 85%);
+    --red4: hsl(355, 80%, 90%);
+    --red5: hsl(355, 80%, 95%);
+    /* Code */
+    --syntax-comment: #6e7781;
+    --syntax-constant: #0550ae;
+    --syntax-entity: #8250df;
+    --syntax-storage-modifier-import: #24292f;
+    --syntax-entity-tag: #116329;
+    --syntax-keyword: #cf222e;
+    --syntax-string: #0a3069;
+    --syntax-variable: #953800;
+}
+
+.lightpurple {
+    /* Background and foreground */
+    --b0: hsl(280, 60%, 95%);
+    --b1: hsl(280, 60%, 90%);
+    --b2: hsl(280, 60%, 85%);
+    --b3: hsl(280, 50%, 80%);
+    --b4: hsl(290, 50%, 70%);
+    --b5: hsl(300, 40%, 60%);
+    --f4: hsl(310, 30%, 50%);
+    --f3: hsl(320, 30%, 35%);
+    --f2: hsl(320, 30%, 15%);
+    --f1: black;
+}
+
+.lightyellow {
+    /* Background and foreground */
+    --b0: hsl(50, 60%, 95%);
+    --b1: hsl(50, 60%, 90%);
+    --b2: hsl(40, 60%, 85%);
+    --b3: hsl(30, 50%, 80%);
+    --b4: hsl(30, 50%, 70%);
+    --b5: hsl(20, 40%, 60%);
+    --f4: hsl(10, 30%, 50%);
+    --f3: hsl(10, 30%, 35%);
+    --f2: hsl(0, 30%, 15%);
+    --f1: black;
+}
+
+.lightgreen {
+    /* Background and foreground */
+    --b0: hsl(100, 60%, 95%);
+    --b1: hsl(100, 60%, 90%);
+    --b2: hsl(110, 60%, 85%);
+    --b3: hsl(120, 50%, 80%);
+    --b4: hsl(120, 50%, 70%);
+    --b5: hsl(130, 40%, 60%);
+    --f4: hsl(140, 30%, 50%);
+    --f3: hsl(140, 30%, 35%);
+    --f2: hsl(150, 30%, 15%);
+    --f1: black;
+    --green0: hsl(180, 60%, 50%);
+    --green1: hsl(180, 60%, 70%);
+    --green2: hsl(180, 60%, 80%);
+    --green3: hsl(180, 60%, 85%);
+    --green4: hsl(180, 60%, 90%);
+}
+
+.lightmuted {
+    /* Background and foreground */
+    --b0: hsl(160, 10%, 95%);
+    --b1: hsl(170, 10%, 90%);
+    --b2: hsl(180, 10%, 85%);
+    --b3: hsl(190, 10%, 80%);
+    --b4: hsl(200, 10%, 70%);
+    --b5: hsl(210, 10%, 60%);
+    --f4: hsl(220, 10%, 50%);
+    --f3: hsl(230, 10%, 35%);
+    --f2: hsl(240, 10%, 15%);
+    --f1: black;
+}
+
+.darkpurple,
+.darkyellow,
+.darkgreen,
+.darkmuted,
+.darkblue {
+    /* Background and foreground */
+    --b0: hsl(270, 30%, 15%);
+    --b1: hsl(270, 30%, 20%);
+    --b2: hsl(270, 30%, 25%);
+    --b3: hsl(270, 30%, 30%);
+    --b4: hsl(280, 30%, 40%);
+    --b5: hsl(290, 30%, 50%);
+    --f4: hsl(300, 30%, 65%);
+    --f3: hsl(310, 40%, 80%);
+    --f2: hsl(310, 50%, 90%);
+    --f1: white;
+    /* Green accent */
+    --green0: hsl(150, 50%, 30%);
+    --green1: hsl(150, 50%, 40%);
+    --green2: hsl(150, 50%, 50%);
+    --green3: hsl(150, 50%, 60%);
+    --green4: hsl(150, 50%, 70%);
+    --green5: hsl(150, 50%, 80%);
+    /* Orange accent */
+    --orange0: hsl(15, 85%, 30%);
+    --orange1: hsl(15, 85%, 40%);
+    --orange2: hsl(15, 85%, 50%);
+    --orange3: hsl(15, 85%, 60%);
+    --orange4: hsl(15, 85%, 70%);
+    --orange5: hsl(15, 85%, 80%);
+    /* Yellow accent */
+    --yellow0:  hsl(40, 70%, 40%);
+    --yellow1:  hsl(40, 70%, 50%);
+    --yellow2:  hsl(40, 70%, 60%);
+    --yellow3:  hsl(40, 70%, 70%);
+    --yellow4:  hsl(40, 70%, 80%);
+    --yellow5:  hsl(40, 70%, 90%);
+    /* Danger */
+    --red0: hsl(340, 55%, 40%);
+    --red1: hsl(340, 55%, 50%);
+    --red2: hsl(340, 55%, 60%);
+    --red3: hsl(340, 55%, 70%);
+    --red4: hsl(340, 55%, 80%);
+    --red5: hsl(340, 55%, 90%);
+    /* Code */
+    --syntax-comment: #8b949e;
+    --syntax-constant: #79c0ff;
+    --syntax-entity: #d2a8ff;
+    --syntax-storage-modifier-import: #c9d1d9;
+    --syntax-entity-tag: #7ee787;
+    --syntax-keyword: #ff7b72;
+    --syntax-string: #a5d6ff;
+    --syntax-variable: #ffa657;
+}
+
+.darkpurple .textbox,
+.darkyellow .textbox,
+.darkgreen .textbox,
+.darkmuted .textbox,
+.darkblue .textbox {
+    background-color: var(--b0);
+    border-color: var(--b0);
+}
+.darkpurple .textbox:focus,
+.darkyellow .textbox:focus,
+.darkgreen .textbox:focus,
+.darkmuted .textbox:focus,
+.darkpurple .textbox:focus-within,
+.darkyellow .textbox:focus-within,
+.darkgreen .textbox:focus-within,
+.darkmuted .textbox:focus-within,
+.darkblue .textbox:focus,
+.darkblue .textbox:focus-within {
+    background-color: var(--b2);
+    border-color: var(--f4);
+}
+
+.darkblue {
+    /* Background and foreground */
+    --b0: hsl(230, 30%, 8%);
+    --b1: hsl(230, 30%, 12%);
+    --b2: hsl(230, 30%, 18%);
+    --b3: hsl(230, 30%, 20%);
+    --b4: hsl(220, 30%, 30%);
+    --b5: hsl(210, 30%, 45%);
+    --f4: hsl(200, 30%, 60%);
+    --f3: hsl(190, 40%, 75%);
+    --f2: hsl(190, 50%, 85%);
+    --f1: white;
+}
+
+.darkyellow {
+    /* Background and foreground */
+    --b0: hsl(40, 20%, 8%);
+    --b1: hsl(40, 20%, 12%);
+    --b2: hsl(40, 20%, 18%);
+    --b3: hsl(40, 30%, 20%);
+    --b4: hsl(30, 30%, 30%);
+    --b5: hsl(20, 30%, 45%);
+    --f4: hsl(10, 30%, 60%);
+    --f3: hsl(0, 40%, 75%);
+    --f2: hsl(0, 50%, 85%);
+    --f1: white;
+}
+
+.darkgreen {
+    /* Background and foreground */
+    --b0: hsl(170, 20%, 8%);
+    --b1: hsl(170, 20%, 12%);
+    --b2: hsl(170, 20%, 18%);
+    --b3: hsl(170, 30%, 20%);
+    --b4: hsl(160, 30%, 30%);
+    --b5: hsl(150, 30%, 45%);
+    --f4: hsl(140, 30%, 60%);
+    --f3: hsl(130, 40%, 75%);
+    --f2: hsl(130, 50%, 85%);
+    --f1: white;
+    --green0: hsl(180, 50%, 30%);
+    --green1: hsl(180, 50%, 40%);
+    --green2: hsl(180, 50%, 50%);
+    --green3: hsl(180, 50%, 60%);
+    --green4: hsl(180, 50%, 70%);
+}
+
+.darkmuted {
+    /* Background and foreground */
+    --b0: hsl(180, 10%, 5%);
+    --b1: hsl(190, 10%, 8%);
+    --b2: hsl(200, 10%, 12%);
+    --b3: hsl(210, 10%, 15%);
+    --b4: hsl(220, 10%, 25%);
+    --b5: hsl(230, 10%, 40%);
+    --f4: hsl(240, 10%, 55%);
+    --f3: hsl(250, 10%, 70%);
+    --f2: hsl(260, 10%, 85%);
+    --f1: white;
+}

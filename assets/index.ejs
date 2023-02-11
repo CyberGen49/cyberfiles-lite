@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#<%= theme_color %>">
+    <meta name="theme-color" content="<%= theme_color %>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title><%= (dirName == 'Root') ? site_name : dirName %></title>
@@ -14,203 +14,338 @@
     <meta property="og:description" content="<%= desc %>">
     <meta name="description" content="<%= desc %>">
     <link rel="icon" href="<%= icon %>">
-    <link rel="stylesheet" href="https://src.simplecyber.org/base.css">
-    <!-- <link rel="stylesheet" href="https://src.simplecyber.org/base.light.css"> -->
+    <link rel="stylesheet" href="?asset=base.css">
+    <link rel="stylesheet" href="?asset=themes.css">
     <link rel="stylesheet" href="?asset=index.css">
-    <!-- <link rel="stylesheet" href="?asset=index.light.css"> -->
-    <script defer src="https://src.simplecyber.org/base.js"></script>
-    <script defer src="https://src.simplecyber.org/tabbable.js"></script>
-    <script defer src="https://src.simplecyber.org/focus-trap.js"></script>
-    <script defer src="https://src.simplecyber.org/dayjs.min.js"></script>
-    <script defer src="https://src.simplecyber.org/prism.js" data-manual></script>
+    <script defer src="?asset=tabbable.js"></script>
+    <script defer src="?asset=focus-trap.js"></script>
+    <script defer src="?asset=base.js"></script>
+    <script defer src="?asset=dayjs.min.js"></script>
+    <script defer src="?asset=dayjs.advancedFormat.js"></script>
+    <script defer src="?asset=prism.js" data-manual></script>
     <script defer src="?asset=index.js" data-manual></script>
 </head>
-<body class="changeColours" style="--fgHue: <%= hue %>">
-    <div class="container col">
-        <div id="head">
-            <div id="title"><%= site_name %></div>
-            <div id="path" class="no-select">
-                <% for (const part of tree) { %>
-                    <a href="<%= part.path %>" class="part">
-                        <%= part.name %>
-                    </a>
-                    <span class="sep"></span>
-                <% } %>
+<body class="<%= theme %>" data-theme="<%= theme %>" data-hue="<%= theme_hue %>">
+    <script>
+        const themes = JSON.parse(`<%- JSON.stringify(themes) %>`);
+        function setTheme(theme) {
+            theme = (themes[theme]) ? theme : '<%= theme %>';
+            document.body.classList = theme;
+            document.body.dataset.theme = theme;
+            document.body.dataset.hue = themes[theme].hue;
+            document.querySelector('meta[name="theme-color"]')
+                .setAttribute('content', themes[theme].themeColor);
+            window.localStorage.setItem('theme', theme);
+        }
+        setTheme(window.localStorage.getItem('theme'));
+    </script>
+    <div class="container col gap-15">
+        <div id="head" class="row align-center justify-center">
+            <div class="col gap-5" style="width: calc(1400px - 30px); min-width: 0px">
+                <div class="row gap-10">
+                    <div id="title" class="flex-grow" style=" padding-top: 7px"><%= site_name %></div>
+                    <button id="settingsOpen" class="btn small iconOnly" title="Settings...">
+                        <div class="icon">settings</div>
+                    </button>
+                </div>
+                <div id="path" class="no-select">
+                    <% for (const part of tree) { %>
+                        <a href="<%= part.path %>" class="part">
+                            <%= part.name %>
+                        </a>
+                        <span class="sep"></span>
+                    <% } %>
+                </div>
             </div>
         </div>
-        <% if (files) { %>
-            <div id="fileListCard" class="card no-select">
-                <div id="fileListHeader" class="header row no-wrap gap-10 align-center" style="padding: 4px 15px">
-                    <button id="searchBtn" class="btn alt2 small noShadow iconOnly" title="Search...">
-                        <div class="icon">search</div>
-                    </button>
-                    <div id="searchBar" class="row no-wrap flex-grow showOnSearch">
-                        <input id="searchInput" class="textbox" type="text" placeholder="Search these files...">
-                    </div>
-                    <div id="counts" class="row align-center flex-grow hideOnSearch" title="<%- `${stats.count_string}<br><small>Processed in ${stats.duration}ms</small>` %>">
-                        <% if (stats.count.dirs > 0) { %>
-                            <div class="row gap-5 no-wrap">
-                                <div class="icon">folder</div>
-                                <div class="num"><%= stats.count.dirs %></div>
+        <div class="row lg gap-15">
+            <div class="col gap-15 flex-grow" style="min-width: 0;">
+                <% if (files) { %>
+                    <div id="fileListCard" class="card no-select">
+                        <div id="fileListHeader" class="header row gap-10 align-center" style="padding: 4px 15px">
+                            <button id="searchBtn" class="btn secondary small iconOnly" title="Search...">
+                                <div class="icon">search</div>
+                            </button>
+                            <div id="searchBar" class="row flex-grow showOnSearch">
+                                <input id="searchInput" class="textbox" type="text" placeholder="Search these files...">
                             </div>
-                        <% } %>
-                        <% if (stats.count.files > 0) { %>
-                            <div class="row gap-3 no-wrap">
-                                <div class="icon">draft</div>
-                                <div class="num"><%= stats.count.files %></div>
+                            <div id="counts" class="row align-center gap-15 flex-grow hideOnSearch" title="<%- `${stats.count_string}<br><small>Processed in ${stats.duration}ms</small>` %>">
+                                <% if (stats.count.dirs > 0) { %>
+                                    <div class="row gap-5">
+                                        <div class="icon">folder</div>
+                                        <div class="num" style="padding-top: 1px"><%= stats.count.dirs %></div>
+                                    </div>
+                                <% } %>
+                                <% if (stats.count.files > 0) { %>
+                                    <div class="row gap-5">
+                                        <div class="icon">draft</div>
+                                        <div class="num" style="padding-top: 1px"><%= stats.count.files %></div>
+                                    </div>
+                                <% } %>
                             </div>
-                        <% } %>
-                    </div>
-                    <div class="row gap-3 no-wrap hideOnSearch">
-                        <button id="sort" class="btn alt2 small noShadow" title="Sort files...">
-                            <%= sort.order.display %>
-                            <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
-                        </button>
-                        <button id="dirMenu" class="btn alt2 small noShadow iconOnly" title="Folder options...">
-                            <div class="icon">more_vert</div>
-                        </button>
-                    </div>
-                    <button id="dirView" class="btn alt2 small noShadow iconOnly" title="Change view" data-current-view="<%= view %>">
-                        <div class="icon"><%= (view == 'tiles') ? 'format_list_bulleted' : 'apps' %></div>
-                    </button>
-                    <button id="dirShare" class="btn alt2 small noShadow iconOnly" title="Share this folder...">
-                        <div class="icon">share</div>
-                    </button>
-                    <button id="dirDownload" class="btn alt2 small noShadow iconOnly" title="Download folder as zip">
-                        <div class="icon">download</div>
-                    </button>
-                </div>
-                <div id="fileList" class="body <%= view %>">
-                    <% for (const file of files) { %>
-                        <div><a
-                            href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>"
-                            class="fileEntry"
-                            data-should-render="<%= file.shouldRender %>"
-                            data-is-dir="<%= file.isDir %>"
-                            data-type="<%= file.type %>"
-                            data-name="<%= file.name %>"
-                            data-mtime="<%= file.mtime %>"
-                            data-size="<%= file.sizeHuman %>"
-                            data-path="<%= file.path %>"
-                        >
-                            <% if (view == 'tiles') { %>
-                                <div class="row gap-0 align-end justify-center thumbCont">
-                                    <div class="icon"><%= file.icon %></div>
-                                    <% if (file.hasThumb) { %>
-                                        <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
-                                    <% } %>
-                                </div>
-                                <div class="name col gap-2 justify-center">
-                                    <div><%= file.name %></div>
-                                </div>
-                            <% } else { %>
-                                <div class="row gap-0 align-center justify-center thumbCont">
-                                    <div class="icon"><%= file.icon %></div>
-                                    <% if (file.hasThumb) { %>
-                                        <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
-                                    <% } %>
-                                </div>
-                                <div class="name col gap-2">
-                                    <div><%= file.name %></div>
-                                    <% if (file.icon !== 'arrow_upward') { %>
-                                        <div class="lower">
-                                            <span data-timestamp="<%= file.mtime %>">-</span>
-                                            <% if (file.sizeHuman) { %>
-                                                • <span><%= file.sizeHuman %></span>
+                            <div class="row gap-3 hideOnSearch">
+                                <button id="sort" class="btn secondary small" title="Sort files...">
+                                    <%= sort.order.display %>
+                                    <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
+                                </button>
+                                <button id="dirMenu" class="btn secondary small iconOnly" title="Folder options...">
+                                    <div class="icon">more_vert</div>
+                                </button>
+                            </div>
+                            <button id="dirView" class="btn secondary small iconOnly" title="Change view" data-current-view="<%= view %>">
+                                <div class="icon"><%= (view == 'tiles') ? 'format_list_bulleted' : 'apps' %></div>
+                            </button>
+                            <button id="dirShare" class="btn secondary small iconOnly" title="Share this folder...">
+                                <div class="icon">share</div>
+                            </button>
+                            <button id="dirDownload" class="btn secondary small iconOnly" title="Download folder as zip">
+                                <div class="icon">download</div>
+                            </button>
+                        </div>
+                        <div id="fileList" class="body <%= view %>">
+                            <% for (const file of files) { %>
+                                <div><a
+                                    href="<%= file.path %><%= (file.shouldRender) ? '?render=true':'' %>"
+                                    class="fileEntry"
+                                    data-should-render="<%= file.shouldRender %>"
+                                    data-is-dir="<%= file.isDir %>"
+                                    data-type="<%= file.type %>"
+                                    data-name="<%= file.name %>"
+                                    data-mtime="<%= file.mtime %>"
+                                    data-size="<%= file.sizeHuman %>"
+                                    data-path="<%= file.path %>"
+                                >
+                                    <% if (view == 'tiles') { %>
+                                        <div class="row gap-0 align-end justify-center thumbCont">
+                                            <div class="icon"><%= file.icon %></div>
+                                            <% if (file.hasThumb) { %>
+                                                <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
                                             <% } %>
                                         </div>
+                                        <div class="name col gap-2 justify-center">
+                                            <div><%= file.name %></div>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="row gap-0 align-center justify-center thumbCont">
+                                            <div class="icon"><%= file.icon %></div>
+                                            <% if (file.hasThumb) { %>
+                                                <img class="thumb" data-src="?thumb=<%= encodeURI(file.name) %>&mtime=<%= file.mtime %>">
+                                            <% } %>
+                                        </div>
+                                        <div class="name col gap-2">
+                                            <div><%= file.name %></div>
+                                            <% if (file.icon !== 'arrow_upward') { %>
+                                                <div class="lower">
+                                                    <span data-timestamp="<%= file.mtime %>">-</span>
+                                                    <% if (file.sizeHuman) { %>
+                                                        • <span><%= file.sizeHuman %></span>
+                                                    <% } %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="modified" data-timestamp="<%= file.mtime %>">-</div>
+                                        <div class="size"><%= file.sizeHuman || '-' %></div>
                                     <% } %>
-                                </div>
-                                <div class="modified" data-timestamp="<%= file.mtime %>">-</div>
-                                <div class="size"><%= file.sizeHuman || '-' %></div>
+                                </a></div>
                             <% } %>
-                        </a></div>
-                    <% } %>
-                    <div id="searchNoneFound" class="col align-center gap-10" style="display: none; padding: 17px 12px;">
-                        <div class="bigIcon">help</div>
-                        <p class="text-center" style="color: var(--b70)">
-                            No files match your search!
-                        </p>
-                    </div>
-                </div>
-            </div>
-        <% } %>
-        <% if (readme) { %>
-            <div id="readmeCard" class="card" data-preview-type="markdown">
-                <div class="header row no-wrap align-center gap-10" style="padding: 4px 15px">
-                    <div class="flex-grow" style="margin-top: 1px;">README</div>
-                    <a class="btn alt2 small noShadow iconOnly" href="<%= readme.path %>?render=true" title="Open this file">
-                        <div class="icon">open_in_new</div>
-                    </a>
-                </div>
-                <div id="readme" class="body"><%- readme.html %></div>
-            </div>
-        <% } %>
-        <% if (error) { %>
-            <div id="errorCard" class="card" data-preview-type="markdown">
-                <div class="header">
-                    Error <%= error %>
-                </div>
-                <div id="readme" class="body">
-                    <div class="col align-center gap-10">
-                        <div class="bigIcon">help</div>
-                        <p class="text-center errorDesc">
-                            This file or folder can't be found!
-                            <br><a href="/">Go to the root</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        <% } %>
-        <% if (previewType) { %>
-            <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
-                <div class="header gap-10" style="padding: 4px 15px">
-                    <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= tree[tree.length-2].path %>" title="Back to containing folder">
-                        <div class="icon">arrow_back</div>
-                    </a>
-                    <div class="flex-grow" style="margin-top: 1px;"><%= dirName %></div>
-                    <button id="shareFile" class="btn alt2 small noShadow iconOnly" title="Share this file...">
-                        <div class="icon">share</div>
-                    </button>
-                    <a id="download" class="btn alt2 small noShadow iconOnly" href="<%= path %>" download title="Download this file">
-                        <div class="icon">download</div>
-                    </a>
-                </div>
-                <div class="body">
-                    <% if (previewType == 'markdown') { %>
-                        <%- html %>
-                    <% } else if (previewType == 'image') { %>
-                        <img src="<%= path %>">
-                    <% } else if (previewType == 'video') { %>
-                        <iframe allow="autoplay; fullscreen; clipboard-write" frameborder="0" data-video-url="<%= path %>"></iframe>
-                    <% } else if (previewType == 'audio') { %>
-                        <iframe allow="autoplay; clipboard-write" frameborder="0" data-audio-url="<%= path %>"></iframe>
-                    <% } else if (previewType == 'text') { %>
-                        <pre><code><%- text %></code></pre>
-                    <% } else { %>
-                        <div class="col align-center gap-10">
-                            <div class="bigIcon"><%= file.icon %></div>
-                            <p class="text-center errorDesc">
-                                You can't view this file in your browser.
-                                <br><a href="<%= path %>" download>Download it instead</a>
+                        </div>
+                        <div id="searchNoneFound" class="col align-center gap-10" style="display: none; padding: 17px 12px;">
+                            <div class="bigIcon">help</div>
+                            <p class="text-center" style="color: var(--b70)">
+                                No files match your search!
                             </p>
                         </div>
-                    <% } %>
-                </div>
-                <div class="footer gap-10" style="padding: 4px 15px">
-                    <div class="flex-grow" style="margin-top: 1px;"><%= file.sizeHuman %> • <%= file.type %></div>
-                    <a id="filePrev" class="btn alt2 small noShadow iconOnly" href="<%= filePrev.path %>?render=true" title="<%= filePrev.name %>">
-                        <div class="icon">navigate_before</div>
-                    </a>
-                    <div id="fileCount" class="no-shrink" style="margin-top: 1px;">
-                        <%= currentFileIndex %> of <%= fileCount %>
                     </div>
-                    <a id="fileNext" class="btn alt2 small noShadow iconOnly" href="<%= fileNext.path %>?render=true" title="<%= fileNext.name %>">
-                        <div class="icon">navigate_next</div>
-                    </a>
-                </div>
+                <% } %>
+                <% if (readme) { %>
+                    <div id="readmeCard" class="card" data-preview-type="markdown">
+                        <div class="header row align-center gap-10" style="padding: 4px 15px">
+                            <div class="flex-grow" style="padding-top: 4px;">README</div>
+                            <a class="btn tertiary small iconOnly" href="<%= readme.path %>?render=true" title="Open this file">
+                                <div class="icon">open_in_new</div>
+                            </a>
+                        </div>
+                        <div id="readme" class="body"><%- readme.html %></div>
+                    </div>
+                <% } %>
+                <% if (error) { %>
+                    <div class="row justify-center">
+                        <div id="errorCard" class="card" data-preview-type="markdown" style="width: 600px">
+                            <div class="header">
+                                <span style="padding-top: 4px;">Error <%= error %></span>
+                            </div>
+                            <div class="body">
+                                <div class="col align-center gap-10">
+                                    <div class="bigIcon">help</div>
+                                    <p class="col gap-5 align-center errorDesc">
+                                        This file or folder can't be found.
+                                        <a class="btn secondary" href="/">Go to the root</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+                <% if (previewType) { %>
+                    <div id="previewCard" class="card" data-preview-type="<%= previewType %>">
+                        <div class="header gap-10" style="padding: 4px 15px">
+                            <a class="btn tertiary small iconOnly" href="<%= tree[tree.length-2].path %>" title="Back to containing folder">
+                                <div class="icon">arrow_back</div>
+                            </a>
+                            <div class="flex-grow" style="margin-top: 4px;">File viewer</div>
+                            <button id="shareFile" class="btn tertiary small iconOnly" title="Share this file...">
+                                <div class="icon">share</div>
+                            </button>
+                            <a id="download" class="btn tertiary small iconOnly" href="<%= path %>" download title="Download this file">
+                                <div class="icon">download</div>
+                            </a>
+                        </div>
+                        <div class="body">
+                            <% if (previewType == 'markdown') { %>
+                                <%- html %>
+                            <% } else if (previewType == 'image') { %>
+                                <img src="<%= path %>">
+                            <% } else if (previewType == 'video') { %>
+                                <iframe allow="autoplay; fullscreen; clipboard-write" frameborder="0" data-video-url="<%= path %>"></iframe>
+                            <% } else if (previewType == 'audio') { %>
+                                <iframe allow="autoplay; clipboard-write" frameborder="0" data-audio-url="<%= path %>"></iframe>
+                            <% } else if (previewType == 'text') { %>
+                                <pre><code><%- text %></code></pre>
+                            <% } else { %>
+                                <div class="col align-center gap-10">
+                                    <div class="bigIcon"><%= file.icon %></div>
+                                    <p class="col gap-5 align-center errorDesc">
+                                        You can't view this file in your browser.
+                                        <a class="btn secondary" href="<%= path %>" download>Download it instead</a>
+                                    </p>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="footer gap-10 justify-center" style="padding: 4px 15px">
+                            <a id="filePrev" class="btn tertiary small iconOnly" href="<%= filePrev.path %>?render=true" title="<%= filePrev.name %>">
+                                <div class="icon">navigate_before</div>
+                            </a>
+                            <div id="fileCount" class="no-shrink" style="margin-top: 4px;">
+                                <%= currentFileIndex %> of <%= fileCount %>
+                            </div>
+                            <a id="fileNext" class="btn tertiary small iconOnly" href="<%= fileNext.path %>?render=true" title="<%= fileNext.name %>">
+                                <div class="icon">navigate_next</div>
+                            </a>
+                        </div>
+                    </div>
+                <% } %>
             </div>
-        <% } %>
+            <% if (!error && (files || previewType)) { %>
+                <%
+                    let subtitle;
+                    let timestamp;
+                    let sizeHuman;
+                    let sizeWarning = 0;
+                    let dirContents;
+                    if (files) {
+                        const tmp = [];
+                        for (let i = 1; i < tree.length-1; i++) {
+                            tmp.push(tree[i].name);
+                        }
+                        const path = tmp.join('/');
+                        subtitle = `In ${path}`;
+                        if (dirName == 'Root') subtitle = `Root folder`;
+                        else if (path == '') subtitle = `Root subfolder`;
+                        timestamp = stats.mtime;
+                        const extCounts = {
+                            Folder: 0
+                        };
+                        for (const file of files) {
+                            if (file.isDir && file.icon !== 'arrow_upward') {
+                                extCounts.Folder++;
+                                continue;
+                            }
+                            if (!file.ext) continue;
+                            file.ext = file.ext.toUpperCase();
+                            if (!extCounts[file.ext]) extCounts[file.ext] = 0;
+                            extCounts[file.ext]++;
+                        }
+                        const uniqueExts = [];
+                        for (const ext in extCounts) {
+                            uniqueExts.push({ ext: ext, count: extCounts[ext] });
+                        }
+                        uniqueExts.sort((a, b) => b.count - a.count);
+                        dirContents = uniqueExts;
+                        sizeHuman = stats.totalSizeHuman;
+                        if (extCounts.Folder > 0) {
+                            sizeWarning = 1;
+                            if (stats.totalSizeIncludesSubdirs)
+                                sizeWarning = 2;
+                        }
+                    }
+                    if (previewType) {
+                        subtitle = file.type
+                        timestamp = file.mtime;
+                        sizeHuman = file.sizeHuman;
+                    }
+                %>
+                <div class="col gap-15 flex-no-shrink" style="width: 350px">
+                    <div id="infoCard" class="card">
+                        <div class="header row align-center gap-10" style="height: 46px">
+                            <div class="flex-grow" style="padding-top: 2px;"><%= files ? 'Folder' : 'File' %> info</div>
+                        </div>
+                        <div class="body">
+                            <div class="col align-center head">
+                                <div class="icon no-select"><%= files ? 'folder' : file.icon %></div>
+                                <h4><%= (dirName == 'Root') ? site_name : dirName %></h4>
+                                <p><%= subtitle %></p>
+                                <div class="row gap-10 flex-wrap justify-center" style="margin-top: 10px;">
+                                    <% if (files) { %>
+                                        <button class="btn small" onClick="$('#dirDownload').click()">Download zip</button>
+                                        <button id="infoDirShare" class="btn small secondary">Copy link</button>
+                                    <% } else { %>
+                                        <button class="btn small" onClick="$('#download').click()">Download</button>
+                                        <button id="infoShareFile" class="btn small secondary">Copy link</button>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="sep"></div>
+                            <div>
+                                <h5>Last modified</h5>
+                                <p>
+                                    <span data-timestamp="<%= timestamp %>" data-mode="relative">-</span>
+                                    <br>
+                                    <span data-timestamp="<%= timestamp %>" data-mode="absoluteLong">-</span>
+                                </p>
+                            </div>
+                            <div class="sep"></div>
+                            <div>
+                                <h5>Size</h5>
+                                <p>
+                                    <%= sizeHuman %>
+                                    <% if (sizeWarning) { %>
+                                        (<%= (sizeWarning === 1) ? `Excluding` : `Including` %> subfolders)
+                                    <% } %>
+                                </p>
+                            </div>
+                            <% if (dirContents && (stats.count.files + stats.count.dirs) > 0) { %>
+                                <div class="sep"></div>
+                                <div>
+                                    <h5>Content breakdown</h5>
+                                    <p><%= stats.count_string %> total</p>
+                                    <table>
+                                        <tbody>
+                                            <% for (const type of dirContents) { %>
+                                                <% if (type.count == 0) continue; %>
+                                                <tr>
+                                                    <td style="color: var(--f2)"><%= type.count %>x</td>
+                                                    <td><%= type.ext %></td>
+                                                </tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
         <div id="footer">
             <p>Powered by <a href="https://github.com/CyberGen49/cyberfiles-lite">CyberFiles Lite</a></p>
         </div>
