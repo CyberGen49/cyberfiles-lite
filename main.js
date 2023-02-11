@@ -111,7 +111,7 @@ const sortOrder = {
  * 
  * Relative paths are relative to the directory of the parent module.
  * 
- * @property {string} [data_dir] A separate directory where thumbnails and user data should be stored to prevent them from being deleted when updating.
+ * @property {string} [data_dir] A separate directory where thumbnails should be stored to prevent them from being deleted when updating. A `thumbs` directory will be created inside this directory.
  * 
  * Defaults to where `cyberfiles-lite` is installed.
  * 
