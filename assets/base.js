@@ -513,7 +513,7 @@ class ToastBuilder {
         this.elClose = document.createElement('button');
         this.elClose.classList.add('btn', 'secondary', 'iconOnly', 'small', 'close');
         this.elClose.innerHTML = '<div class="icon">close</div>';
-        this.elClose.title = 'Clear';
+        this.elClose.title = 'Dismiss';
         this.el.appendChild(this.elClose);
         this.el.dataset.delay = 5000;
     }
@@ -573,7 +573,6 @@ window.addEventListener('mousemove', (e) => {
 document.addEventListener('domChange', () => {
     // Get elements with a title attribute but no tooltip
     const els = $$('[title]:not([data-has-tooltip])');
-    if (els.length == 0) return;
     // Loop through 'em
     for (const el of els) {
         let isMouseOver = false;
@@ -620,6 +619,83 @@ document.addEventListener('domChange', () => {
         });
         // Mark the tooltip as added
         el.dataset.hasTooltip = true;
+    }
+
+    // Get slider elements
+    const sliders = $$('div.slider:not([data-modified])');
+    // Loop through 'em
+    for (const slider of sliders) {
+        // Collect initial values
+        const min = slider.dataset.min || 0;
+        const max = slider.dataset.max || 100;
+        const step = slider.dataset.step || 1;
+        const value = slider.dataset.value || 0;
+        const textbox = $(slider.dataset.textbox);
+        // Remove parent data values
+        slider.removeAttribute('data-min');
+        slider.removeAttribute('data-max');
+        slider.removeAttribute('data-step');
+        slider.removeAttribute('data-value');
+        slider.removeAttribute('data-textbox');
+        // Create progress element
+        const prog = document.createElement('progress');
+        prog.min = min;
+        prog.max = max;
+        prog.value = value;
+        prog.step = step;
+        slider.appendChild(prog);
+        // Create input element
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.min = min;
+        input.max = max;
+        input.value = value;
+        input.step = step;
+        slider.appendChild(input);
+        // Add event listeners
+        input.addEventListener('input', () => {
+            prog.value = input.value;
+            if (textbox) textbox.value = input.value;
+        });
+        input.addEventListener('change', () => {
+            prog.value = input.value;
+            if (textbox) textbox.value = input.value;
+        });
+        prog.addEventListener('change', () => {
+            input.value = prog.value;
+            if (textbox) textbox.value = prog.value;
+        });
+        if (textbox) {
+            textbox.type = 'number';
+            textbox.min = min;
+            textbox.max = max;
+            textbox.step = step;
+            textbox.value = value;
+            textbox.addEventListener('input', () => {
+                input.value = textbox.value;
+                prog.value = textbox.value;
+            });
+            textbox.addEventListener('change', () => {
+                input.value = textbox.value;
+                prog.value = textbox.value;
+            });
+        }
+        input.dispatchEvent(new Event('input'));
+        // Mark the slider as added
+        slider.dataset.modified = true;
+    }
+
+    // Get expandable textareas
+    const textareas = $$('textarea[data-make-expandable]:not([data-modified])');
+    // Loop through 'em
+    for (const textarea of textareas) {
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
+        textarea.dataset.modified = true;
+        textarea.dispatchEvent(new Event('input'));
+        setInterval(() => textarea.dispatchEvent(new Event('input')), 1000);
     }
 });
     
