@@ -302,7 +302,7 @@ class ContextMenuBuilder {
     /**
      * Sets if menu item icons should be shown. If `true`, the space an icon takes up is still visible even on items without set icons. If `false`, all item icons are hidden, regardless of whether they're set or not. Defaults to `true`.
      * @param {boolean} areVisible The new state
-     * @returns {PopupBuilder}
+     * @returns {ContextMenuBuilder}
      */
     setIconVisibility(areVisible) {
         this.el.classList.toggle('hideIcons', !areVisible);
@@ -420,6 +420,16 @@ class ContextMenuItemBuilder {
         return this;
     }
     /**
+     * Sets whether or not the icon and text of this item should be red.
+     * @param {boolean} isDanger
+     * @returns {ContextMenuItemBuilder}
+     */
+    setIsDanger(isDanger) {
+        this.elIcon.classList.toggle('text-danger', isDanger);
+        this.elLabel.classList.toggle('text-danger', isDanger);
+        return this;
+    }
+    /**
      * Disables this menu item.
      * @returns {ContextMenuItemBuilder}
      */
@@ -482,14 +492,9 @@ class ToastOverlay {
         this.el.insertAdjacentElement('afterbegin', toast.el);
         setTimeout(() => {
             const delay = toast.el.dataset.delay;
-            const close = () => {
-                toast.el.classList.remove('visible');
-                setTimeout(() => {
-                    if (!toast.el.parentNode) return;
-                    toast.el.parentNode.removeChild(toast.el);
-                }, 200);
-            }
-            toast.elClose.addEventListener('click', close);
+            if (delay) setTimeout(() => {
+                toast.close();
+            }, delay);
             toast.el.classList.add('visible');
             if (delay) setTimeout(close, delay);
         }, 100);
@@ -514,6 +519,7 @@ class ToastBuilder {
         this.elClose.classList.add('btn', 'secondary', 'iconOnly', 'small', 'close');
         this.elClose.innerHTML = '<div class="icon">close</div>';
         this.elClose.title = 'Dismiss';
+        this.elClose.addEventListener('click', () => this.close());
         this.el.appendChild(this.elClose);
         this.el.dataset.delay = 5000;
     }
@@ -560,6 +566,18 @@ class ToastBuilder {
         }
         return this;
     }
+    /**
+     * Closes the toast, assuming that it's visible.
+     * @returns {ToastBuilder}
+     */
+    close() {
+        this.el.classList.remove('visible');
+        setTimeout(() => {
+            if (!this.el.parentNode) return;
+            this.el.parentNode.removeChild(this.el);
+        }, 200);
+        return this;
+    }
 }
 
 // Continuously save mouse position
@@ -572,7 +590,7 @@ window.addEventListener('mousemove', (e) => {
 // Handle dynamic changes
 document.addEventListener('domChange', () => {
     // Get elements with a title attribute but no tooltip
-    const els = $$('[title]:not([data-has-tooltip])');
+    const els = $$('[title]:not([data-has-tooltip]):not([data-no-tooltip])');
     // Loop through 'em
     for (const el of els) {
         let isMouseOver = false;
@@ -580,10 +598,10 @@ document.addEventListener('domChange', () => {
         // Create and append the tooltip
         const tooltip = document.createElement('div');
         tooltip.classList.add('tooltip');
-        tooltip.innerHTML = el.title;
         document.body.appendChild(tooltip);
         // Remove original title
-        el.title = '';
+        let html = el.title;
+        el.removeAttribute('title');
         // Hide the tooltip
         const hide = () => {
             clearTimeout(timeout);
@@ -592,6 +610,10 @@ document.addEventListener('domChange', () => {
         // Show the tooltip
         const show = () => {
             hide();
+            if (!el) return;
+            if (el.title) html = el.title;
+            el.removeAttribute('title');
+            tooltip.innerHTML = html;
             timeout = setTimeout(() => {
                 positionElement(tooltip, mouse.x+5, mouse.y);
                 timeout = setTimeout(() => {
@@ -631,18 +653,15 @@ document.addEventListener('domChange', () => {
         const step = slider.dataset.step || 1;
         const value = slider.dataset.value || 0;
         const textbox = $(slider.dataset.textbox);
-        // Remove parent data values
-        slider.removeAttribute('data-min');
-        slider.removeAttribute('data-max');
-        slider.removeAttribute('data-step');
-        slider.removeAttribute('data-value');
-        slider.removeAttribute('data-textbox');
+        const rangeId = slider.dataset.rangeId;
+        const progId = slider.dataset.progId;
         // Create progress element
         const prog = document.createElement('progress');
         prog.min = min;
         prog.max = max;
         prog.value = value;
         prog.step = step;
+        (progId) ? prog.id = progId : '';
         slider.appendChild(prog);
         // Create input element
         const input = document.createElement('input');
@@ -651,6 +670,7 @@ document.addEventListener('domChange', () => {
         input.max = max;
         input.value = value;
         input.step = step;
+        (rangeId) ? input.id = rangeId : '';
         slider.appendChild(input);
         // Add event listeners
         input.addEventListener('input', () => {

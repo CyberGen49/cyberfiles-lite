@@ -26,8 +26,8 @@ See `themes.json` for some metadata about each theme.
     --f2: hsl(180, 30%, 15%);
     --f1: black;
     /* Green accent */
-    --green0: hsl(120, 60%, 50%);
-    --green1: hsl(120, 60%, 70%);
+    --green0: hsl(120, 60%, 40%);
+    --green1: hsl(120, 60%, 65%);
     --green2: hsl(120, 60%, 80%);
     --green3: hsl(120, 60%, 85%);
     --green4: hsl(120, 60%, 90%);
@@ -40,12 +40,19 @@ See `themes.json` for some metadata about each theme.
     --orange4: hsl(20, 100%, 90%);
     --orange5: hsl(20, 100%, 95%);
     /* Yellow accent */
-    --yellow0:  hsl(40, 100%, 50%);
+    --yellow0:  hsl(40, 100%, 40%);
     --yellow1:  hsl(40, 100%, 70%);
     --yellow2:  hsl(40, 100%, 80%);
     --yellow3:  hsl(40, 100%, 85%);
     --yellow4:  hsl(40, 100%, 90%);
     --yellow5:  hsl(40, 100%, 95%);
+    /* Blue accent */
+    --blue0:  hsl(210, 80%, 45%);
+    --blue1:  hsl(210, 80%, 70%);
+    --blue2:  hsl(210, 80%, 80%);
+    --blue3:  hsl(210, 80%, 85%);
+    --blue4:  hsl(210, 80%, 90%);
+    --blue5:  hsl(210, 80%, 95%);
     /* Danger */
     --red0: hsl(355, 80%, 55%);
     --red1: hsl(355, 80%, 75%);
@@ -162,6 +169,13 @@ See `themes.json` for some metadata about each theme.
     --yellow3:  hsl(40, 70%, 70%);
     --yellow4:  hsl(40, 70%, 80%);
     --yellow5:  hsl(40, 70%, 90%);
+    /* Blue accent */
+    --blue0:  hsl(220, 70%, 50%);
+    --blue1:  hsl(220, 70%, 60%);
+    --blue2:  hsl(220, 70%, 70%);
+    --blue3:  hsl(220, 70%, 85%);
+    --blue4:  hsl(220, 70%, 90%);
+    --blue5:  hsl(220, 70%, 95%);
     /* Danger */
     --red0: hsl(340, 55%, 40%);
     --red1: hsl(340, 55%, 50%);
@@ -182,33 +196,62 @@ See `themes.json` for some metadata about each theme.
 
 .darkpurple .textbox,
 .darkyellow .textbox,
-.darkgreen .textbox,
-.darkmuted .textbox,
-.darkblue .textbox {
+.darkgreen  .textbox,
+.darkmuted  .textbox,
+.darkblue   .textbox {
     background-color: var(--b0);
     border-color: var(--b0);
 }
 .darkpurple .textbox:focus,
 .darkyellow .textbox:focus,
-.darkgreen .textbox:focus,
-.darkmuted .textbox:focus,
+.darkgreen  .textbox:focus,
+.darkmuted  .textbox:focus,
 .darkpurple .textbox:focus-within,
 .darkyellow .textbox:focus-within,
-.darkgreen .textbox:focus-within,
-.darkmuted .textbox:focus-within,
-.darkblue .textbox:focus,
-.darkblue .textbox:focus-within {
+.darkgreen  .textbox:focus-within,
+.darkmuted  .textbox:focus-within,
+.darkblue   .textbox:focus,
+.darkblue   .textbox:focus-within {
     background-color: var(--b2);
     border-color: var(--f4);
 }
 
 .darkpurple .slider input[type="range"],
 .darkyellow .slider input[type="range"],
-.darkgreen .slider input[type="range"],
-.darkmuted .slider input[type="range"],
-.darkblue .slider input[type="range"] {
+.darkgreen  .slider input[type="range"],
+.darkmuted  .slider input[type="range"],
+.darkblue   .slider input[type="range"] {
     --thumbFill: var(--f2);
     --thumbFillHover: var(--f4);
+}
+
+.darkpurple .text-info,
+.darkyellow .text-info,
+.darkgreen  .text-info,
+.darkmuted  .text-info,
+.darkblue   .text-info {
+    color: var(--blue2) !important;
+}
+.darkpurple .text-success,
+.darkyellow .text-success,
+.darkgreen  .text-success,
+.darkmuted  .text-success,
+.darkblue   .text-success {
+    color: var(--green2) !important;
+}
+.darkpurple .text-warning,
+.darkyellow .text-warning,
+.darkgreen  .text-warning,
+.darkmuted  .text-warning,
+.darkblue   .text-warning {
+    color: var(--yellow2) !important;
+}
+.darkpurple .text-danger,
+.darkyellow .text-danger,
+.darkgreen  .text-danger,
+.darkmuted  .text-danger,
+.darkblue   .text-danger {
+    color: var(--red2) !important;
 }
 
 .darkblue {
