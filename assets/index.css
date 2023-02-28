@@ -89,7 +89,9 @@ body {
     position: sticky;
     display: flex;
     align-items: center;
+    margin: 1px;
     padding: 12px 15px 11px 15px;
+    background: var(--b1);
     line-height: 1.2;
     color: var(--f2);
     user-select: none;
@@ -99,26 +101,29 @@ body {
     border: 1px solid transparent;
     z-index: 3;
     transition: 0.2s var(--bezier);
+    transition-property: border, background;
 }
 .card .header {
     top: 0px;
-    border-radius: 0px 0px 20px 20px;
-}
-.card .header.sticky {
-    margin-left: -1px;
-    margin-right: -1px;
-    border-color: transparent var(--b4) var(--b4) var(--b4);
-    background: var(--b2);
+    border-radius: 20px;
+    z-index: 4;
 }
 .card .footer {
     bottom: 0px;
-    border-radius: 20px 20px 0px 0px;
+    border-radius: 20px;
+}
+.card .header.sticky,
+.card .footer.sticky {
+    margin: -1px;
+    background: var(--b2);
+}
+.card .header.sticky {
+    border-radius: 0px 0px 20px 20px;
+    border-color: transparent var(--b4) var(--b4) var(--b4);
 }
 .card .footer.sticky {
-    margin-left: -1px;
-    margin-right: -1px;
+    border-radius: 20px 20px 0px 0px;
     border-color: var(--b4) var(--b4) transparent var(--b4);
-    background: var(--b2);
 }
 #fileListCard > .header:not(.sticky) {
     border-bottom-color: var(--b4);

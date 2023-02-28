@@ -168,15 +168,15 @@ async function main() {
     const lazyLoadImages = () => {
         clearTimeout(lazyLoadTimeout);
         lazyLoadTimeout = setTimeout(() => {
-            const unloadedImages = [...$$('img[data-src]:not([src])')];
-            unloadedImages.forEach(img => {
-                const viewportTop = document.documentElement.scrollTop;
-                const viewportBottom = document.documentElement.scrollTop+window.innerHeight;
-                const elTop = img.offsetTop;
-                if (elTop > viewportTop-300 && elTop < viewportBottom+300) {
+            const unloadedImages = $$('img[data-src]:not([src])');
+            for (const img of unloadedImages) {
+                const rect = img.getBoundingClientRect();
+                const buffer = 300;
+                if (rect.top < (window.innerHeight+buffer) && rect.bottom > -buffer) {
                     img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
                 }
-            });
+            }
         }, 50);
     };
     on(window, ['resize', 'orientationChange'], lazyLoadImages);
@@ -186,17 +186,11 @@ async function main() {
         const cardFooters = $$('.card .footer');
         for (const header of cardHeaders) {
             const headerTop = header.getBoundingClientRect().top;
-            if (headerTop <= 0)
-                header.classList.add('sticky');
-            else
-                header.classList.remove('sticky');
+            header.classList.toggle('sticky', (headerTop <= 0));
         }
         for (const footer of cardFooters) {
-            const footerTop = footer.getBoundingClientRect().bottom;
-            if (footerTop >= window.innerHeight)
-                footer.classList.add('sticky');
-            else
-                footer.classList.remove('sticky');
+            const footerBottom = footer.getBoundingClientRect().bottom;
+            footer.classList.toggle('sticky', (footerBottom >= (window.innerHeight)));
         }
     });
     document.dispatchEvent(new Event('scroll'));
