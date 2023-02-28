@@ -180,17 +180,31 @@ async function main() {
         }, 50);
     };
     on(window, ['resize', 'orientationChange'], lazyLoadImages);
+    const cardHeaders = $$('.card .header');
+    const cardFooters = $$('.card .footer');
     on(document, 'scroll', () => {
         lazyLoadImages();
-        const cardHeaders = $$('.card .header');
-        const cardFooters = $$('.card .footer');
         for (const header of cardHeaders) {
             const headerTop = header.getBoundingClientRect().top;
-            header.classList.toggle('sticky', (headerTop <= 0));
+            const hasSticky = header.classList.contains('sticky');
+            if (hasSticky) {
+                if (headerTop > 2)
+                    header.classList.remove('sticky');
+            } else {
+                if (headerTop <= 0)
+                    header.classList.add('sticky');
+            }
         }
         for (const footer of cardFooters) {
             const footerBottom = footer.getBoundingClientRect().bottom;
-            footer.classList.toggle('sticky', (footerBottom >= (window.innerHeight)));
+            const hasSticky = footer.classList.contains('sticky');
+            if (hasSticky) {
+                if (footerBottom < (window.innerHeight-2))
+                    footer.classList.remove('sticky');
+            } else {
+                if (footerBottom >= window.innerHeight)
+                    footer.classList.add('sticky');
+            }
         }
     });
     document.dispatchEvent(new Event('scroll'));

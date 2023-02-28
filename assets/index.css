@@ -89,6 +89,7 @@ body {
     position: sticky;
     display: flex;
     align-items: center;
+    min-height: 46px;
     margin: 1px;
     padding: 12px 15px 11px 15px;
     background: var(--b1);
