@@ -314,3 +314,39 @@ See `themes.json` for some metadata about each theme.
     --f2: hsl(260, 10%, 85%);
     --f1: white;
 }
+
+.lightblue,
+.lightyellow,
+.lightgreen,
+.lightmuted,
+.lightpurple {
+    /* Luminance palette */
+    --l0: var(--f1);
+    --l1: var(--f2);
+    --l2: var(--f3);
+    --l3: var(--f4);
+    --l4: var(--b5);
+    --l5: var(--b4);
+    --l6: var(--b3);
+    --l7: var(--b2);
+    --l8: var(--b1);
+    --l9: var(--b0);
+}
+
+.darkpurple,
+.darkyellow,
+.darkgreen,
+.darkmuted,
+.darkblue {
+    /* Luminance palette */
+    --l0: var(--b0);
+    --l1: var(--b1);
+    --l2: var(--b2);
+    --l3: var(--b3);
+    --l4: var(--b4);
+    --l5: var(--b5);
+    --l6: var(--f4);
+    --l7: var(--f3);
+    --l8: var(--f2);
+    --l9: var(--f1);
+}

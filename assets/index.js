@@ -438,7 +438,7 @@ async function main() {
     }
 
     for (const el of $$('[data-video-url]')) {
-        el.src = `https://src.simplecyber.org/v1/video/?hue=${document.body.dataset.hue}&nameOnlyFullscreen=true&url=${baseUrl}${el.dataset.videoUrl}`;
+        el.src = `https://src.simplecyber.org/v2/video/?url=${baseUrl}${el.dataset.videoUrl}&titleOnlyFullscreen=true&autoplay=true&theme=${document.body.dataset.theme}`;
         console.log(el.src);
     }
 

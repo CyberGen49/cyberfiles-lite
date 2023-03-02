@@ -315,10 +315,11 @@ class ContextMenuBuilder {
      */
     showAtCoords(x, y) {
         document.body.appendChild(this.#elCont);
+        this.#elCont.classList.remove('ani');
+        this.#elCont.classList.remove('visible');
         setTimeout(() => {
             this.el.style.scale = '1';
             positionElement(this.el, x, y);
-            this.el.style.scale = '';
             setTimeout(() => {
                 this.#elCont.classList.add('ani');
                 setTimeout(() => {
@@ -580,6 +581,13 @@ class ToastBuilder {
     }
 }
 
+function promptUrlDownload(url, name) {
+    const a = document.createElement('a');
+    a.href = url
+    a.download = name || url.split('/').pop();
+    a.click();
+}
+
 // Continuously save mouse position
 const mouse = { x: 0, y: 0 };
 window.addEventListener('mousemove', (e) => {
@@ -647,60 +655,70 @@ document.addEventListener('domChange', () => {
     const sliders = $$('div.slider:not([data-modified])');
     // Loop through 'em
     for (const slider of sliders) {
-        // Collect initial values
-        const min = slider.dataset.min || 0;
-        const max = slider.dataset.max || 100;
-        const step = slider.dataset.step || 1;
-        const value = slider.dataset.value || 0;
-        const textbox = $(slider.dataset.textbox);
-        const rangeId = slider.dataset.rangeId;
-        const progId = slider.dataset.progId;
-        // Create progress element
+        // Create elements
         const prog = document.createElement('progress');
-        prog.min = min;
-        prog.max = max;
-        prog.value = value;
-        prog.step = step;
-        (progId) ? prog.id = progId : '';
-        slider.appendChild(prog);
-        // Create input element
         const input = document.createElement('input');
-        input.type = 'range';
-        input.min = min;
-        input.max = max;
-        input.value = value;
-        input.step = step;
-        (rangeId) ? input.id = rangeId : '';
+        // Set attributes
+        let textbox;
+        const onSliderChange = () => {
+            // Collect data values
+            const min = slider.dataset.min || 0;
+            const max = slider.dataset.max || 100;
+            const step = slider.dataset.step || 1;
+            const value = slider.dataset.value || 0;
+            const rangeId = slider.dataset.rangeId;
+            const progId = slider.dataset.progId;
+            textbox = $(slider.dataset.textbox);
+            // Set attributes
+            prog.min = min;
+            prog.max = max;
+            prog.value = value;
+            prog.step = step;
+            if (progId) prog.id = progId || '';
+            input.type = 'range';
+            input.min = min;
+            input.max = max;
+            input.value = value;
+            input.step = step;
+            if (rangeId) input.id = rangeId || '';
+            // Handle the textbox
+            if (textbox) {
+                textbox.type = 'number';
+                textbox.min = min;
+                textbox.max = max;
+                textbox.step = step;
+                textbox.value = value;
+                textbox.oninput = () => {
+                    slider.dataset.value = textbox.value;
+                    slider.dispatchEvent(new Event('change'));
+                };
+                textbox.onchange = textbox.oninput;
+            }
+            // Dispatch events
+            input.dispatchEvent(new Event('change'));
+            prog.dispatchEvent(new Event('change'));
+        }
+        onSliderChange();
+        // Append elements
+        slider.appendChild(prog);
         slider.appendChild(input);
         // Add event listeners
         input.addEventListener('input', () => {
-            prog.value = input.value;
-            if (textbox) textbox.value = input.value;
+            slider.dataset.value = input.value;
+            prog.value = slider.dataset.value;
+            if (textbox) textbox.value = slider.dataset.value;
+            slider.dispatchEvent(new Event('input'));
         });
         input.addEventListener('change', () => {
-            prog.value = input.value;
-            if (textbox) textbox.value = input.value;
+            slider.dataset.value = input.value;
+            prog.value = slider.dataset.value;
+            if (textbox) textbox.value = slider.dataset.value;
         });
         prog.addEventListener('change', () => {
-            input.value = prog.value;
-            if (textbox) textbox.value = prog.value;
+            input.value = slider.dataset.value;
+            if (textbox) textbox.value = slider.dataset.value;
         });
-        if (textbox) {
-            textbox.type = 'number';
-            textbox.min = min;
-            textbox.max = max;
-            textbox.step = step;
-            textbox.value = value;
-            textbox.addEventListener('input', () => {
-                input.value = textbox.value;
-                prog.value = textbox.value;
-            });
-            textbox.addEventListener('change', () => {
-                input.value = textbox.value;
-                prog.value = textbox.value;
-            });
-        }
-        input.dispatchEvent(new Event('input'));
+        slider.addEventListener('change', onSliderChange);
         // Mark the slider as added
         slider.dataset.modified = true;
     }

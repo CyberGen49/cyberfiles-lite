@@ -255,7 +255,7 @@ code .token.namespace { color: var(--f3) }
     --bgActive: var(--b4);
 }
 .btn.overlay {
-    --fg: white;
+    --fg: var(--l8);
     --bg: transparent;
     --bgHover: rgba(255, 255, 255, 0.2);
     --bgActive: rgba(255, 255, 255, 0.4);
@@ -291,13 +291,19 @@ code .token.namespace { color: var(--f3) }
     text-decoration: none;
     transition: none;
 }
+@media ( hover: none ) {
+    .btn:hover {
+        background: var(--bg);
+        transition: 0.2s var(--bezier);
+    }
+}
 .btn:active {
     background: var(--bgActive);
     color: var(--fg);
     text-decoration: none;
 }
 .btn > .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined Rounded';
     font-size: 26px;
     line-height: 1;
     color: inherit;
@@ -405,7 +411,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     align-items: center;
     justify-content: center;
     content: 'expand_more';
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined Rounded';
     font-size: 32px;
     color: var(--f3);
     pointer-events: none;
@@ -529,6 +535,12 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     background: var(--b3);
     transition: none;
 }
+@media ( hover: none ) {
+    .context > .item:hover:not(:disabled) {
+        background: transparent;
+        transition: 0.2s var(--bezier);
+    }
+}
 .context > .item:active:not(:disabled) {
     background: var(--b4);
 }
@@ -546,7 +558,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     white-space: nowrap;
 }
 .context > .item > .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined Rounded';
     width: 24px;
     font-size: 24px;
     line-height: 1;
@@ -631,7 +643,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     opacity: 1;
 }
 .toastOverlay > .toast > .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined Rounded';
     font-size: 28px;
     line-height: 1;
     color: var(--f2);
@@ -675,7 +687,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     background: var(--red2);
 }
 .notice > .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined Rounded';
     font-size: 28px;
     line-height: 1;
     color: var(--f3);
@@ -764,8 +776,8 @@ progress::-moz-progress-bar {
     margin-top: 11px;
 }
 .slider.overlay progress {
-    --bg: rgba(255, 255, 255, 0.3);
-    --fill: white;
+    --bg: rgba(255, 255, 255, 0.2);
+    --fill: var(--l8);
 }
 .slider progress::-webkit-progress-value {
     transition: none;
@@ -790,7 +802,7 @@ progress::-moz-progress-bar {
 }
 .slider.overlay input[type="range"] {
     --thumbFill: white;
-    --thumbFillHover: hsl(240, 10%, 85%);
+    --thumbFillHover: var(--l7);
 }
 .slider input[type="range"]::-webkit-slider-thumb {
     appearance: none;
@@ -829,10 +841,13 @@ progress::-moz-progress-bar {
     }
 }
 .spinner {
+    --bg: var(--b4);
     --fill: var(--f3);
-    height: 48px;
-    width: 48px;
-    border: 5px solid var(--b4);
+    --size: 48px;
+    --thickness: 5px;
+    height: var(--size);
+    width: var(--size);
+    border: var(--thickness) solid var(--bg);
     border-top-color: var(--fill);
     border-radius: 50%;
     animation: spinner 1s linear infinite;
@@ -848,6 +863,10 @@ progress::-moz-progress-bar {
 }
 .spinner.danger {
     --fill: var(--red1);
+}
+.spinner.overlay {
+    --bg: rgba(255, 255, 255, 0.2);
+    --fill: var(--l8);
 }
 
 .text-muted {
