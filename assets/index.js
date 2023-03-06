@@ -179,35 +179,22 @@ async function main() {
             }
         }, 50);
     };
-    on(window, ['resize', 'orientationChange'], lazyLoadImages);
     const cardHeaders = $$('.card .header');
     const cardFooters = $$('.card .footer');
-    on(document, 'scroll', () => {
+    const onResizeOrientationChangeScroll = () => {
         lazyLoadImages();
         for (const header of cardHeaders) {
             const headerTop = header.getBoundingClientRect().top;
-            const hasSticky = header.classList.contains('sticky');
-            if (hasSticky) {
-                if (headerTop > 2)
-                    header.classList.remove('sticky');
-            } else {
-                if (headerTop <= 0)
-                    header.classList.add('sticky');
-            }
+            header.classList.toggle('sticky', (headerTop <= 0));
         }
         for (const footer of cardFooters) {
             const footerBottom = footer.getBoundingClientRect().bottom;
-            const hasSticky = footer.classList.contains('sticky');
-            if (hasSticky) {
-                if (footerBottom < (window.innerHeight-2))
-                    footer.classList.remove('sticky');
-            } else {
-                if (footerBottom >= window.innerHeight)
-                    footer.classList.add('sticky');
-            }
+            footer.classList.toggle('sticky', (footerBottom >= window.innerHeight));
         }
-    });
-    document.dispatchEvent(new Event('scroll'));
+    };
+    on(window, ['resize', 'orientationChange'], onResizeOrientationChangeScroll);
+    on(document, 'scroll', onResizeOrientationChangeScroll);
+    onResizeOrientationChangeScroll();
 
     const markdownContainer = $(`.card[data-preview-type="markdown"]`);
     if (markdownContainer) {
