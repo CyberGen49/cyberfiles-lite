@@ -282,13 +282,13 @@ module.exports = (opts = {}) => {
             file.size = stats.size;
             file.sizeHuman = utils.formatSize(stats.size),
             file.icon = iconFromExt(filePathAbs),
-            //file.shouldRender = (ext.match(/^(md|markdown|mp4|png|jpg|jpeg|gif|webp|webm|mov|mp3|weba|ogg|m4a)$/) || prismLangs[ext]) ? true : false,
             file.shouldRender = true;
             file.hasThumb = false;
             if (ext.match(/^(png|jpg|jpeg|gif|webp|mp4|mov|webm)$/) && opts.make_thumbs) {
                 file.hasThumb = true;
                 const mapEntry = thumbMap[filePathAbs];
                 if (!mapEntry || mapEntry.mtime !== file.mtime) {
+                    thumbQueuePaths.push(filePathAbs);
                     thumbQueue.push({
                         path: filePathAbs,
                         mtime: file.mtime
@@ -375,6 +375,7 @@ module.exports = (opts = {}) => {
     };
     // Handle thumbnail generation
     let thumbsInProgress = 0;
+    const thumbQueuePaths = [];
     setInterval(async() => {
         if (thumbsInProgress > 3 || thumbQueue.length == 0) return;
         thumbsInProgress++;
@@ -403,7 +404,11 @@ module.exports = (opts = {}) => {
             if (tmpPath) fs.unlinkSync(tmpPath);
             thumbMap[filePath] = { name: thumbName, mtime: entry.mtime };
             fs.writeFileSync(thumbMapFile, JSON.stringify(thumbMap));
-            if (thumbHandlers[filePath]) thumbHandlers[filePath](thumbPath);
+            thumbQueuePaths.splice(thumbQueuePaths.indexOf(entry.path), 1);
+            if (thumbHandlers[filePath]) {
+                thumbHandlers[filePath](thumbPath);
+                delete thumbHandlers[filePath];
+            }
         } catch (error) {
             logDebug(`Error while generating thumbnail:`, error);
         }
@@ -415,7 +420,7 @@ module.exports = (opts = {}) => {
         const filePathAbs = path.join(opts.root, filePathRel);
         if (thumbMap[filePathAbs]) {
             res.sendFile(path.join(thumbsDir, thumbMap[filePathAbs].name));
-        } else if (thumbQueue.includes(filePathAbs)) {
+        } else if (thumbQueuePaths.includes(filePathAbs)) {
             res.setHeader('content-type', 'image/png');
             thumbHandlers[filePathAbs] = image => {
                 res.sendFile(image);
