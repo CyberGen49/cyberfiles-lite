@@ -5,39 +5,38 @@ body {
 
 .container {
     padding: 20px 15px;
-    padding-top: 105px;
     max-width: 1400px;
     margin: 0px auto;
 }
 
-#head {
-    position: absolute;
-    top: 0px;
-    left: 0px;
+#topbar {
     width: 100%;
-    height: 85px;
+    height: 55px;
     padding: 0px 20px;
     background: var(--b2);
     border-bottom: 1px solid var(--b3);
 }
 #title {
+    margin-top: -1px;
     font-family: 'Comfortaa';
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--f2);
 }
 
 #path {
-    display: flex;
-    gap: 5px;
-    overflow-x: auto;
+    height: 46px;
+    padding: 0px 16px;
+    background: var(--b2);
+    border: 1px solid var(--b4);
+    border-radius: 20px;
+    overflow-x: scroll;
     overflow-y: hidden;
-    padding: 3px 0px;
-    padding-bottom: 10px;
-    margin-bottom: -5px;
+    scrollbar-width: none;
 }
 #path::-webkit-scrollbar {
     height: 5px;
+    display: none;
 }
 #path::-webkit-scrollbar-thumb {
     background: var(--b4);
@@ -50,28 +49,29 @@ body {
     font-family: 'Comfortaa';
     font-weight: bold;
     font-size: 18px;
-    color: var(--f1);
+    color: var(--f2);
     flex-shrink: 0;
     transition: 0.1s var(--bezier);
     text-decoration: none;
 }
 #path .part:hover,
 #path .part:focus-visible {
-    color: var(--f3);
+    color: var(--f4);
 }
 #path .part[href=""] {
-    color: var(--f4);
+    color: var(--f1);
     pointer-events: none;
 }
 #path .sep {
+    margin: 0px -4px;
+    margin-top: 1px;
     flex-shrink: 0;
 }
 #path .sep::after {
-    font-family: 'Quicksand';
-    font-weight: bold;
-    font-size: 18px;
-    color: var(--b5);
-    content: '/';
+    content: 'chevron_right';
+    font-family: 'Material Symbols Outlined';
+    font-size: 24px;
+    color: var(--f4);
 }
 #path .sep:last-child {
     display: none;
@@ -106,12 +106,10 @@ body {
 }
 .card .header {
     top: 0px;
-    margin-bottom: -1px;
     z-index: 4;
 }
 .card .footer {
     bottom: 0px;
-    margin-top: -1px;
 }
 .card .header.sticky,
 .card .footer.sticky {
@@ -123,10 +121,12 @@ body {
 .card .header.sticky {
     border-radius: 0px 0px 20px 20px;
     border-top-color: transparent;
+    margin-bottom: -1px;
 }
 .card .footer.sticky {
     border-radius: 20px 20px 0px 0px;
     border-bottom-color: transparent;
+    margin-top: -1px;
 }
 #fileListCard > .header:not(.sticky) {
     border-bottom-color: var(--b4);
@@ -439,7 +439,7 @@ body {
     border: none;
 }
 #infoCard table td {
-    padding: 4px;
+    padding: 0px 4px;
     font-size: 15px;
 }
 
