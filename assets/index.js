@@ -443,7 +443,7 @@ async function main() {
     }
 
     for (const el of $$('[data-audio-url]')) {
-        el.src = `https://src.simplecyber.org/v1/audio/?hue=${document.body.dataset.hue}&url=${baseUrl}${el.dataset.audioUrl}`;
+        el.src = `https://src.simplecyber.org/v2/audio/?url=${baseUrl}${el.dataset.audioUrl}&hideTitle=true&hideBorder=true&autoplay=true&theme=${document.body.dataset.theme}`;
         console.log(el.src);
     }
 
