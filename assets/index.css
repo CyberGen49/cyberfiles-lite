@@ -133,8 +133,12 @@ body {
     background: var(--b2);
     border-radius: 20px 20px 0px 0px;
 }
-#fileListCard > .header .btn.secondary:not(:focus-visible):not(:hover) {
-    background: transparent;
+.header.sticky .btn.tertiary,
+.footer.sticky .btn.tertiary,
+#fileListCard > .header .btn.tertiary {
+    --bg: transparent;
+    --bgHover: var(--b4);
+    --bgActive: var(--b5);
 }
 .card .body {
     padding: 10px 15px 20px 15px;

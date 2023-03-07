@@ -65,7 +65,7 @@
                 <% if (files) { %>
                     <div id="fileListCard" class="card no-select">
                         <div id="fileListHeader" class="header row gap-10 align-center" style="padding: 4px 15px">
-                            <button id="searchBtn" class="btn secondary small iconOnly" title="Search...">
+                            <button id="searchBtn" class="btn tertiary small iconOnly" title="Search...">
                                 <div class="icon">search</div>
                             </button>
                             <div id="searchBar" class="row flex-grow showOnSearch">
@@ -86,21 +86,21 @@
                                 <% } %>
                             </div>
                             <div class="row gap-3 hideOnSearch">
-                                <button id="sort" class="btn secondary small" title="Sort files...">
+                                <button id="sort" class="btn tertiary small" title="Sort files...">
                                     <%= sort.order.display %>
                                     <div class="icon"><%= (sort.descending) ? 'arrow_upward' : 'arrow_downward' %></div>
                                 </button>
-                                <button id="dirMenu" class="btn secondary small iconOnly" title="Folder options...">
+                                <button id="dirMenu" class="btn tertiary small iconOnly" title="Folder options...">
                                     <div class="icon">more_vert</div>
                                 </button>
                             </div>
-                            <button id="dirView" class="btn secondary small iconOnly" title="Change view" data-current-view="<%= view %>">
+                            <button id="dirView" class="btn tertiary small iconOnly" title="Change view" data-current-view="<%= view %>">
                                 <div class="icon"><%= (view == 'tiles') ? 'format_list_bulleted' : 'apps' %></div>
                             </button>
-                            <button id="dirShare" class="btn secondary small iconOnly" title="Share this folder...">
+                            <button id="dirShare" class="btn tertiary small iconOnly" title="Share this folder...">
                                 <div class="icon">share</div>
                             </button>
-                            <button id="dirDownload" class="btn secondary small iconOnly" title="Download folder as zip">
+                            <button id="dirDownload" class="btn tertiary small iconOnly" title="Download folder as zip">
                                 <div class="icon">download</div>
                             </button>
                         </div>

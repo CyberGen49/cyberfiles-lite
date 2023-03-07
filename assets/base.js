@@ -41,6 +41,15 @@ function positionElement(element, x, y) {
     element.style.top = y + 'px';
 }
 
+function isElementVisible(el) {
+    if (!el || typeof el.getBoundingClientRect !== 'function') {
+        return false;
+    }
+    const rect = el.getBoundingClientRect();
+    const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+}
+
 /**
  * Builds a popup
  */
@@ -595,21 +604,30 @@ window.addEventListener('mousemove', (e) => {
     mouse.y = e.clientY;
 });
 
+// Create and append the tooltip element
+const tooltip = document.createElement('div');
+tooltip.classList.add('tooltip');
+tooltip.role = 'tooltip';
+tooltip.id = Date.now();
+document.body.appendChild(tooltip);
 // Handle dynamic changes
 document.addEventListener('domChange', () => {
-    // Get elements with a title attribute but no tooltip
-    const els = $$('[title]:not([data-has-tooltip]):not([data-no-tooltip])');
+    // Get elements with a title attribute
+    const titleEls = $$('[title]:not([data-no-tooltip])');
+    for (const el of titleEls) {
+        // Remove the title attribute and add it to the tooltip data attribute
+        const title = el.title;
+        el.removeAttribute('title');
+        el.dataset.tooltip = title;
+        // Add aria label
+        el.setAttribute('aria-describedby', tooltip.id);
+    }
+    // Get elements with a tooltip data attribute
+    const tooltipEls = $$('[data-tooltip]:not([data-has-tooltip])');
     // Loop through 'em
-    for (const el of els) {
+    for (const el of tooltipEls) {
         let isMouseOver = false;
         let timeout;
-        // Create and append the tooltip
-        const tooltip = document.createElement('div');
-        tooltip.classList.add('tooltip');
-        document.body.appendChild(tooltip);
-        // Remove original title
-        let html = el.title;
-        el.removeAttribute('title');
         // Hide the tooltip
         const hide = () => {
             clearTimeout(timeout);
@@ -618,19 +636,22 @@ document.addEventListener('domChange', () => {
         // Show the tooltip
         const show = () => {
             hide();
-            if (!el) return;
-            if (el.title) html = el.title;
-            el.removeAttribute('title');
-            tooltip.innerHTML = html;
             timeout = setTimeout(() => {
-                positionElement(tooltip, mouse.x+5, mouse.y);
-                timeout = setTimeout(() => {
-                    if (!isMouseOver) return;
-                    tooltip.classList.add('visible');
+                tooltip.style.transition = 'none';
+                tooltip.style.scale = '1';
+                tooltip.innerHTML = el.dataset.tooltip;
+                setTimeout(() => {
+                    positionElement(tooltip, mouse.x+5, mouse.y);
+                    tooltip.style.scale = '';
+                    tooltip.style.transition = '';
                     timeout = setTimeout(() => {
-                        hide();
-                    }, 10000);
-                }, 500);
+                        if (!isMouseOver || !isElementVisible(el)) return;
+                        tooltip.classList.add('visible');
+                        timeout = setTimeout(() => {
+                            hide();
+                        }, 10000);
+                    }, 500);
+                }, 50);
             }, 200);
         };
         // On mouse move
@@ -670,16 +691,16 @@ document.addEventListener('domChange', () => {
             const progId = slider.dataset.progId;
             textbox = $(slider.dataset.textbox);
             // Set attributes
-            prog.min = min;
-            prog.max = max;
-            prog.value = value;
-            prog.step = step;
-            if (progId) prog.id = progId || '';
             input.type = 'range';
             input.min = min;
             input.max = max;
             input.value = value;
             input.step = step;
+            prog.min = min;
+            prog.max = max;
+            prog.value = value;
+            prog.step = step;
+            if (progId) prog.id = progId || '';
             if (rangeId) input.id = rangeId || '';
             // Handle the textbox
             if (textbox) {
@@ -689,8 +710,8 @@ document.addEventListener('domChange', () => {
                 textbox.step = step;
                 textbox.value = value;
                 textbox.oninput = () => {
-                    slider.dataset.value = textbox.value;
-                    slider.dispatchEvent(new Event('change'));
+                    input.value = textbox.value;
+                    input.dispatchEvent(new Event('input'));
                 };
                 textbox.onchange = textbox.oninput;
             }

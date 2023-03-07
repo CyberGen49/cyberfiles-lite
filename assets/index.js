@@ -473,7 +473,7 @@ async function main() {
                             Reset settings
                         </button>
                     </div>
-                    <small>This will reset all CyberFiles settings to their defaults, and delete any saved video progress.</small>
+                    <small>This will reset all CyberFiles settings to their defaults.</small>
                 </div>
             `);
         popup.show();

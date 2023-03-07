@@ -192,13 +192,18 @@ code .token.namespace { color: var(--f3) }
 }
 
 .btn {
-    height: 40px;
-    padding: 0px 20px;
-    padding-top: 2px;
+    --height: 40px;
+    --padding-top: 2px;
+    --padding-lr: 20px;
+    --gap: 12px;
+    --icon-size: 26px;
+    height: var(--height);
+    padding: 0px var(--padding-lr);
+    padding-top: var(--padding-top);
     border: none;
     border-radius: 100px;
     font-family: 'Comfortaa';
-    font-size: 15px;
+    font-size: var(--font-size);
     font-weight: bold;
     color: var(--fg);
     background: var(--bg);
@@ -206,7 +211,7 @@ code .token.namespace { color: var(--f3) }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: var(--gap);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -304,7 +309,7 @@ code .token.namespace { color: var(--f3) }
 }
 .btn > .icon {
     font-family: 'Material Symbols Outlined Rounded';
-    font-size: 26px;
+    font-size: var(--icon-size);
     line-height: 1;
     color: inherit;
     font-weight: normal;
@@ -319,39 +324,26 @@ code .token.namespace { color: var(--f3) }
     margin-left: 1px;
 }
 .btn.small {
-    height: 34px;
-    padding: 0px 16px;
-    font-size: 14px;
-    padding-top: 2px;
+    --height: 34px;
+    --font-size: 14px;
+    --padding-top: 1px;
+    --padding-lr: 16px;
+    --icon-size: 24px;
 }
 .btn.large {
-    height: 46px;
-    padding: 0px 24px;
-    font-size: 16px;
-    padding-top: 3px;
-}
-.btn.small > .icon {
-    font-size: 24px;
-}
-.btn.large > .icon {
-    font-size: 28px;
+    --height: 46px;
+    --font-size: 16px;
+    --padding-top: 2px;
+    --padding-lr: 24px;
+    --icon-size: 28px;
 }
 .btn.iconOnly {
     padding: 0px;
-    width: 40px;
-    height: 40px;
-}
-.btn.small.iconOnly {
-    width: 34px;
-    height: 34px;
-}
-.btn.large.iconOnly {
-    width: 44px;
-    height: 44px;
+    width: var(--height);
+    height: var(--height);
 }
 .btn:disabled {
-    background: var(--b2);
-    color: var(--b5);
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
@@ -767,17 +759,25 @@ progress::-moz-progress-bar {
     transition: 0.1s ease-in-out;
 }
 .slider {
+    --thumbFill: var(--b0);
+    --thumbFillHover: var(--b3);
+    --barBg: var(--b4);
+    --barFill: var(--f3);
     position: relative;
     width: 100%;
     height: 27px;
 }
+.slider.overlay {
+    --thumbFill: white;
+    --thumbFillHover: var(--l7);
+    --barBg: rgba(255, 255, 255, 0.2);
+    --barFill: var(--l8);
+}
 .slider progress {
+    --bg: var(--barBg);
+    --fill: var(--barFill);
     position: absolute;
     margin-top: 11px;
-}
-.slider.overlay progress {
-    --bg: rgba(255, 255, 255, 0.2);
-    --fill: var(--l8);
 }
 .slider progress::-webkit-progress-value {
     transition: none;
@@ -787,8 +787,6 @@ progress::-moz-progress-bar {
 }
 .slider input[type="range"] {
     position: absolute;
-    --thumbFill: var(--b0);
-    --thumbFillHover: var(--b3);
     appearance: none;
     background: transparent;
     position: absolute;
@@ -799,10 +797,6 @@ progress::-moz-progress-bar {
     width: calc(100% + 24px);
     height: 24px;
     z-index: 2;
-}
-.slider.overlay input[type="range"] {
-    --thumbFill: white;
-    --thumbFillHover: var(--l7);
 }
 .slider input[type="range"]::-webkit-slider-thumb {
     appearance: none;
@@ -867,6 +861,15 @@ progress::-moz-progress-bar {
 .spinner.overlay {
     --bg: rgba(255, 255, 255, 0.2);
     --fill: var(--l8);
+}
+
+.container {
+    max-width: 1000px;
+    padding: 30px 20px;
+    margin: 0px auto;
+}
+.container img {
+    max-width: 100%;
 }
 
 .text-muted {
