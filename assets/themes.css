@@ -32,13 +32,6 @@ See `themes.json` for some metadata about each theme.
     --green3: hsl(120, 60%, 85%);
     --green4: hsl(120, 60%, 90%);
     --green5: hsl(120, 60%, 95%);
-    /* Orange accent */
-    --orange0: hsl(20, 100%, 40%);
-    --orange1: hsl(20, 100%, 70%);
-    --orange2: hsl(20, 100%, 80%);
-    --orange3: hsl(20, 100%, 85%);
-    --orange4: hsl(20, 100%, 90%);
-    --orange5: hsl(20, 100%, 95%);
     /* Yellow accent */
     --yellow0:  hsl(40, 100%, 40%);
     --yellow1:  hsl(40, 100%, 70%);
@@ -155,13 +148,6 @@ See `themes.json` for some metadata about each theme.
     --green3: hsl(150, 50%, 60%);
     --green4: hsl(150, 50%, 70%);
     --green5: hsl(150, 50%, 80%);
-    /* Orange accent */
-    --orange0: hsl(15, 85%, 30%);
-    --orange1: hsl(15, 85%, 40%);
-    --orange2: hsl(15, 85%, 50%);
-    --orange3: hsl(15, 85%, 60%);
-    --orange4: hsl(15, 85%, 70%);
-    --orange5: hsl(15, 85%, 80%);
     /* Yellow accent */
     --yellow0:  hsl(40, 70%, 40%);
     --yellow1:  hsl(40, 70%, 50%);
@@ -206,11 +192,11 @@ See `themes.json` for some metadata about each theme.
 .darkyellow .textbox:focus,
 .darkgreen  .textbox:focus,
 .darkmuted  .textbox:focus,
+.darkblue   .textbox:focus,
 .darkpurple .textbox:focus-within,
 .darkyellow .textbox:focus-within,
 .darkgreen  .textbox:focus-within,
 .darkmuted  .textbox:focus-within,
-.darkblue   .textbox:focus,
 .darkblue   .textbox:focus-within {
     background-color: var(--b2);
     border-color: var(--f4);
