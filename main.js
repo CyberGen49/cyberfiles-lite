@@ -540,7 +540,7 @@ module.exports = (opts = {}) => {
             return res.sendFile(filePath);
         }
         // Build file path tree
-        const tree = [{ name: 'Root', path: '/' }];
+        const tree = [{ name: opts.site_name, path: '/' }];
         const parts = pathRel.split('/').filter(String);
         for (const part of parts) {
             const item = {

@@ -1,6 +1,16 @@
 
 body {
+    --fontDefault: 'Comfortaa';
     scroll-behavior: smooth;
+}
+
+.tooltip {
+    /* padding: 6px 12px; */
+    padding-top: 9px;
+}
+.toastOverlay > .toast > .body {
+    /* padding: 15px 5px; */
+    padding-top: 18px;
 }
 
 .container {
@@ -29,7 +39,7 @@ body {
     padding: 0px 16px;
     background: var(--b2);
     border: 1px solid var(--b4);
-    border-radius: 20px;
+    border-radius: 16px;
     overflow-x: scroll;
     overflow-y: hidden;
     scrollbar-width: none;
@@ -80,7 +90,7 @@ body {
 .card {
     display: flex;
     flex-direction: column;
-    border-radius: 20px;
+    border-radius: 16px;
     background: var(--b1);
     border: 1px solid var(--b4);
 }
@@ -98,7 +108,7 @@ body {
     word-break: break-word;
     font-family: 'Comfortaa';
     font-weight: bold;
-    border-radius: 20px;
+    border-radius: 16px;
     border: 1px solid transparent;
     z-index: 3;
     transition: 0.2s var(--bezier);
@@ -119,19 +129,19 @@ body {
     margin-right: -1px;
 }
 .card .header.sticky {
-    border-radius: 0px 0px 20px 20px;
+    border-radius: 0px 0px 16px 16px;
     border-top-color: transparent;
     margin-bottom: -1px;
 }
 .card .footer.sticky {
-    border-radius: 20px 20px 0px 0px;
+    border-radius: 16px 16px 0px 0px;
     border-bottom-color: transparent;
     margin-top: -1px;
 }
 #fileListCard > .header:not(.sticky) {
     border-bottom-color: var(--b4);
     background: var(--b2);
-    border-radius: 20px 20px 0px 0px;
+    border-radius: 16px 16px 0px 0px;
 }
 .header.sticky .btn.tertiary,
 .footer.sticky .btn.tertiary,
@@ -158,7 +168,7 @@ body {
 }
 .card[data-preview-type="video"] .body {
     padding: 0px;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
 }
 .card[data-preview-type="video"] .body iframe {
@@ -190,7 +200,7 @@ body {
     height: auto;
 }
 .bigIcon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Filled Rounded';
     font-size: 56px;
     color: var(--b5);
     user-select: none;
@@ -229,7 +239,7 @@ body {
     display: flex;
     color: var(--f2);
     line-height: 1.2;
-    border-radius: 14px;
+    border-radius: 8px;
     transition: 0.2s var(--bezier);
     text-decoration: none;
 }
@@ -272,7 +282,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Filled Rounded';
     font-size: 28px;
     color: var(--f3);
     line-height: 1;
@@ -299,7 +309,6 @@ body {
     aspect-ratio: 4 / 3;
     margin: 6px;
     margin-bottom: 0px;
-    filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.1));
     overflow: hidden;
 }
 #fileList .thumb {
@@ -363,6 +372,11 @@ body {
     color: var(--f2);
     flex-shrink: 0;
 }
+#fileList.list .fileEntry .name,
+#fileList.list .fileEntry .modified,
+#fileList.list .fileEntry .size {
+    margin-top: 3px;
+}
 
 #fileListHeader:not(.search) .showOnSearch {
     display: none;
@@ -399,7 +413,7 @@ body {
     margin-top: 1px;
 }
 #counts .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Filled Rounded';
     font-size: 20px;
     line-height: 1;
 }
@@ -408,7 +422,7 @@ body {
     padding-top: 0px;
 }
 #infoCard .icon {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Filled Rounded';
     font-size: 54px;
     color: var(--f2);
     line-height: 1;

@@ -39,29 +39,24 @@
         }
         setTheme(window.localStorage.getItem('theme'));
     </script>
-    <div id="topbar" class="row justify-center">
-        <div class="row gap-10 align-center" style="width: calc(1400px - 30px); min-width: 0px">
-            <div id="title" class="flex-grow" style=" padding-top: 7px"><%= site_name %></div>
-            <button id="settingsOpen" class="btn secondary iconOnly" title="Settings...">
+    <div class="container col gap-15">
+        <div class="row gap-10 align-center">
+            <div class="row flex-grow" style="min-width: 0px">
+                <div id="path" class="row gap-5 align-center no-select">
+                    <% for (const part of tree) { %>
+                        <a href="<%= part.path %>" class="part">
+                            <%= part.name %>
+                        </a>
+                        <span class="sep"></span>
+                    <% } %>
+                </div>
+            </div>
+            <button id="settingsOpen" class="btn tertiary large iconOnly flex-no-shrink" title="Settings...">
                 <div class="icon">settings</div>
             </button>
         </div>
-    </div>
-    <div class="container col gap-15">
         <div class="row lg gap-15">
             <div class="col gap-15 flex-grow" style="min-width: 0;">
-                <% if (tree.length > 1) { %>
-                    <div class="row">
-                        <div id="path" class="row gap-5 align-center no-select">
-                            <% for (const part of tree) { %>
-                                <a href="<%= part.path %>" class="part">
-                                    <%= part.name %>
-                                </a>
-                                <span class="sep"></span>
-                            <% } %>
-                        </div>
-                    </div>
-                <% } %>
                 <% if (files) { %>
                     <div id="fileListCard" class="card no-select">
                         <div id="fileListHeader" class="header row gap-10 align-center" style="padding: 4px 15px">

@@ -209,16 +209,6 @@ async function main() {
             const tagName = el.tagName.toLowerCase();
             if (!tagName.toLowerCase().match(/^(h1|h2|h3|h4|h5|h6)$/))
                 continue;
-            /* el.addEventListener('contextmenu', (e) => {
-                if (e.shiftKey) return;
-                e.preventDefault();
-                new ContextMenuBuilder()
-                    .addItem(item => item
-                        .setIcon('content_copy')
-                        .setLabel('Copy link to heading')
-                        .setClickHandler(() => copyText(`${window.location.href}#${el.id}`)))
-                    .showAtCursor()
-            }); */
             const item = new ContextMenuItemBuilder(menu)
                 .setLabel(el.innerText)
                 .setClickHandler(() => {
