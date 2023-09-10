@@ -748,13 +748,19 @@ document.addEventListener('domChange', () => {
     const textareas = $$('textarea[data-make-expandable]:not([data-modified])');
     // Loop through 'em
     for (const textarea of textareas) {
-        textarea.addEventListener('input', () => {
+        textarea.addEventListener('resize', () => {
+            if (!isElementVisible(textarea) || !textarea.scrollHeight) return;
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
         });
+        textarea.dispatchEvent(new Event('resize'));
+        textarea.addEventListener('input', () => {
+            textarea.dispatchEvent(new Event('resize'));
+        });
+        window.addEventListener('resize', () => {
+            textarea.dispatchEvent(new Event('resize'));
+        });
         textarea.dataset.modified = true;
-        textarea.dispatchEvent(new Event('input'));
-        setInterval(() => textarea.dispatchEvent(new Event('input')), 1000);
     }
 });
     

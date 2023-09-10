@@ -5,13 +5,20 @@
 @import 'https://src.simplecyber.org/fonts/material-symbols-outlined.css';
 
 body {
+    /* Fonts */
+    --fontDefault: 'Poppins';
+    --fontCode: 'Cascadia Code';
+    --fontHeading: 'Comfortaa';
+    --fontButton: 'Comfortaa';
+    --fontContext: 'Comfortaa';
+    --fontIcons: 'Material Symbols Outlined Rounded';
     /* Timing functions */
     --bezier: cubic-bezier(0.1, 0.3, 0.3, 1);
     /* Body styles */
     margin: 0px;
     background: var(--b1);
     color: var(--f1);
-    font-family: 'Poppins';
+    font-family: var(--fontDefault);
     font-size: 16px;
     line-height: 1;
 }
@@ -31,7 +38,7 @@ a:hover {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Comfortaa';
+    font-family: var(--fontHeading);
     font-weight: bold;
     color: var(--f1);
     line-height: 1.2;
@@ -101,13 +108,13 @@ table th, table td {
     border: 1px solid var(--b4);
 }
 table th {
-    font-family: 'Comfortaa';
+    font-family: var(--fontHeading);
     font-weight: bold;
     color: var(--f2);
 }
 
 code {
-    font-family: 'Cascadia Code';
+    font-family: var(--fontCode);
 }
 code:not(pre code) {
     padding: 2px 4px;
@@ -202,7 +209,7 @@ code .token.namespace { color: var(--f3) }
     padding-top: var(--padding-top);
     border: none;
     border-radius: 100px;
-    font-family: 'Comfortaa';
+    font-family: var(--fontButton);
     font-size: var(--font-size);
     font-weight: bold;
     color: var(--fg);
@@ -308,7 +315,7 @@ code .token.namespace { color: var(--f3) }
     text-decoration: none;
 }
 .btn > .icon {
-    font-family: 'Material Symbols Outlined Rounded';
+    font-family: var(--fontIcons);
     font-size: var(--icon-size);
     line-height: 1;
     color: inherit;
@@ -353,7 +360,7 @@ code .token.namespace { color: var(--f3) }
     padding: 0px 20px;
     border: 2px solid var(--b3);
     border-radius: 20px;
-    font-family: 'Poppins';
+    font-family: var(--fontDefault);
     font-size: 16px;
     line-height: 1.3;
     background: var(--b3);
@@ -382,6 +389,7 @@ code .token.namespace { color: var(--f3) }
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
+    line-height: 1.3;
     resize: none;
     outline: none;
 }
@@ -403,7 +411,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     align-items: center;
     justify-content: center;
     content: 'expand_more';
-    font-family: 'Material Symbols Outlined Rounded';
+    font-family: var(--fontIcons);
     font-size: 32px;
     color: var(--f3);
     pointer-events: none;
@@ -444,7 +452,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     scale: 1;
 }
 .popup > .title {
-    font-family: 'Comfortaa';
+    font-family: var(--fontHeading);
     font-size: 22px;
     font-weight: bold;
     color: var(--f1);
@@ -538,8 +546,10 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
 }
 .context > .item > .label {
     max-width: 100%;
+    margin-top: 3px;
     color: var(--f1);
-    font-family: 'Poppins';
+    font-family: var(--fontContext);
+    font-weight: bold;
     font-size: 16px;
     text-align: left;
     display: flex;
@@ -550,7 +560,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     white-space: nowrap;
 }
 .context > .item > .icon {
-    font-family: 'Material Symbols Outlined Rounded';
+    font-family: var(--fontIcons);
     width: 24px;
     font-size: 24px;
     line-height: 1;
@@ -635,7 +645,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     opacity: 1;
 }
 .toastOverlay > .toast > .icon {
-    font-family: 'Material Symbols Outlined Rounded';
+    font-family: var(--fontIcons);
     font-size: 28px;
     line-height: 1;
     color: var(--f2);
@@ -679,7 +689,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"], select {
     background: var(--red2);
 }
 .notice > .icon {
-    font-family: 'Material Symbols Outlined Rounded';
+    font-family: var(--fontIcons);
     font-size: 28px;
     line-height: 1;
     color: var(--f3);
@@ -824,6 +834,50 @@ progress::-moz-progress-bar {
 .slider input[type="range"]::-moz-range-thumb:hover,
 .slider input[type="range"]::-moz-range-thumb:active {
     background: var(--thumbFillHover);
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    appearance: none;
+    font-family: var(--fontIcons);
+    font-size: 1.8em;
+    color: var(--f1);
+    line-height: 1;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
+    color: var(--f4);
+}
+input[type="radio"]::before { content: "radio_button_unchecked"; }
+input[type="radio"]:checked::before { content: "radio_button_checked"; }
+input[type="checkbox"]::before { content: "check_box_outline_blank"; }
+input[type="checkbox"]:checked::before { content: "check_box"; }
+label.selectOption {
+    margin: 0px;
+    padding-right: 8px;
+    display: flex;
+    align-items: center;
+    font-family: var(--fontDefault);
+    font-size: 16px;
+    line-height: 1.2;
+    color: var(--f1);
+    cursor: pointer;
+    user-select: none;
+}
+label.selectOption input[type="radio"],
+label.selectOption input[type="checkbox"] {
+    margin-top: 0;
+    margin-right: 0.3em;
+}
+label.selectOption:hover > input[type="radio"],
+label.selectOption:hover > input[type="checkbox"] {
+    color: var(--f2);
+}
+label.selectOption:hover > input[type="radio"]:checked,
+label.selectOption:hover > input[type="checkbox"]:checked {
+    color: var(--b5);
 }
 
 @keyframes spinner {
@@ -1008,6 +1062,17 @@ progress::-moz-progress-bar {
     color: var(--f1);
 }
 
+[placeholder]:empty::before,
+[placeholder]:empty::after {
+    color: var(--f4);
+    pointer-events: none;
+}
+[placeholder]:empty:not(:focus)::before {
+    content: attr(placeholder);
+}
+[placeholder]:empty:focus::after {
+    content: attr(placeholder);
+}
 ::placeholder {
     color: var(--f4);
 }
