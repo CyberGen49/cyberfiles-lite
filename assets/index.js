@@ -13,14 +13,20 @@ async function main() {
         return num;
     }
     function downloadFile(url, name) {
+        if (!name) name = url.split('/').reverse()[0];
+        console.log(`Downloading: "${name}" ->`, url);
         const link = document.createElement('a');
         link.style.display = 'none';
         link.href = url;
         link.download = name || url.split('/').reverse()[0];
         link.target = '_blank';
         document.body.appendChild(link);
-        link.click();
-        link.remove();
+        setTimeout(() => {
+            link.click();
+            setTimeout(() => {
+                link.remove();
+            }, 100);
+        }, 100);
     }
     function on(el, type, callback) {
         if (!Array.isArray(type)) type = [type];
