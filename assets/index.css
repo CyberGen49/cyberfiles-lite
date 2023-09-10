@@ -38,7 +38,7 @@ body {
     height: 46px;
     padding: 0px 16px;
     background: var(--b2);
-    border: 1px solid var(--b4);
+    border: 1px solid var(--b3);
     border-radius: 16px;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -92,7 +92,7 @@ body {
     flex-direction: column;
     border-radius: 16px;
     background: var(--b1);
-    border: 1px solid var(--b4);
+    border: 1px solid var(--b3);
 }
 .card .header,
 .card .footer {
@@ -124,7 +124,7 @@ body {
 .card .header.sticky,
 .card .footer.sticky {
     background: var(--b2);
-    border-color: var(--b4);
+    border-color: var(--b3);
     margin-left: -1px;
     margin-right: -1px;
 }
@@ -139,7 +139,7 @@ body {
     margin-top: -1px;
 }
 #fileListCard > .header:not(.sticky) {
-    border-bottom-color: var(--b4);
+    border-bottom-color: var(--b3);
     background: var(--b2);
     border-radius: 16px 16px 0px 0px;
 }
@@ -202,7 +202,7 @@ body {
 .bigIcon {
     font-family: 'Material Symbols Filled Rounded';
     font-size: 56px;
-    color: var(--b5);
+    color: var(--f3);
     user-select: none;
 }
 .errorDesc {
@@ -424,7 +424,7 @@ body {
 #infoCard .icon {
     font-family: 'Material Symbols Filled Rounded';
     font-size: 54px;
-    color: var(--f2);
+    color: var(--f3);
     line-height: 1;
 }
 #infoCard p {
