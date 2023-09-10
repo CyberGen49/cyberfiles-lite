@@ -306,6 +306,22 @@ module.exports = (opts = {}) => {
         }
         return file;
     }
+    // Get the names of the subfolders of a folder
+    const getSubfolders = (folderPathAbs, folderPathRel) => {
+        if (!fs.existsSync(folderPathAbs) || isPathHidden(folderPathRel))
+            return [];
+        const sourceStats = fs.statSync(folderPathAbs);
+        if (!sourceStats.isDirectory()) return [];
+        const subfolders = fs.readdirSync(folderPathAbs).filter(name => {
+            const stats = fs.statSync(path.join(folderPathAbs, name));
+            return stats.isDirectory() && !isPathHidden(path.join(folderPathRel, name));
+        });
+        subfolders.sort((a, b) => a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: 'base'
+        }));
+        return subfolders;
+    }
     // Extract starting text from Markdown HTML
     const getTextFromMarkdownHTML = html => {
         logDebug(`Extracting text from markdown file`);
@@ -540,12 +556,19 @@ module.exports = (opts = {}) => {
             return res.sendFile(filePath);
         }
         // Build file path tree
-        const tree = [{ name: opts.site_name, path: '/' }];
+        const tree = [{
+            name: opts.site_name,
+            path: '/',
+            dirs: getSubfolders(opts.root, '/')
+        }];
         const parts = pathRel.split('/').filter(String);
         for (const part of parts) {
+            const partPath = path.join(tree[tree.length-1].path, part);
+            const partPathAbs = path.join(opts.root, partPath);
             const item = {
                 name: part,
-                path: path.join(tree[tree.length-1].path, part)
+                path: partPath,
+                dirs: getSubfolders(partPathAbs, partPath)
             };
             tree.push(item);
         }

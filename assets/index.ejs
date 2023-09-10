@@ -46,6 +46,7 @@
                     <% for (const part of tree) { %>
                         <a href="<%= part.path %>" class="part">
                             <%= part.name %>
+                            <div class="subfolders" style="display: none"><%= JSON.stringify(part.dirs) %></div>
                         </a>
                         <span class="sep"></span>
                     <% } %>

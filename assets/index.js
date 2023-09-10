@@ -1,5 +1,5 @@
 
-const baseUrl = `${window.location.protocol}//${window.location.host}`;
+const baseUrl = window.location.origin;
 
 dayjs.extend(window.dayjs_plugin_advancedFormat);
 
@@ -94,6 +94,47 @@ async function main() {
         }
     };
 
+    const pathParts = $$('#path .part');
+    const pathPartLast = pathParts[pathParts.length-1];
+    for (const part of pathParts) {
+        const pathHref = part.href || null;
+        const dirs = JSON.parse($('.subfolders', part).innerText);
+        const menu = new ContextMenuBuilder();
+        if (part != pathPartLast) {
+            for (const dir of dirs) {
+                const item = new ContextMenuItemBuilder(menu)
+                    .setIcon('folder')
+                    .setLabel(dir)
+                    .setClickHandler(() => window.location.href = `${pathHref}/${dir}`);
+                item.elIcon.style.fontFamily = 'Material Symbols Filled Rounded';
+                menu.addItem(() => item);
+            }
+            if (dirs.length > 0) {
+                menu.addSeparator();
+            }
+        }
+        menu.addItem(item => item
+            .setIcon('content_copy')
+            .setLabel('Copy folder URL')
+            .setClickHandler(() => copyText(`${pathHref}`)));
+        if (part != pathPartLast) {
+            menu.addItem(item => item
+                .setIcon('open_in_new')
+                .setLabel('Open in new tab...')
+                .setClickHandler(() => window.open(pathHref, '_blank')));
+        }
+        part.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            menu.showAtCursor();
+        });
+        if (part == pathPartLast) {
+            part.addEventListener('click', (e) => {
+                e.preventDefault();
+            });
+        }
+        part.title = `Right-click for options...`;
+    }
+
     for (const el of $$('#fileList .fileEntry')) {
         const icon = $('.icon', el).innerText;
         const name = el.dataset.name;
@@ -123,11 +164,6 @@ async function main() {
                     .setIcon('content_copy')
                     .setLabel('Copy folder URL')
                     .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
-                menu.addSeparator();
-                menu.addItem(item => item
-                    .setIcon('download')
-                    .setLabel('Download as zip')
-                    .setClickHandler(() => downloadFile(`?zip=./${encodeURI(name)}`, `${name}.zip`)));
             } else if (!isUp) {
                 if (shouldRender) menu.addItem(item => item
                     .setIcon('content_copy')
@@ -145,12 +181,17 @@ async function main() {
                     .setLabel('Download file')
                     .setClickHandler(() => downloadFile(el.dataset.path)));
             }
-            if (!isUp)
-                menu.addSeparator();
             menu.addItem(item => item
                 .setIcon('open_in_new')
                 .setLabel('Open in new tab...')
                 .setClickHandler(() => window.open(el.href, '_blank')));
+            if (isDir && !isUp) {
+                menu.addSeparator();
+                menu.addItem(item => item
+                    .setIcon('download')
+                    .setLabel('Download as zip')
+                    .setClickHandler(() => downloadFile(`?zip=./${encodeURI(name)}`, `${name}.zip`)));
+            }
             menu.showAtCursor();
         });
         if ($('.thumb', el)) {

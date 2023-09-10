@@ -71,7 +71,6 @@ body {
 }
 #path .part[href=""] {
     color: var(--f1);
-    pointer-events: none;
 }
 #path .sep {
     margin: 0px -4px;
