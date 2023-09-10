@@ -175,11 +175,6 @@ async function main() {
                     .setLabel('Copy raw file URL')
                     .setTooltip(`Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`)
                     .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
-                menu.addSeparator();
-                menu.addItem(item => item
-                    .setIcon('download')
-                    .setLabel('Download file')
-                    .setClickHandler(() => downloadFile(el.dataset.path)));
             }
             menu.addItem(item => item
                 .setIcon('open_in_new')
@@ -191,6 +186,12 @@ async function main() {
                     .setIcon('download')
                     .setLabel('Download as zip')
                     .setClickHandler(() => downloadFile(`?zip=./${encodeURI(name)}`, `${name}.zip`)));
+            } else if (!isUp) {
+                menu.addSeparator();
+                menu.addItem(item => item
+                    .setIcon('download')
+                    .setLabel('Download file')
+                    .setClickHandler(() => downloadFile(el.dataset.path)));
             }
             menu.showAtCursor();
         });
