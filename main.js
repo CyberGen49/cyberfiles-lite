@@ -111,7 +111,7 @@ const sortOrder = {
  * 
  * @property {string} [icon] A URL to use as the tab icon for the file index.
  * 
- * Defaults to `"?asset=icon.png"`
+ * Defaults to one of the built-in themed icons: `?asset=icons/icon-<theme>.svg`
  * 
  * @property {string} [theme] A theme to use for the file index. This value must be the same as one of the keys in `themes.json`.
  * 
@@ -173,10 +173,10 @@ module.exports = (opts = {}) => {
     if (!opts.hide_patterns) opts.hide_patterns = defaultHidePatterns;
     else opts.hide_patterns.unshift(...defaultHidePatterns);
     if (!opts.index_files) opts.index_files = [ 'index.html' ];
-    if (!opts.icon) opts.icon = `?asset=icon.png`;
     if (!opts.theme) opts.theme = 'darkmuted';
     const theme = themes[opts.theme];
     if (!theme) throw new Error(`[CyberFiles] Invalid theme! Make sure your provided theme matches one of the keys in themes.json.`);
+    if (!opts.icon) opts.icon = `?asset=icons/icon-${opts.theme}.svg`;
     if (!opts.site_name) opts.site_name = `CyberFiles Lite`;
     if (opts.handle_404 == undefined) opts.handle_404 = false;
     if (opts.get_dir_sizes == undefined) opts.get_dir_sizes = false;
@@ -380,14 +380,14 @@ module.exports = (opts = {}) => {
             }
         };
         getFiles(pathRel);
-        logDebug(`Zipping selected contents of`, pathAbs);
         const archive = archiver('zip');
         res.setHeader('content-type', 'application/zip');
         archive.pipe(res);
         for (const file of files) {
+            logDebug(`Zipping`, file.pathRel);
             archive.file(file.pathAbs, { name: file.pathRel });
         }
-        archive.finalize();
+        await archive.finalize();
     };
     // Handle thumbnail generation
     let thumbsInProgress = 0;
@@ -526,7 +526,6 @@ module.exports = (opts = {}) => {
             dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
             icon: opts.icon,
             theme: opts.theme,
-            theme_hue: theme.hue,
             themes: themes,
             site_name: opts.site_name,
             site_name_meta: opts.site_name,

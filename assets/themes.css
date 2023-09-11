@@ -5,7 +5,6 @@ See `themes.json` for some metadata about each theme.
  - The `themeColor` property is the suggested value for the `theme-color` meta tag.
     - Equal to the theme's `--b3` color.
  - The `name` property is the theme's canonical name.
- - The `hue` property is the suggested hue to use for colouring custom elements
 
 */
 

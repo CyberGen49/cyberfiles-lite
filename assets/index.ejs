@@ -25,16 +25,18 @@
     <script defer src="?asset=lib/prism.min.js" data-manual></script>
     <script defer src="?asset=index.js" data-manual></script>
 </head>
-<body class="<%= theme %>" data-theme="<%= theme %>" data-hue="<%= theme_hue %>">
+<body class="<%= theme %>" data-theme="<%= theme %>">
     <script>
         const themes = JSON.parse(`<%- JSON.stringify(themes) %>`);
         function setTheme(theme) {
             theme = (themes[theme]) ? theme : '<%= theme %>';
             document.body.classList = theme;
             document.body.dataset.theme = theme;
-            document.body.dataset.hue = themes[theme].hue;
             document.querySelector('meta[name="theme-color"]')
                 .setAttribute('content', themes[theme].themeColor);
+            const icon = document.querySelector('link[rel="icon"]');
+            if (icon.href.match(/\?asset=icons\/icon-(.*)\.svg$/))
+                icon.href = `?asset=icons/icon-${theme}.svg`;
             window.localStorage.setItem('theme', theme);
         }
         setTheme(window.localStorage.getItem('theme'));

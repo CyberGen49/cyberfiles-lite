@@ -13,7 +13,6 @@ async function main() {
         return num;
     }
     function downloadFile(url, name) {
-        if (!name) name = url.split('/').reverse()[0];
         console.log(`Downloading: "${name}" ->`, url);
         const link = document.createElement('a');
         link.style.display = 'none';
@@ -121,7 +120,7 @@ async function main() {
         }
         menu.addItem(item => item
             .setIcon('content_copy')
-            .setLabel('Copy URL')
+            .setLabel('Copy link')
             .setClickHandler(() => copyText(`${pathHref}`)));
         if (part != pathPartLast) {
             menu.addItem(item => item
@@ -167,19 +166,18 @@ async function main() {
             const menu = new ContextMenuBuilder();
             if (isDir && !isUp) {
                 menu.addItem(item => item
-                    .setIcon('content_copy')
-                    .setLabel('Copy folder URL')
+                    .setIcon('smb_share')
+                    .setLabel('Copy folder link')
                     .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
             } else if (!isUp) {
                 if (shouldRender) menu.addItem(item => item
-                    .setIcon('content_copy')
-                    .setLabel('Copy file viewer URL')
-                    .setTooltip(`Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`)
+                    .setIcon('smb_share')
+                    .setLabel('Copy file viewer link')
                     .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}?render=true`)));
                 menu.addItem(item => item
-                    .setIcon('content_copy')
-                    .setLabel('Copy raw file URL')
-                    .setTooltip(`Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`)
+                    .setIcon('file_copy')
+                    .setLabel('Copy direct file link')
+                    .setTooltip(`To share this file with others, copy the file viewer link instead!`)
                     .setClickHandler(() => copyText(`${baseUrl}${el.dataset.path}`)));
             }
             menu.addItem(item => item
@@ -197,7 +195,7 @@ async function main() {
                 menu.addItem(item => item
                     .setIcon('download')
                     .setLabel('Download file')
-                    .setClickHandler(() => downloadFile(el.dataset.path)));
+                    .setClickHandler(() => downloadFile(el.dataset.path, name)));
             }
             menu.showAtCursor();
         });
@@ -359,8 +357,8 @@ async function main() {
     const copyFolderURL = () => copyText(`${baseUrl}${window.location.pathname}`);
     if ($('#dirShare')) {
         shareMenu.addItem(item => item
-            .setIcon('content_copy')
-            .setLabel('Copy folder URL')
+            .setIcon('smb_share')
+            .setLabel('Copy folder link')
             .setClickHandler(copyFolderURL));
         on($('#dirShare'), 'click', () => shareMenu.showAtElement($('#dirShare')));
         on($('#infoDirShare'), 'click', copyFolderURL);
@@ -449,14 +447,13 @@ async function main() {
         const copyPreviewURL = () => copyText(`${baseUrl}${window.location.pathname}?render=true`);
         const menu = new ContextMenuBuilder()
             .addItem(item => item
-                .setIcon('content_copy')
-                .setLabel('Copy file viewer URL')
-                .setTooltip(`Copies a link that allows anyone to view this file in their browser. This is ideal for sharing the file with others.`)
+                .setIcon('smb_share')
+                .setLabel('Copy file viewer link')
                 .setClickHandler(copyPreviewURL))
             .addItem(item => item
-                .setIcon('content_copy')
-                .setLabel('Copy raw file URL')
-                .setTooltip(`Copies a link that leads directly to this file, not a viewable page. This is ideal if you're adding a link to this file in code, or for direct downloading.`)
+                .setIcon('file_copy')
+                .setLabel('Copy raw file link')
+                .setTooltip(`To share this file with others, copy the file viewer link instead!`)
                 .setClickHandler(() => copyText(`${baseUrl}${window.location.pathname}`)));
         on($('#shareFile'), 'click', () => menu.showAtElement($('#shareFile')));
         on($('#infoShareFile'), 'click', copyPreviewURL);

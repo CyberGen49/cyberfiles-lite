@@ -167,7 +167,7 @@ Defaults to `"CyberFiles Lite"`.
 ### string `icon`
 A URL to use as the tab icon for the file index.
 
-Defaults to `"?asset=icon.png"`.
+Defaults to one of the built-in themed icons: `?asset=icons/icon-<theme>.svg`
 
 ### string `theme`
 A theme to use for the file index. This value must be the same as one of the keys in `themes.json`.
