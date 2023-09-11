@@ -121,7 +121,7 @@ async function main() {
         }
         menu.addItem(item => item
             .setIcon('content_copy')
-            .setLabel('Copy folder URL')
+            .setLabel('Copy URL')
             .setClickHandler(() => copyText(`${pathHref}`)));
         if (part != pathPartLast) {
             menu.addItem(item => item
