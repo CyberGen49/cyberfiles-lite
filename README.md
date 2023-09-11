@@ -145,84 +145,81 @@ srv.listen(port, () => console.log(`Listening on port ${port}`));
 ## Options
 These are all the configuration options for CyberFiles Lite.
 
-### String `root`
+### string `root`
 A directory path to serve as the root of your file index.
 
-Default: The directory of the parent module
+Defaults to the directory of the parent module.
 
 Relative paths are relative to the directory of the parent module.
 
-### String `data_dir`
+### string `data_dir`
 A separate directory where thumbnails should be stored to prevent them from being deleted when updating. A `thumbs` directory will be created inside this directory.
 
-Default: `cyberfiles-lite`'s installation directory
+Defaults to where `cyberfiles-lite` is installed.
 
 Relative paths are relative to `cyberfiles-lite`'s installation directory.
 
-### String `site_name`
+### string `site_name`
 The name of this file index, used in various places around the site.
 
-Default: `"CyberFiles Lite"`
+Defaults to `"CyberFiles Lite"`.
 
-### String `icon`
+### string `icon`
 A URL to use as the tab icon for the file index.
 
-Default: `"?asset=icon.png"`
+Defaults to `"?asset=icon.png"`.
 
-### Number `theme`
-A theme to use for the file index. This value must be the same as one of the keys in [`themes.json`](/themes.json).
+### string `theme`
+A theme to use for the file index. This value must be the same as one of the keys in `themes.json`.
 
-Default: `"darkmuted"`
+Defaults to `"darkmuted"`.
 
-### String[] `index_files`
+### string[] `index_files`
 An array of file names to checked for and sent when a directory is accessed. If one of these files exist in a directory, they'll be sent instead of the file index.
 
-Default: `[ "index.html" ]`
+Defaults to `[ "index.html" ]`.
 
-### String[] or RegExp[] `hide_patterns`
-An array of RegEx strings to be checked against the relative file/directory path of each request. If the pattern matches, the file/directory will be hidden from view.
+### string[] `hide_patterns`
+An array of RegEx strings to be checked against the absolute file/directory path of each request. If the pattern matches, the file/directory will be hidden from view.
 
-The default will hide all files and directories whose paths contain a node starting with `.` or `_`.
+Defaults to `[ /\/(\.|_).*?(\/|$)/ ]`, which will hide all files and directories whose paths contain a node/segment starting with `.` or `_`.
 
-If storing these options in JSON, be sure to escape backslashes when escaping other characters.
+When storing these options in JSON, be sure to escape backslashes when escaping other characters.
 
-Default: `[ /\/(\.|_).*?(\/|$)/ ]`
-
-### Boolean `handle_404`
+### boolean `handle_404`
 If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s) and show the user an error page. If `false`, `next()` will be called, passing control to the next middleware.
 
-Default: `false`
+Defaults to `false`.
 
-### Boolean `get_dir_sizes`
-If `true`, we'll get the total size of directories and display them. This will increase load times, especially with lots of files.
+### boolean `get_dir_sizes`
+If `true`, the index will recurse through directories to get and display their total sizes. This will impact performance with lots of files.
 
-Default: `false`
+Defaults to `false`.
 
-### Boolean `make_thumbs`
+### boolean `make_thumbs`
 If `true`, thumbnails to show in the index will be generated for image and video files. `ffmpeg` needs to be installed for video thumbnail generation.
 
-Default: `false`
+Defaults to `false`.
 
-Thumbnails are stored in a `thumbs` folder inside of the module folder. So reinstalling the module will most likely wipe all stored thumbnail information.
-
-Each instance of CyberFiles has its own `thumb-map-*.json` file inside of the thumbs folder, where the `*` is an MD5 hash of that instance's root (as set by [opts.root](#string-root), but normalized). These thumb map files contain a property for each absolute file path, and each property contains the associated thumbnail file name, along with the file's modification time.
-
-The server's thumb map file is loaded into memory on startup and rewritten whenever changes are made. Don't make manual changes to these files.
-
-### Boolean `auto_view`
+### boolean `auto_view`
 If this and `make_thumbs` are `true`, and if more than 50% (or the value of `auto_view_threshold`) of the files in a directory have thumbnails, the directory will automatically be switched to `tiles` view.
 
-Default: `true`
+Defaults to `true`.
 
-### Number `auto_view_threshold`
+### number `auto_view_threshold`
 A float between 0 and 1, representing the percentage of files in a directory that need to have thumbnails for the directory to be switched to `tiles` view.
 
-Defaults to `0.5`
+Defaults to `0.5`.
 
-### Boolean `debug`
+### boolean `show_path_subfolders`
+If `true`, you'll be able to view the subfolders of a directory when you right-click on it in the path bar. This might affect performance in large directories.
+
+Defaults to `true`.
+
+### boolean `debug`
 If `true`, debug messages will be logged to the console.
 
-Default: `false`
+Defaults to `false`.
 
 ## Other projects that make this one possible
 CyberFiles Lite wouldn't be here without these amazing projects:

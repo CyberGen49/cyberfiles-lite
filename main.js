@@ -55,18 +55,6 @@ function typeFromExt(filePath) {
         return `File`;
 }
 
-// https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
-function hslToHex(h, s, l) {
-    l /= 100;
-    const a = s * Math.min(l, 1 - l) / 100;
-    const f = n => {
-        const k = (n + h / 30) % 12;
-        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
-    };
-    return `${f(0)}${f(8)}${f(4)}`;
-}
-
 const themes = require('./themes.json');
 
 const sortOrder = {
@@ -137,13 +125,13 @@ const sortOrder = {
  * 
  * Defaults to `[ /\/(\.|_).*?(\/|$)/ ]`, which will hide all files and directories whose paths contain a node/segment starting with `.` or `_`.
  * 
- * If storing these options in JSON, be sure to escape backslashes when escaping other characters.
+ * When storing these options in JSON, be sure to escape backslashes when escaping other characters.
  * 
  * @property {boolean} [handle_404] If `true`, CyberFiles Lite will handle requests for nonexistent paths (error 404s) and show the user an error page. If `false`, `next()` will be called, passing control to the next middleware.
  * 
  * Defaults to `false`
  * 
- * @property {boolean} [get_dir_sizes] If `true`, the index will recurse through directories to get and display their total sizes. This will increase load times.
+ * @property {boolean} [get_dir_sizes] If `true`, the index will recurse through directories to get and display their total sizes. This will impact performance with lots of files.
  * 
  * Defaults to `false`
  * 
@@ -158,6 +146,10 @@ const sortOrder = {
  * @property {number} [auto_view_threshold] A float between 0 and 1, representing the percentage of files in a directory that need to have thumbnails for the directory to be switched to `tiles` view.
  * 
  * Defaults to `0.5`
+ * 
+ * @property {boolean} [show_path_subfolders] If `true`, you'll be able to view the subfolders of a directory when you right-click on it in the path bar. This might affect performance in large directories.
+ * 
+ * Defaults to `true`
  * 
  * @property {boolean} [debug] If `true`, debug messages will be logged to the console.
  * 
@@ -191,6 +183,7 @@ module.exports = (opts = {}) => {
     if (opts.make_thumbs == undefined) opts.make_thumbs = false;
     if (opts.auto_view == undefined) opts.auto_view = true;
     if (!opts.auto_view_threshold) opts.auto_view_threshold = 0.5;
+    if (opts.show_path_subfolders == undefined) opts.show_path_subfolders = true;
     const logDebug = (...params) => {
         if (opts.debug) console.log(`[CyberFiles]`, ...params);
     }
@@ -233,6 +226,13 @@ module.exports = (opts = {}) => {
             if (filePath.match(regex)) {
                 return true;
             }
+        }
+        // Deem the file path hidden if we don't have read access
+        try {
+            fs.accessSync(path.join(opts.root, filePath), fs.constants.R_OK);
+        } catch (error) {
+            console.error(error);
+            return true;
         }
         return false;
     }
@@ -559,7 +559,7 @@ module.exports = (opts = {}) => {
         const tree = [{
             name: opts.site_name,
             path: '/',
-            dirs: getSubfolders(opts.root, '/')
+            dirs: opts.show_path_subfolders ? getSubfolders(opts.root, '/') : []
         }];
         const parts = pathRel.split('/').filter(String);
         for (const part of parts) {
@@ -568,7 +568,7 @@ module.exports = (opts = {}) => {
             const item = {
                 name: part,
                 path: partPath,
-                dirs: getSubfolders(partPathAbs, partPath)
+                dirs: opts.show_path_subfolders ? getSubfolders(partPathAbs, partPath) : []
             };
             tree.push(item);
         }
