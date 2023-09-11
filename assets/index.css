@@ -171,6 +171,7 @@ body {
 }
 .card[data-preview-type="image"] img {
     max-width: 100%;
+    border-radius: 16px;
 }
 .card[data-preview-type="video"] .body {
     padding: 0px;
