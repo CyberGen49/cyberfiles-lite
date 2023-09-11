@@ -10,6 +10,14 @@
     <title><%= (dirName == 'Root') ? site_name : dirName %></title>
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="<%= site_name_meta %>">
+    <% if (previewType == 'image') { %>
+        <meta property="og:image" content="<%= path %>">
+        <meta name="twitter:image" content="<%= path %>">
+        <meta name="twitter:card" content="summary_large_image">
+    <% } else if (previewType == 'video') { %>
+        <meta property="og:video" content="<%= path %>">
+        <meta name="twitter:card" content="player">
+    <% } %>
     <meta property="og:title" content="<%= (dirName == 'Root') ? site_name : dirName %>">
     <meta property="og:description" content="<%= desc %>">
     <meta name="description" content="<%= desc %>">
