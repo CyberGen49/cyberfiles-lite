@@ -520,17 +520,18 @@ module.exports = (opts = {}) => {
         const sessionDir = session.dir[pathRel] || {};
         // Build data object
         let data = {
-            files: false,
-            readme: false,
-            previewType: false,
-            dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
+            site_name: opts.site_name,
+            site_name_meta: opts.site_name,
             icon: opts.icon,
             theme: opts.theme,
             themes: themes,
-            site_name: opts.site_name,
-            site_name_meta: opts.site_name,
             theme_color: themes[opts.theme].themeColor,
-            error: false,
+            dirName: pathRel.split('/').filter(String).reverse()[0] || 'Root',
+            files: null,
+            file: null,
+            readme: null,
+            previewType: null,
+            error: null,
         };
         // Handle rendering
         const render = async() => {
@@ -578,8 +579,8 @@ module.exports = (opts = {}) => {
         // If the path doesn't exist, return 404
         if (!fs.existsSync(pathAbs)) return send404();
         // Save if the file is a directory
-        const dirStats = fs.statSync(pathAbs);
-        const isDir = dirStats.isDirectory();
+        const targetStats = fs.statSync(pathAbs);
+        const isDir = targetStats.isDirectory();
         // If we aren't at the root, change meta site name
         if (tree.length > 2 && opts.site_name.length < 64) {
             let tmp = [...parts];
@@ -642,11 +643,11 @@ module.exports = (opts = {}) => {
                 data.desc = getTextFromMarkdownHTML(data.html)
                 return render();
             // Images
-            } else if (file.ext.match(/^(png|jpg|jpeg|gif|webp)$/)) {
+            } else if (file.ext.match(/^(png|jpg|jpeg|gif|webp|svg|apng|avif)$/)) {
                 data.previewType = 'image';
                 return render();
             // Videos
-            } else if (file.ext.match(/^(mp4|webm|mov)$/)) {
+            } else if (file.ext.match(/^(mp4|webm|mov|mpg|wmv)$/)) {
                 data.previewType = 'video';
                 return render();
             // Audio files
@@ -748,7 +749,7 @@ module.exports = (opts = {}) => {
             totalSize: totalSize,
             totalSizeHuman: utils.formatSize(totalSize),
             totalSizeIncludesSubdirs: opts.get_dir_sizes,
-            mtime: dirStats.mtimeMs,
+            mtime: targetStats.mtimeMs,
             duration: Math.round(Date.now()-startTime)
         };
         // Count files and dirs and make a human-readable string
