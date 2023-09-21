@@ -193,6 +193,8 @@ body {
 }
 .card[data-preview-type="text"] .body {
     padding: 0px;
+    border-radius: 16px;
+    background: var(--b0);
 }
 .card[data-preview-type="text"] .body pre {
     margin: 0px;
